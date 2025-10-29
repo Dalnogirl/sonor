@@ -1,13 +1,6 @@
 {
-  "extends": ["next/core-web-vitals"],
-  "rules": {
-    "@typescript-eslint/consistent-type-imports": [
-      "warn",
-      {
-        "prefer": "type-imports",
-        "fixStyle": "inline-type-imports"
-      }
-    ],
-    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }]
-  }
+  "extends": [
+    "next/core-web-vitals",
+    "next/typescript"
+  ]
 }
