@@ -23,8 +23,34 @@ This document outlines the architectural approach for building a Next.js applica
 
 ## Project Structure
 
+**Important Note - Pragmatic Architecture Decision:**  
+Following **Next.js conventions** and the **principle of least surprise**, we place the `app/` directory at `src/app/` (not under `src/adapters/ui/app/`). This maintains framework ergonomics while preserving hexagonal architecture principles in the business logic layers. The `app/` directory is still considered part of the **Adapter Layer** - it adapts Next.js routing to our use cases.
+
+This applies the **Open/Closed Principle** - we can swap frameworks without changing business logic, and **Dependency Inversion Principle** - pages depend on use cases (abstractions), not implementations.
+
 ```
 src/
+├── app/                             # Next.js App Router (UI Adapter - follows framework conventions)
+│   ├── layout.tsx                   # Root layout with metadata
+│   ├── page.tsx                     # Home page
+│   ├── globals.css                  # Global styles
+│   ├── (auth)/                      # Auth route group
+│   │   ├── login/
+│   │   │   └── page.tsx
+│   │   └── register/
+│   │       └── page.tsx
+│   ├── (dashboard)/                 # Dashboard route group
+│   │   ├── posts/
+│   │   │   ├── page.tsx
+│   │   │   └── [id]/
+│   │   │       └── page.tsx
+│   │   └── profile/
+│   │       └── page.tsx
+│   └── api/                         # API routes
+│       └── trpc/
+│           └── [trpc]/
+│               └── route.ts         # tRPC HTTP handler
+│
 ├── domain/                          # Core business logic (pure TypeScript)
 │   ├── models/                      # Entities & Value Objects
 │   │   ├── User.ts
@@ -91,18 +117,9 @@ src/
 │   │   ├── procedures/
 │   │   │   ├── protected.ts
 │   │   │   └── public.ts
-│   │   └── server.ts
+│   │   └── init.ts                  # tRPC initialization
 │   │
-│   └── ui/                          # Next.js UI adapters
-│       ├── app/                     # Next.js App Router pages
-│       │   ├── (auth)/
-│       │   │   ├── login/
-│       │   │   └── register/
-│       │   ├── (dashboard)/
-│       │   │   ├── posts/
-│       │   │   └── profile/
-│       │   ├── layout.tsx
-│       │   └── page.tsx
+│   └── ui/                          # Reusable UI utilities (separate from app/)
 │       ├── components/              # React components
 │       │   ├── posts/
 │       │   │   ├── PostList.tsx
@@ -110,16 +127,13 @@ src/
 │       │   │   └── CreatePostForm.tsx
 │       │   ├── users/
 │       │   └── shared/
-│       └── hooks/                   # Custom React hooks
-│           ├── useCreatePost.ts
-│           ├── usePosts.ts
-│           └── useCurrentUser.ts
-│
-├── server/                          # tRPC server setup
-│   └── api/
-│       └── trpc/
-│           └── [trpc]/
-│               └── route.ts         # Next.js API route handler
+│       ├── hooks/                   # Custom React hooks
+│       │   ├── useCreatePost.ts
+│       │   ├── usePosts.ts
+│       │   └── useCurrentUser.ts
+│       └── actions/                 # Server Actions
+│           ├── post.actions.ts
+│           └── user.actions.ts
 │
 └── config/
     ├── dependencies.ts              # Dependency configuration
@@ -483,9 +497,15 @@ export const postRouter = router({
 });
 ```
 
-#### B. UI Adapters (`adapters/ui/`)
+#### B. UI Adapters (`src/app/` + `adapters/ui/`)
 
-**Responsibility:** React components and Next.js pages.
+**Responsibility:** Next.js pages (at `src/app/`) and reusable React components/hooks (at `adapters/ui/`).
+
+**Architectural Note:** Following **Next.js conventions** and the **Adapter Pattern**, we separate:
+- **`src/app/`** - Framework-specific routing (pages, layouts, route groups)
+- **`adapters/ui/`** - Reusable UI logic (components, hooks, actions)
+
+Both are part of the UI Adapter Layer, but split for **Single Responsibility** - routing vs. reusable presentation logic.
 
 **Example:**
 
@@ -549,7 +569,7 @@ export function CreatePostForm() {
   );
 }
 
-// adapters/ui/app/(dashboard)/posts/page.tsx
+// src/app/(dashboard)/posts/page.tsx
 import { PostList } from '@/adapters/ui/components/posts/PostList';
 import { CreatePostForm } from '@/adapters/ui/components/posts/CreatePostForm';
 
