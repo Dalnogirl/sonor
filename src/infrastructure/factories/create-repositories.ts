@@ -1,8 +1,9 @@
-import { MockUserRepository } from "../database/repositories/MockUserRepository";
+import { prisma } from "../database/prisma/client";
+import { PrismaUserRepository } from "../database/repositories/PrismaUserRepository";
 
 export const createRepositories = () => {
     return {
-        userRepository: new MockUserRepository(),
+        userRepository: new PrismaUserRepository(prisma),
         // Future: postRepository, commentRepository, etc.
     };
 }
