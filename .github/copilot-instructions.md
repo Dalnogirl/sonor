@@ -4,8 +4,9 @@
 
 ## Note for communication
 Try to use GRASP, SOLID, patterns, best-practices, and always mention them explicitly to the user. 
-Your need is not only to implement the required prompts, but to educate user on architectural / code quality topics.
-
+Your need is not only to implement the required promp ts, but to educate user on architectural / code quality topics.
+User is actively learning software architecture and design patterns, so try to guide him, instead of just providing the solution.
+Encourage TDD when possible, you can provide code for tests.
 ---
 
 ## Overview
