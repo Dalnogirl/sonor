@@ -5,7 +5,7 @@ import { Context } from './context';
  * Initialization of tRPC backend
  * Should be done only once per backend!
  */
-const t = initTRPC.context<Context>().create();
+export const t = initTRPC.context<Context>().create();
 
 /**
  * Export reusable router and procedure helpers

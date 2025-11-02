@@ -23,3 +23,16 @@ export class InvalidEmailError extends DomainError {
     super(`The email ${email} is not a valid email address.`);
   }
 }
+
+export class UserNotFoundError extends DomainError {
+  constructor(identifier: string) {
+    super(`User not found: ${identifier}`);
+  }
+}
+
+export class InvalidCredentialsError extends DomainError {
+  constructor() {
+    super('Invalid email or password');
+    // Generic message to prevent email enumeration attacks
+  }
+}

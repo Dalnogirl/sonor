@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { UserRepository } from '@/domain/ports/repositories/UserRepository';
 import { PasswordHasher } from '@/domain/ports/services/PasswordHasher';
 import { User } from '@/domain/models/User';
-import { EmailAlreadyExistsError, InvalidPasswordError } from '@/domain/errors';
+import { EmailAlreadyExistsError } from '@/domain/errors';
 import { RegisterUseCase } from '@/application/use-cases/auth/RegisterUseCase';
 
 describe('RegisterUseCase', () => {
@@ -34,7 +34,7 @@ describe('RegisterUseCase', () => {
   });
 
   describe('Successful Registration', () => {
-    it('should register a new user with valid data', async () => {
+    it('should register a new user with valid data and return UserResponseDTO', async () => {
       // Arrange
       const registrationData = {
         name: 'John Doe',
@@ -55,14 +55,14 @@ describe('RegisterUseCase', () => {
         async (user) => user
       );
 
-      // Act - Direct parameters, no DTO!
+      // Act
       const result = await registerUseCase.execute(registrationData);
 
-      // Assert
+      // Assert - Returns UserResponseDTO (no password!)
       expect(result.name).toBe('John Doe');
       expect(result.email).toBe('john@example.com');
-      expect(result.password).toBe('hashed_password_123');
       expect(result.isEmailVerified).toBe(false);
+      expect('password' in result).toBe(false); // Password should NOT be in response
 
       // Verify interactions
       expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(
@@ -73,7 +73,7 @@ describe('RegisterUseCase', () => {
     });
   });
 
-  describe('Validation Errors', () => {
+  describe('Business Rule Validation', () => {
     it('should throw EmailAlreadyExistsError when email is taken', async () => {
       // Arrange
       const existingUser = User.createWithDefaults(
@@ -85,7 +85,7 @@ describe('RegisterUseCase', () => {
 
       vi.mocked(mockUserRepository.findByEmail).mockResolvedValue(existingUser);
 
-      // Act & Assert - Using DTO
+      // Act & Assert - Business rule enforced in use case
       await expect(
         registerUseCase.execute({
           name: 'New User',
@@ -99,22 +99,8 @@ describe('RegisterUseCase', () => {
       expect(mockUserRepository.create).not.toHaveBeenCalled();
     });
 
-    it('should throw InvalidPasswordError for weak password', async () => {
-      // Arrange
-      vi.mocked(mockUserRepository.findByEmail).mockResolvedValue(null);
-
-      // Act & Assert - Using DTO
-      await expect(
-        registerUseCase.execute({
-          name: 'John Doe',
-          email: 'john@example.com',
-          password: 'weak', // Too short, no special char
-        })
-      ).rejects.toThrow(InvalidPasswordError);
-
-      // Should not hash or save
-      expect(mockPasswordHasher.hash).not.toHaveBeenCalled();
-      expect(mockUserRepository.create).not.toHaveBeenCalled();
-    });
+    // Note: Format validation (email format, password strength) is now
+    // handled by the adapter layer (Zod schema in tRPC router)
+    // Use case only handles business rules!
   });
 });

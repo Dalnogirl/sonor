@@ -1,9 +1,6 @@
 import { RegisterDTO } from '@/application/dto/RegisterDTO';
-import {
-  EmailAlreadyExistsError,
-  InvalidEmailError,
-  InvalidPasswordError,
-} from '@/domain/errors';
+import { UserResponseDTO } from '@/application/dto/UserResponseDTO';
+import { EmailAlreadyExistsError } from '@/domain/errors';
 import { User } from '@/domain/models/User';
 import { UserRepository } from '@/domain/ports/repositories/UserRepository';
 import { PasswordHasher } from '@/domain/ports/services/PasswordHasher';
@@ -14,25 +11,17 @@ export class RegisterUseCase {
     private passwordHasher: PasswordHasher
   ) {}
 
-  async execute(data: RegisterDTO): Promise<User> {
-    // Validating email
-    if (!User.validateEmail(data.email)) {
-      throw new InvalidEmailError(data.email);
+  async execute(data: RegisterDTO): Promise<UserResponseDTO> {
+    // Business Rule: Check if user with provided email already exists
+    const existingUser = await this.userRepository.findByEmail(data.email);
+    if (existingUser) {
+      throw new EmailAlreadyExistsError(data.email);
     }
 
-    // Checking if user with provided email already exists
-    const userWithProvidedEmail = await this.userRepository.findByEmail(
-      data.email
-    );
-
-    if (userWithProvidedEmail) throw new EmailAlreadyExistsError(data.email);
-
-    // Validating password
-    if (!User.validatePassword(data.password)) {
-      throw new InvalidPasswordError();
-    }
+    // Hash password (infrastructure concern, but orchestrated here)
     const hashedPassword = await this.passwordHasher.hash(data.password);
 
+    // Create domain entity
     const user = User.createWithDefaults(
       crypto.randomUUID(),
       data.name,
@@ -40,8 +29,17 @@ export class RegisterUseCase {
       hashedPassword
     );
 
+    // Persist user
     await this.userRepository.create(user);
 
-    return user;
+    // Return safe DTO (no password!)
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      isEmailVerified: user.isEmailVerified,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
   }
 }
