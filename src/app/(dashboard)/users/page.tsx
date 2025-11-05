@@ -1,10 +1,13 @@
 import { UserList } from '@/adapters/ui/components/users/UserList';
+import { Container, Title, Stack } from '@mantine/core';
 
 export default function UsersPage() {
   return (
-    <div>
-      <h1>User Management</h1>
-      <UserList />
-    </div>
+    <Container size="lg" py="xl">
+      <Stack gap="lg">
+        <Title order={1}>User Management</Title>
+        <UserList />
+      </Stack>
+    </Container>
   );
 }

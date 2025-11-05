@@ -21,8 +21,6 @@ export class ListUsersUseCase {
 
   async execute(): Promise<UserResponseDTO[]> {
     const users = await this.userRepository.findAll();
-
-    // Transform domain entities to safe DTOs using injected mapper
     return this.userMapper.toResponseDTOArray(users);
   }
 }
