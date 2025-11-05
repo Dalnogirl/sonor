@@ -44,7 +44,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <Container size="sm">
+    <Container size="md">
       <Button
         variant="subtle"
         leftSection={<IconArrowLeft size={16} />}
@@ -57,7 +57,7 @@ export default function ProfilePage() {
       <Paper shadow="sm" p="xl" radius="md">
         <Stack gap="lg">
           <Group>
-            <Avatar color="blue" radius="xl" size="xl">
+            <Avatar radius="xl" size="xl">
               {getInitials(displayName)}
             </Avatar>
             <div>
