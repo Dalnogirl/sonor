@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { PrismaClient } from '@prisma/client';
 import { PrismaUserRepository } from '@/infrastructure/database/repositories/PrismaUserRepository';
 import { User } from '@/domain/models/User';
+import { PaginationParams } from '@/domain/models/PaginationParams';
 
 /**
  * Integration tests for PrismaUserRepository
@@ -149,8 +150,10 @@ describe('PrismaUserRepository Integration Tests', () => {
         ],
       });
 
+      const paginationParams: PaginationParams = PaginationParams.create(0, 10);
+
       // Act
-      const users = await repository.findAll();
+      const users = await repository.findAll(paginationParams);
 
       // Assert
       expect(users).toHaveLength(2);
@@ -159,8 +162,9 @@ describe('PrismaUserRepository Integration Tests', () => {
     });
 
     it('should return empty array when no users exist', async () => {
+      const paginationParams: PaginationParams = PaginationParams.create(0, 10);
       // Act
-      const users = await repository.findAll();
+      const users = await repository.findAll(paginationParams);
 
       // Assert
       expect(users).toHaveLength(0);
