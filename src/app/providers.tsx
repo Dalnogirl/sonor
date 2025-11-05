@@ -22,7 +22,17 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
     <SessionProvider>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
-          <MantineProvider defaultColorScheme="auto">
+          <MantineProvider
+            defaultColorScheme="auto"
+            theme={{
+              primaryColor: 'pink', // Main accent color - affects buttons, links, etc.
+              // You can use: blue, cyan, teal, green, lime, yellow, orange, red, pink, grape, violet, indigo
+
+              // Optional: customize other theme aspects
+              // fontFamily: 'Your Font, sans-serif',
+              // headings: { fontFamily: 'Your Heading Font, serif' },
+            }}
+          >
             {children}
           </MantineProvider>
         </QueryClientProvider>
