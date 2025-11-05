@@ -1,6 +1,7 @@
 import { UserRepository } from '@/domain/ports/repositories/UserRepository';
 import { PasswordHasher } from '@/domain/ports/services/PasswordHasher';
 import { UserResponseDTO } from '@/application/dto/UserResponseDTO';
+import { UserMapperPort } from '@/domain/ports/mappers/UserMapperPort';
 import { InvalidCredentialsError } from '@/domain/errors';
 import { LoginDTO } from '@/application/dto/LoginDTO';
 
@@ -20,7 +21,8 @@ import { LoginDTO } from '@/application/dto/LoginDTO';
 export class LoginUseCase {
   constructor(
     private userRepository: UserRepository,
-    private passwordHasher: PasswordHasher
+    private passwordHasher: PasswordHasher,
+    private userMapper: UserMapperPort
   ) {}
 
   async execute(dto: LoginDTO): Promise<UserResponseDTO> {
@@ -39,14 +41,7 @@ export class LoginUseCase {
       throw new InvalidCredentialsError();
     }
 
-    // 4. Return safe user data (no password!)
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      isEmailVerified: user.isEmailVerified,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
+    // 4. Return safe user data using injected mapper (DRY + Dependency Inversion)
+    return this.userMapper.toResponseDTO(user);
   }
 }

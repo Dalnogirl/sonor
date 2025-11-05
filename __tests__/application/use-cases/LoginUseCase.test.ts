@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { UserRepository } from '@/domain/ports/repositories/UserRepository';
 import { PasswordHasher } from '@/domain/ports/services/PasswordHasher';
+import { UserMapperPort } from '@/domain/ports/mappers/UserMapperPort';
 import { User } from '@/domain/models/User';
 import { InvalidCredentialsError } from '@/domain/errors';
 import { LoginUseCase } from '@/application/use-cases/auth/LoginUseCase';
@@ -9,6 +10,7 @@ describe('LoginUseCase', () => {
   let loginUseCase: LoginUseCase;
   let mockUserRepository: UserRepository;
   let mockPasswordHasher: PasswordHasher;
+  let mockUserMapper: UserMapperPort;
 
   beforeEach(() => {
     // Create mocks
@@ -26,8 +28,25 @@ describe('LoginUseCase', () => {
       compare: vi.fn(),
     };
 
-    // Inject mocks into use case
-    loginUseCase = new LoginUseCase(mockUserRepository, mockPasswordHasher);
+    mockUserMapper = {
+      toResponseDTO: vi.fn((user: User) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        isEmailVerified: user.isEmailVerified,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      })),
+      toResponseDTOArray: vi.fn(),
+      toSummaryDTO: vi.fn(),
+    };
+
+    // Inject mocks into use case (Dependency Injection)
+    loginUseCase = new LoginUseCase(
+      mockUserRepository,
+      mockPasswordHasher,
+      mockUserMapper
+    );
   });
 
   describe('Successful Login', () => {

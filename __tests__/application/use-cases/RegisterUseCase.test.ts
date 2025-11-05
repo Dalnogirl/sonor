@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { UserRepository } from '@/domain/ports/repositories/UserRepository';
 import { PasswordHasher } from '@/domain/ports/services/PasswordHasher';
+import { UserMapperPort } from '@/domain/ports/mappers/UserMapperPort';
 import { User } from '@/domain/models/User';
 import { EmailAlreadyExistsError } from '@/domain/errors';
 import { RegisterUseCase } from '@/application/use-cases/auth/RegisterUseCase';
@@ -9,6 +10,7 @@ describe('RegisterUseCase', () => {
   let registerUseCase: RegisterUseCase;
   let mockUserRepository: UserRepository;
   let mockPasswordHasher: PasswordHasher;
+  let mockUserMapper: UserMapperPort;
 
   beforeEach(() => {
     // Create mocks (test doubles)
@@ -26,10 +28,24 @@ describe('RegisterUseCase', () => {
       compare: vi.fn(),
     };
 
-    // Inject mocks into use case
+    mockUserMapper = {
+      toResponseDTO: vi.fn((user: User) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        isEmailVerified: user.isEmailVerified,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      })),
+      toResponseDTOArray: vi.fn(),
+      toSummaryDTO: vi.fn(),
+    };
+
+    // Inject mocks into use case (Dependency Injection Pattern)
     registerUseCase = new RegisterUseCase(
       mockUserRepository,
-      mockPasswordHasher
+      mockPasswordHasher,
+      mockUserMapper
     );
   });
 

@@ -3,10 +3,12 @@
 **Framework:** Next.js 15 (App Router) + tRPC v11
 
 ## Note for communication
-Try to use GRASP, SOLID, patterns, best-practices, and always mention them explicitly to the user. 
-Your need is not only to implement the required promp ts, but to educate user on architectural / code quality topics.
+Always be critical and sacrifice grammar in favor of clarity and conciseness.
+Try to use GRASP, SOLID, patterns, best-practices, and always mention them explicitly to the user.
+Your need is not only to implement the required prompts, but to educate user on architectural / code quality topics.
 User is actively learning software architecture and design patterns, so try to guide him, instead of just providing the solution.
 Encourage TDD when possible, you can provide code for tests.
+Only leave comments in the code when they are absolutely necessary for clarity.
 ---
 
 ## Overview

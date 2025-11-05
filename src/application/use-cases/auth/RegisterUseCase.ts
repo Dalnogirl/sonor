@@ -4,11 +4,13 @@ import { EmailAlreadyExistsError } from '@/domain/errors';
 import { User } from '@/domain/models/User';
 import { UserRepository } from '@/domain/ports/repositories/UserRepository';
 import { PasswordHasher } from '@/domain/ports/services/PasswordHasher';
+import { UserMapperPort } from '@/domain/ports/mappers/UserMapperPort';
 
 export class RegisterUseCase {
   constructor(
     private userRepository: UserRepository,
-    private passwordHasher: PasswordHasher
+    private passwordHasher: PasswordHasher,
+    private userMapper: UserMapperPort
   ) {}
 
   async execute(data: RegisterDTO): Promise<UserResponseDTO> {
@@ -32,14 +34,7 @@ export class RegisterUseCase {
     // Persist user
     await this.userRepository.create(user);
 
-    // Return safe DTO (no password!)
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      isEmailVerified: user.isEmailVerified,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
+    // Return safe DTO using injected mapper (DRY + Dependency Inversion)
+    return this.userMapper.toResponseDTO(user);
   }
 }
