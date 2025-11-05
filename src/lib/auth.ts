@@ -2,6 +2,7 @@ import { LoginUseCase } from '@/application/use-cases/auth/LoginUseCase';
 import { InvalidCredentialsError } from '@/domain/errors';
 import { prisma } from '@/infrastructure/database/prisma/client';
 import { PrismaUserRepository } from '@/infrastructure/database/repositories/PrismaUserRepository';
+import { UserMapper } from '@/infrastructure/mappers/UserMapper';
 import { BcryptPasswordHasher } from '@/infrastructure/services/BcryptPasswordHasher';
 import NextAuth, { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
@@ -9,7 +10,8 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 // Create dependencies (singleton pattern)
 const userRepository = new PrismaUserRepository(prisma);
 const bcrypt = new BcryptPasswordHasher();
-const loginUseCase = new LoginUseCase(userRepository, bcrypt);
+const userMapper = new UserMapper();
+const loginUseCase = new LoginUseCase(userRepository, bcrypt, userMapper);
 
 export const authOptions: AuthOptions = {
   providers: [

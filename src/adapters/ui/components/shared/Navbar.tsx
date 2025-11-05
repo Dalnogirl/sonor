@@ -1,12 +1,20 @@
 'use client';
 
 import { Group, Button, Container, Title } from '@mantine/core';
-import { IconMusic, IconUsers, IconUserPlus } from '@tabler/icons-react';
+import {
+  IconMusic,
+  IconUsers,
+  IconUserPlus,
+  IconLogin,
+} from '@tabler/icons-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { UserInfo } from './UserInfo';
 
 export function Navbar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   return (
     <nav style={{ borderBottom: '1px solid #dee2e6', marginBottom: '2rem' }}>
@@ -28,14 +36,29 @@ export function Navbar() {
             >
               Users
             </Button>
-            <Button
-              component={Link}
-              href="/register"
-              variant={pathname === '/register' ? 'filled' : 'subtle'}
-              leftSection={<IconUserPlus size={18} />}
-            >
-              Register
-            </Button>
+
+            {session?.user ? (
+              <UserInfo />
+            ) : (
+              <>
+                <Button
+                  component={Link}
+                  href="/login"
+                  variant={pathname === '/login' ? 'filled' : 'subtle'}
+                  leftSection={<IconLogin size={18} />}
+                >
+                  Login
+                </Button>
+                <Button
+                  component={Link}
+                  href="/register"
+                  variant={pathname === '/register' ? 'filled' : 'subtle'}
+                  leftSection={<IconUserPlus size={18} />}
+                >
+                  Register
+                </Button>
+              </>
+            )}
           </Group>
         </Group>
       </Container>
