@@ -1,3 +1,4 @@
+import { RecurringPattern } from './RecurringPattern';
 import { User } from './User';
 
 export class Lesson {
@@ -9,7 +10,8 @@ export class Lesson {
   public pupils: User[];
   public startDate: Date;
   public endDate: Date;
-
+  public description?: string;
+  public recurringPattern?: RecurringPattern;
   constructor(
     id: string,
     title: string,
@@ -18,7 +20,9 @@ export class Lesson {
     updatedAt: Date,
     pupils: User[],
     startDate: Date,
-    endDate: Date
+    endDate: Date,
+    description?: string,
+    recurringPattern?: RecurringPattern 
   ) {
     this.id = id;
     this.title = title;
@@ -28,6 +32,8 @@ export class Lesson {
     this.pupils = pupils;
     this.startDate = startDate;
     this.endDate = endDate;
+    this.description = description;
+    this.recurringPattern = recurringPattern;
   }
 
   static createWithDefaults(
@@ -35,10 +41,23 @@ export class Lesson {
     title: string,
     teachers: User[],
     startDate: Date,
-    endDate: Date
+    endDate: Date,
+    description?: string,
+    recurringPattern?: RecurringPattern
   ): Lesson {
     const now = new Date();
-    return new Lesson(id, title, teachers, now, now, [], startDate, endDate);
+    return new Lesson(
+      id,
+      title,
+      teachers,
+      now,
+      now,
+      [],
+      startDate,
+      endDate,
+      description,
+      recurringPattern
+    );
   }
 
   get isPast(): boolean {
