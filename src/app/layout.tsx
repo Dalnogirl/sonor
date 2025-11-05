@@ -3,6 +3,7 @@ import './globals.css';
 import { Providers } from './providers';
 import { ColorSchemeScript } from '@mantine/core';
 import { Navbar } from '@/adapters/ui/components/shared/Navbar';
+import { Footer } from '@/adapters/ui/components/shared/Footer';
 
 export const metadata: Metadata = {
   title: 'Sonor - Music School Management',
@@ -19,10 +20,13 @@ export default function RootLayout({
       <head>
         <ColorSchemeScript defaultColorScheme="auto" />
       </head>
-      <body>
+      <body
+        style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}
+      >
         <Providers>
           <Navbar />
-          {children}
+          <main style={{ flex: 1 }}>{children}</main>
+          <Footer />
         </Providers>
       </body>
     </html>
