@@ -1,11 +1,24 @@
 'use client';
 
 import { useUsers } from '@/adapters/ui/hooks/useUsers';
-import { Table, Loader, Alert, Text, Paper, Stack } from '@mantine/core';
+import {
+  Table,
+  Loader,
+  Alert,
+  Text,
+  Paper,
+  Stack,
+  Pagination,
+  Group,
+} from '@mantine/core';
 import { IconAlertCircle, IconUser } from '@tabler/icons-react';
+import { useState } from 'react';
 
 export function UserList() {
-  const { data: users, isLoading, error } = useUsers();
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+
+  const { data: users, isLoading, error } = useUsers({ page, pageSize });
 
   if (isLoading) {
     return (
@@ -32,28 +45,46 @@ export function UserList() {
     );
   }
 
+  // Basic pagination - estimate total pages (since backend doesn't return count yet)
+  // If we got fewer users than pageSize, we're on the last page
+  const estimatedTotalPages = users.length < pageSize ? page : page + 1;
+
   return (
-    <Paper shadow="sm" radius="md" withBorder>
-      <Table striped highlightOnHover>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>Name</Table.Th>
-            <Table.Th>Email</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {users.map((user) => (
-            <Table.Tr key={user.id}>
-              <Table.Td>
-                <Text fw={500}>{user.name}</Text>
-              </Table.Td>
-              <Table.Td>
-                <Text c="dimmed">{user.email}</Text>
-              </Table.Td>
+    <Stack gap="md">
+      <Paper shadow="sm" radius="md" withBorder>
+        <Table striped highlightOnHover>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Name</Table.Th>
+              <Table.Th>Email</Table.Th>
             </Table.Tr>
-          ))}
-        </Table.Tbody>
-      </Table>
-    </Paper>
+          </Table.Thead>
+          <Table.Tbody>
+            {users.map((user) => (
+              <Table.Tr key={user.id}>
+                <Table.Td>
+                  <Text fw={500}>{user.name}</Text>
+                </Table.Td>
+                <Table.Td>
+                  <Text c="dimmed">{user.email}</Text>
+                </Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
+      </Paper>
+
+      <Group justify="space-between">
+        <Text size="sm" c="dimmed">
+          Page {page} • Showing {users.length} users
+        </Text>
+        <Pagination
+          value={page}
+          onChange={setPage}
+          total={estimatedTotalPages}
+          disabled={isLoading}
+        />
+      </Group>
+    </Stack>
   );
 }

@@ -1,5 +1,11 @@
 import { trpc } from '@/lib/trpc';
 
-export const useUsers = () => {
-  return trpc.user.list.useQuery();
+export const useUsers = ({
+  page,
+  pageSize,
+}: {
+  page?: number;
+  pageSize?: number;
+}) => {
+  return trpc.user.list.useQuery({ page, pageSize });
 };

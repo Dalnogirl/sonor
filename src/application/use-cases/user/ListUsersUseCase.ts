@@ -1,6 +1,8 @@
 import { UserRepository } from '@/domain/ports/repositories/UserRepository';
 import { UserResponseDTO } from '@/application/dto/UserResponseDTO';
 import { UserMapperPort } from '@/domain/ports/mappers/UserMapperPort';
+import { ListUserRequestDTO } from '@/application/dto/user/ListUserRequestDTO';
+import { PaginationParams } from '@/domain/models/PaginationParams';
 
 /**
  * ListUsersUseCase
@@ -19,8 +21,10 @@ export class ListUsersUseCase {
     private userMapper: UserMapperPort
   ) {}
 
-  async execute(): Promise<UserResponseDTO[]> {
-    const users = await this.userRepository.findAll();
+  async execute(requestDTO: ListUserRequestDTO): Promise<UserResponseDTO[]> {
+    const users = await this.userRepository.findAll(
+      PaginationParams.create(requestDTO.page, requestDTO.pageSize)
+    );
     return this.userMapper.toResponseDTOArray(users);
   }
 }

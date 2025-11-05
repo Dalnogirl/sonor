@@ -1,3 +1,4 @@
+import { PaginationParams } from '@/domain/models/PaginationParams';
 import { User } from '@/domain/models/User';
 import { UserRepository } from '@/domain/ports/repositories/UserRepository';
 import { PrismaClient, User as PrismaUser } from '@prisma/client';
@@ -5,8 +6,10 @@ import { PrismaClient, User as PrismaUser } from '@prisma/client';
 export class PrismaUserRepository implements UserRepository {
   constructor(private prisma: PrismaClient) {}
 
-  async findAll(): Promise<User[]> {
-    const users = await this.prisma.user.findMany();
+  async findAll(paginationParams: PaginationParams): Promise<User[]> {
+    const users = await this.prisma.user.findMany({
+      ...paginationParams.toPrisma(),
+    });
     return users.map((user) => this.toDomainEntity(user));
   }
 
