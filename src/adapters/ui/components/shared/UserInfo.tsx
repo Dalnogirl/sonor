@@ -48,9 +48,18 @@ export function UserInfo() {
           style={{
             padding: '8px 12px',
             borderRadius: '8px',
-            transition: 'background-color 0.2s',
+            transition: 'background-color 0.2s, transform 0.1s',
           }}
-          className="user-info-button"
+          styles={{
+            root: {
+              '&:hover': {
+                backgroundColor: 'rgba(0, 0, 0, 0.05)',
+              },
+              '&:active': {
+                transform: 'scale(0.98)',
+              },
+            },
+          }}
         >
           <Group gap="sm">
             <Avatar color="blue" radius="xl" size="md">

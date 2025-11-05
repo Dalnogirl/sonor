@@ -22,7 +22,9 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
     <SessionProvider>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
-          <MantineProvider>{children}</MantineProvider>
+          <MantineProvider defaultColorScheme="auto">
+            {children}
+          </MantineProvider>
         </QueryClientProvider>
       </trpc.Provider>
     </SessionProvider>

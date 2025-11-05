@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { UserInfo } from './UserInfo';
+import { ThemeToggle } from './ThemeToggle';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -59,6 +60,8 @@ export function Navbar() {
                 </Button>
               </>
             )}
+
+            <ThemeToggle />
           </Group>
         </Group>
       </Container>
