@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaUserRepository } from '@/infrastructure/database/repositories/PrismaUserRepository';
 import { User } from '@/domain/models/User';
 import { PaginationParams } from '@/domain/models/PaginationParams';
+import { cleanDatabase } from './test-helpers';
 
 /**
  * Integration tests for PrismaUserRepository
@@ -22,7 +23,7 @@ describe('PrismaUserRepository Integration Tests', () => {
     repository = new PrismaUserRepository(prisma);
 
     // Ensure database is clean
-    await prisma.user.deleteMany();
+    await cleanDatabase(prisma);
   });
 
   afterAll(async () => {
@@ -32,7 +33,7 @@ describe('PrismaUserRepository Integration Tests', () => {
 
   beforeEach(async () => {
     // Clean database before each test for isolation
-    await prisma.user.deleteMany();
+    await cleanDatabase(prisma);
   });
 
   describe('create', () => {

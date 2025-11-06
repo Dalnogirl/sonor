@@ -22,7 +22,7 @@ export class Lesson {
     startDate: Date,
     endDate: Date,
     description?: string,
-    recurringPattern?: RecurringPattern 
+    recurringPattern?: RecurringPattern
   ) {
     this.id = id;
     this.title = title;
@@ -37,9 +37,9 @@ export class Lesson {
   }
 
   static createWithDefaults(
-    id: string,
     title: string,
     teachers: User[],
+    pupils: User[],
     startDate: Date,
     endDate: Date,
     description?: string,
@@ -47,12 +47,12 @@ export class Lesson {
   ): Lesson {
     const now = new Date();
     return new Lesson(
-      id,
+      crypto.randomUUID(),
       title,
       teachers,
       now,
       now,
-      [],
+      pupils,
       startDate,
       endDate,
       description,

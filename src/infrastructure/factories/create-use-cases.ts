@@ -4,6 +4,7 @@ import { LoginUseCase } from '@/application/use-cases/auth/LoginUseCase';
 import { BcryptPasswordHasher } from '@/infrastructure/services/BcryptPasswordHasher';
 import { UserMapper } from '@/infrastructure/mappers/UserMapper';
 import { Repositories } from './create-repositories';
+import { GetMyTeachingLessonsForPeriod } from '@/application/use-cases/lesson/GetMyTeachingLessonsForPeriod';
 
 /**
  * Dependency Injection Factory
@@ -38,6 +39,11 @@ export const createUseCases = (repositories: Repositories) => {
         repositories.userRepository,
         passwordHasher,
         userMapper
+      ),
+    },
+    lesson: {
+      getMyTeachingLessonsForPeriod: new GetMyTeachingLessonsForPeriod(
+        repositories.lessonRepository
       ),
     },
   };

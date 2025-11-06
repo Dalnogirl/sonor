@@ -123,21 +123,21 @@ describe('Lesson', () => {
 
   describe('createWithDefaults', () => {
     it('should create a lesson with default dates and empty pupils', () => {
-      const id = 'lesson-1';
       const title = 'Default Lesson';
       const teachers = [teacher1];
       const startDate = new Date('2025-11-10T10:00:00Z');
       const endDate = new Date('2025-11-10T12:00:00Z');
 
       const lesson = Lesson.createWithDefaults(
-        id,
         title,
         teachers,
+        [],
         startDate,
         endDate
       );
 
-      expect(lesson.id).toBe(id);
+      expect(lesson.id).toBeDefined();
+      expect(typeof lesson.id).toBe('string');
       expect(lesson.title).toBe(title);
       expect(lesson.teachers).toEqual(teachers);
       expect(lesson.pupils).toEqual([]);
