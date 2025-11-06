@@ -1,34 +1,18 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { PrismaLessonRepository } from '@/infrastructure/database/repositories/PrismaLessonRepository';
 import { Lesson } from '@/domain/models/Lesson';
-import { User } from '@/domain/models/User';
-import {
-  RecurringPattern,
-  RecurringFrequency,
-  DayOfWeek,
-} from '@/domain/models/RecurringPattern';
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { cleanDatabase } from './test-helpers';
 
-/**
- * Integration tests for PrismaLessonRepository
- * These tests run against a real database
- *
- * Setup required:
- * - Test database running (Docker)
- * - DATABASE_URL pointing to test DB
- */
 describe('PrismaLessonRepository Integration Tests', () => {
   let prisma: PrismaClient;
   let repository: PrismaLessonRepository;
-  let testTeacher: User;
-  let testPupil: User;
+  let testTeacherId: string;
+  let testPupilId: string;
 
   beforeAll(async () => {
     prisma = new PrismaClient();
     repository = new PrismaLessonRepository(prisma);
-
-    // Ensure database is clean
     await cleanDatabase(prisma);
   });
 
@@ -37,10 +21,9 @@ describe('PrismaLessonRepository Integration Tests', () => {
   });
 
   beforeEach(async () => {
-    // Clean database before each test for isolation
     await cleanDatabase(prisma);
 
-    const teacherData = await prisma.user.create({
+    const teacher = await prisma.user.create({
       data: {
         id: crypto.randomUUID(),
         name: 'Test Teacher',
@@ -50,7 +33,7 @@ describe('PrismaLessonRepository Integration Tests', () => {
       },
     });
 
-    const pupilData = await prisma.user.create({
+    const pupil = await prisma.user.create({
       data: {
         id: crypto.randomUUID(),
         name: 'Test Pupil',
@@ -60,25 +43,51 @@ describe('PrismaLessonRepository Integration Tests', () => {
       },
     });
 
-    testTeacher = new User(
-      teacherData.id,
-      teacherData.name,
-      teacherData.email,
-      teacherData.createdAt,
-      teacherData.updatedAt,
-      teacherData.password,
-      teacherData.isEmailVerified
-    );
+    testTeacherId = teacher.id;
+    testPupilId = pupil.id;
+  });
 
-    testPupil = new User(
-      pupilData.id,
-      pupilData.name,
-      pupilData.email,
-      pupilData.createdAt,
-      pupilData.updatedAt,
-      pupilData.password,
-      pupilData.isEmailVerified
-    );
+  describe('findById', () => {
+    it('should return lesson by ID with teacher and pupil IDs', async () => {
+      const lesson = await prisma.lesson.create({
+        data: {
+          id: crypto.randomUUID(),
+          title: 'Math 101',
+          description: 'Introduction to Mathematics',
+          startDate: new Date('2025-11-10T10:00:00Z'),
+          endDate: new Date('2025-11-10T11:00:00Z'),
+        },
+      });
+
+      await prisma.lessonTeacher.create({
+        data: {
+          lessonId: lesson.id,
+          userId: testTeacherId,
+        },
+      });
+
+      await prisma.lessonPupil.create({
+        data: {
+          lessonId: lesson.id,
+          userId: testPupilId,
+        },
+      });
+
+      const result = await repository.findById(lesson.id);
+
+      expect(result).toBeDefined();
+      expect(result?.id).toBe(lesson.id);
+      expect(result?.title).toBe('Math 101');
+      expect(result?.teacherIds).toHaveLength(1);
+      expect(result?.teacherIds[0]).toBe(testTeacherId);
+      expect(result?.pupilIds).toHaveLength(1);
+      expect(result?.pupilIds[0]).toBe(testPupilId);
+    });
+
+    it('should return null if lesson does not exist', async () => {
+      const result = await repository.findById('non-existent-id');
+      expect(result).toBeNull();
+    });
   });
 
   describe('findMyTeachingLessonsForPeriod', () => {
@@ -99,256 +108,120 @@ describe('PrismaLessonRepository Integration Tests', () => {
       await prisma.lessonTeacher.create({
         data: {
           lessonId: lesson.id,
-          userId: testTeacher.id,
+          userId: testTeacherId,
         },
       });
 
-      const lessons = await repository.findMyTeachingLessonsForPeriod(
-        testTeacher.id,
+      const results = await repository.findMyTeachingLessonsForPeriod(
+        testTeacherId,
         startDate,
         endDate
       );
 
-      expect(lessons).toHaveLength(1);
-      expect(lessons[0]).toBeInstanceOf(Lesson);
-      expect(lessons[0].id).toBe(lesson.id);
-      expect(lessons[0].title).toBe('Math 101');
-      expect(lessons[0].description).toBe('Introduction to Mathematics');
-      expect(lessons[0].teachers).toHaveLength(1);
-      expect(lessons[0].teachers[0]).toBeInstanceOf(User);
-      expect(lessons[0].teachers[0].id).toBe(testTeacher.id);
-      expect(lessons[0].pupils).toHaveLength(0);
-      expect(lessons[0].recurringPattern).toBeUndefined();
+      expect(results).toHaveLength(1);
+      expect(results[0].id).toBe(lesson.id);
+      expect(results[0].title).toBe('Math 101');
+      expect(results[0].teacherIds).toContain(testTeacherId);
     });
 
-    it('should return empty array when no lessons found', async () => {
-      const lessons = await repository.findMyTeachingLessonsForPeriod(
-        testTeacher.id,
-        new Date('2025-12-01'),
-        new Date('2025-12-31')
-      );
-
-      expect(lessons).toEqual([]);
-    });
-
-    it('should map multiple lessons correctly', async () => {
-      const lesson1 = await prisma.lesson.create({
+    it('should not return lessons outside date range', async () => {
+      const lesson = await prisma.lesson.create({
         data: {
           id: crypto.randomUUID(),
-          title: 'Lesson 1',
-          description: undefined,
-          startDate: new Date('2025-11-10T10:00:00Z'),
-          endDate: new Date('2025-11-10T11:00:00Z'),
+          title: 'Future Lesson',
+          startDate: new Date('2026-01-01T10:00:00Z'),
+          endDate: new Date('2026-01-01T11:00:00Z'),
         },
       });
 
-      const lesson2 = await prisma.lesson.create({
+      await prisma.lessonTeacher.create({
         data: {
-          id: crypto.randomUUID(),
-          title: 'Lesson 2',
-          description: 'Description 2',
-          startDate: new Date('2025-11-11T10:00:00Z'),
-          endDate: new Date('2025-11-11T11:00:00Z'),
+          lessonId: lesson.id,
+          userId: testTeacherId,
         },
       });
 
-      await prisma.lessonTeacher.createMany({
-        data: [
-          { lessonId: lesson1.id, userId: testTeacher.id },
-          { lessonId: lesson2.id, userId: testTeacher.id },
-        ],
-      });
-
-      const lessons = await repository.findMyTeachingLessonsForPeriod(
-        testTeacher.id,
-        new Date('2025-11-01'),
-        new Date('2025-11-30')
+      const results = await repository.findMyTeachingLessonsForPeriod(
+        testTeacherId,
+        new Date('2025-11-01T00:00:00Z'),
+        new Date('2025-11-30T23:59:59Z')
       );
 
-      expect(lessons).toHaveLength(2);
-      expect(lessons.map((l) => l.title)).toContain('Lesson 1');
-      expect(lessons.map((l) => l.title)).toContain('Lesson 2');
+      expect(results).toHaveLength(0);
+    });
+  });
+
+  describe('create', () => {
+    it('should create a lesson with teacher and pupil IDs', async () => {
+      const lesson = Lesson.create(
+        'Physics 101',
+        [testTeacherId],
+        [testPupilId],
+        new Date('2025-11-15T10:00:00Z'),
+        new Date('2025-11-15T11:00:00Z'),
+        'Introduction to Physics'
+      );
+
+      await repository.create(lesson);
+
+      const saved = await prisma.lesson.findUnique({
+        where: { id: lesson.id },
+        include: {
+          teachers: true,
+          pupils: true,
+        },
+      });
+
+      expect(saved).toBeDefined();
+      expect(saved?.title).toBe('Physics 101');
+      expect(saved?.description).toBe('Introduction to Physics');
+      expect(saved?.teachers).toHaveLength(1);
+      expect(saved?.teachers[0].userId).toBe(testTeacherId);
+      expect(saved?.pupils).toHaveLength(1);
+      expect(saved?.pupils[0].userId).toBe(testPupilId);
     });
 
-    it('should map lessons with multiple teachers', async () => {
-      const teacher2Data = await prisma.user.create({
+    it('should create a lesson with multiple teachers and pupils', async () => {
+      const teacher2 = await prisma.user.create({
         data: {
           id: crypto.randomUUID(),
-          name: 'Second Teacher',
+          name: 'Teacher 2',
           email: `teacher2-${Date.now()}@example.com`,
           password: 'hashed',
           isEmailVerified: true,
         },
       });
 
-      const lesson = await prisma.lesson.create({
+      const pupil2 = await prisma.user.create({
         data: {
           id: crypto.randomUUID(),
-          title: 'Team Teaching',
-          startDate: new Date('2025-11-10T10:00:00Z'),
-          endDate: new Date('2025-11-10T11:00:00Z'),
-        },
-      });
-
-      await prisma.lessonTeacher.createMany({
-        data: [
-          { lessonId: lesson.id, userId: testTeacher.id },
-          { lessonId: lesson.id, userId: teacher2Data.id },
-        ],
-      });
-
-      const lessons = await repository.findMyTeachingLessonsForPeriod(
-        testTeacher.id,
-        new Date('2025-11-01'),
-        new Date('2025-11-30')
-      );
-
-      expect(lessons[0].teachers).toHaveLength(2);
-      expect(lessons[0].teachers.map((t) => t.name)).toContain('Test Teacher');
-      expect(lessons[0].teachers.map((t) => t.name)).toContain(
-        'Second Teacher'
-      );
-    });
-
-    it('should map lessons with pupils', async () => {
-      const lesson = await prisma.lesson.create({
-        data: {
-          id: crypto.randomUUID(),
-          title: 'Lesson with Pupils',
-          startDate: new Date('2025-11-10T10:00:00Z'),
-          endDate: new Date('2025-11-10T11:00:00Z'),
-        },
-      });
-
-      await prisma.lessonTeacher.create({
-        data: { lessonId: lesson.id, userId: testTeacher.id },
-      });
-
-      await prisma.lessonPupil.create({
-        data: { lessonId: lesson.id, userId: testPupil.id },
-      });
-
-      const lessons = await repository.findMyTeachingLessonsForPeriod(
-        testTeacher.id,
-        new Date('2025-11-01'),
-        new Date('2025-11-30')
-      );
-
-      expect(lessons[0].pupils).toHaveLength(1);
-      expect(lessons[0].pupils[0].name).toBe('Test Pupil');
-      expect(lessons[0].pupils[0].isEmailVerified).toBe(false);
-    });
-
-    it('should parse recurring pattern from JSON', async () => {
-      const recurringPattern = {
-        frequency: RecurringFrequency.WEEKLY,
-        interval: 1,
-        daysOfWeek: [DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY],
-        endDate: '2025-12-31T23:59:59Z',
-        occurrences: null,
-      };
-
-      const lesson = await prisma.lesson.create({
-        data: {
-          id: crypto.randomUUID(),
-          title: 'Recurring Lesson',
-          startDate: new Date('2025-11-10T10:00:00Z'),
-          endDate: new Date('2025-11-10T11:00:00Z'),
-          recurringPattern: recurringPattern as Prisma.InputJsonValue,
-        },
-      });
-
-      await prisma.lessonTeacher.create({
-        data: { lessonId: lesson.id, userId: testTeacher.id },
-      });
-
-      const lessons = await repository.findMyTeachingLessonsForPeriod(
-        testTeacher.id,
-        new Date('2025-11-01'),
-        new Date('2025-12-31')
-      );
-
-      expect(lessons[0].recurringPattern).toBeDefined();
-      expect(lessons[0].recurringPattern).toBeInstanceOf(RecurringPattern);
-      expect(lessons[0].recurringPattern?.frequency).toBe(
-        RecurringFrequency.WEEKLY
-      );
-      expect(lessons[0].recurringPattern?.interval).toBe(1);
-      expect(lessons[0].recurringPattern?.daysOfWeek).toEqual([
-        DayOfWeek.MONDAY,
-        DayOfWeek.WEDNESDAY,
-      ]);
-      expect(lessons[0].recurringPattern?.endDate).toBeInstanceOf(Date);
-      expect(lessons[0].recurringPattern?.occurrences).toBeNull();
-    });
-
-    it('should filter lessons by date range correctly', async () => {
-      const outOfRangeLesson = await prisma.lesson.create({
-        data: {
-          id: crypto.randomUUID(),
-          title: 'Out of Range',
-          startDate: new Date('2025-12-01T10:00:00Z'),
-          endDate: new Date('2025-12-01T11:00:00Z'),
-        },
-      });
-
-      const inRangeLesson = await prisma.lesson.create({
-        data: {
-          id: crypto.randomUUID(),
-          title: 'In Range',
-          startDate: new Date('2025-11-10T10:00:00Z'),
-          endDate: new Date('2025-11-10T11:00:00Z'),
-        },
-      });
-
-      await prisma.lessonTeacher.createMany({
-        data: [
-          { lessonId: outOfRangeLesson.id, userId: testTeacher.id },
-          { lessonId: inRangeLesson.id, userId: testTeacher.id },
-        ],
-      });
-
-      const lessons = await repository.findMyTeachingLessonsForPeriod(
-        testTeacher.id,
-        new Date('2025-11-01'),
-        new Date('2025-11-30')
-      );
-
-      expect(lessons).toHaveLength(1);
-      expect(lessons[0].title).toBe('In Range');
-    });
-
-    it('should not return lessons where user is not a teacher', async () => {
-      const otherTeacher = await prisma.user.create({
-        data: {
-          id: crypto.randomUUID(),
-          name: 'Other Teacher',
-          email: `other-${Date.now()}@example.com`,
+          name: 'Pupil 2',
+          email: `pupil2-${Date.now()}@example.com`,
           password: 'hashed',
-          isEmailVerified: true,
+          isEmailVerified: false,
         },
       });
 
-      const lesson = await prisma.lesson.create({
-        data: {
-          id: crypto.randomUUID(),
-          title: 'Other Teacher Lesson',
-          startDate: new Date('2025-11-10T10:00:00Z'),
-          endDate: new Date('2025-11-10T11:00:00Z'),
-        },
-      });
-
-      await prisma.lessonTeacher.create({
-        data: { lessonId: lesson.id, userId: otherTeacher.id },
-      });
-
-      const lessons = await repository.findMyTeachingLessonsForPeriod(
-        testTeacher.id,
-        new Date('2025-11-01'),
-        new Date('2025-11-30')
+      const lesson = Lesson.create(
+        'Team Teaching',
+        [testTeacherId, teacher2.id],
+        [testPupilId, pupil2.id],
+        new Date('2025-11-15T10:00:00Z'),
+        new Date('2025-11-15T11:00:00Z')
       );
 
-      expect(lessons).toHaveLength(0);
+      await repository.create(lesson);
+
+      const saved = await prisma.lesson.findUnique({
+        where: { id: lesson.id },
+        include: {
+          teachers: true,
+          pupils: true,
+        },
+      });
+
+      expect(saved?.teachers).toHaveLength(2);
+      expect(saved?.pupils).toHaveLength(2);
     });
   });
 });

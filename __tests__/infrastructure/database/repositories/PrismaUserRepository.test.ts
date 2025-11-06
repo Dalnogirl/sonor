@@ -37,6 +37,10 @@ describe('PrismaUserRepository Integration Tests', () => {
   });
 
   describe('create', () => {
+    beforeEach(async () => {
+      await cleanDatabase(prisma);
+    });
+
     it('should create a user in the database', async () => {
       // Arrange
       const user = User.createWithDefaults(
@@ -66,6 +70,10 @@ describe('PrismaUserRepository Integration Tests', () => {
   });
 
   describe('findById', () => {
+    beforeEach(async () => {
+      await cleanDatabase(prisma);
+    });
+
     it('should find a user by id', async () => {
       // Arrange - Create a user directly with Prisma
       const createdUser = await prisma.user.create({
@@ -98,9 +106,13 @@ describe('PrismaUserRepository Integration Tests', () => {
   });
 
   describe('findByEmail', () => {
+    beforeEach(async () => {
+      await cleanDatabase(prisma);
+    });
+
     it('should find a user by email', async () => {
       // Arrange
-      await prisma.user.create({
+      const createdUser = await prisma.user.create({
         data: {
           id: crypto.randomUUID(),
           name: 'Bob Smith',
@@ -130,6 +142,10 @@ describe('PrismaUserRepository Integration Tests', () => {
   });
 
   describe('findAll', () => {
+    beforeEach(async () => {
+      await cleanDatabase(prisma);
+    });
+
     it('should return all users', async () => {
       // Arrange - Create multiple users
       await prisma.user.createMany({
@@ -173,6 +189,10 @@ describe('PrismaUserRepository Integration Tests', () => {
   });
 
   describe('update', () => {
+    beforeEach(async () => {
+      await cleanDatabase(prisma);
+    });
+
     it('should update an existing user', async () => {
       // Arrange
       const created = await prisma.user.create({
@@ -209,6 +229,10 @@ describe('PrismaUserRepository Integration Tests', () => {
   });
 
   describe('delete', () => {
+    beforeEach(async () => {
+      await cleanDatabase(prisma);
+    });
+
     it('should delete a user from database', async () => {
       // Arrange
       const created = await prisma.user.create({

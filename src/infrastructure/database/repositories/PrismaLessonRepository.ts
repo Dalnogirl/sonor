@@ -5,25 +5,42 @@ import {
 } from '@/domain/models/RecurringPattern';
 import { LessonRepository } from '@/domain/ports/repositories/LessonRepository';
 import { PrismaClient, Prisma } from '@prisma/client';
-import { PrismaUserMapper } from '@/infrastructure/mappers/PrismaUserMapper';
 
-type PrismaLessonWithRelations = Prisma.LessonGetPayload<{
-  include: {
-    teachers: {
-      include: {
-        user: true;
-      };
-    };
-    pupils: {
-      include: {
-        user: true;
-      };
-    };
-  };
-}>;
-
+/**
+ * PrismaLessonRepository
+ *
+ * **IDs-Only Approach**
+ * - Works with user IDs directly, no User object hydration
+ * - Simpler mapping - just IDs from join tables
+ * - Microservice-ready pattern
+ * - More queries, but clearer aggregate boundaries
+ */
 export class PrismaLessonRepository implements LessonRepository {
   constructor(private readonly prisma: PrismaClient) {}
+
+  async findById(id: string): Promise<Lesson | null> {
+    const prismaLesson = await this.prisma.lesson.findUnique({
+      where: { id },
+      include: {
+        teachers: {
+          select: {
+            userId: true,
+          },
+        },
+        pupils: {
+          select: {
+            userId: true,
+          },
+        },
+      },
+    });
+
+    if (!prismaLesson) {
+      return null;
+    }
+
+    return this.toDomain(prismaLesson);
+  }
 
   async findMyTeachingLessonsForPeriod(
     userId: string,
@@ -40,13 +57,13 @@ export class PrismaLessonRepository implements LessonRepository {
       },
       include: {
         teachers: {
-          include: {
-            user: true,
+          select: {
+            userId: true,
           },
         },
         pupils: {
-          include: {
-            user: true,
+          select: {
+            userId: true,
           },
         },
       },
@@ -55,41 +72,51 @@ export class PrismaLessonRepository implements LessonRepository {
     return prismaLessons.map((lesson) => this.toDomain(lesson));
   }
 
-  async createLesson(data: Lesson): Promise<Lesson> {
-    const prismaLesson = await this.prisma.lesson.create({
+  async create(lesson: Lesson): Promise<Lesson> {
+    await this.prisma.lesson.create({
       data: {
-        id: data.id,
-        title: data.title,
-        startDate: data.startDate,
-        endDate: data.endDate,
-        description: data.description,
+        id: lesson.id,
+        title: lesson.title,
+        startDate: lesson.startDate,
+        endDate: lesson.endDate,
+        description: lesson.description,
+        recurringPattern: lesson.recurringPattern
+          ? this.serializeRecurringPattern(lesson.recurringPattern)
+          : Prisma.DbNull,
         teachers: {
-          create: data.teachers.map((teacher) => ({
+          create: lesson.teacherIds.map((teacherId) => ({
             user: {
-              connect: { id: teacher.id },
+              connect: { id: teacherId },
             },
           })),
         },
         pupils: {
-          create: data.pupils.map((pupil) => ({
+          create: lesson.pupilIds.map((pupilId) => ({
             user: {
-              connect: { id: pupil.id },
+              connect: { id: pupilId },
             },
           })),
         },
       },
     });
 
-    return this.toDomain(prismaLesson);
+    return lesson;
   }
 
-  private toDomain(prismaLesson: PrismaLessonWithRelations): Lesson {
-    const teachers = prismaLesson.teachers.map((lt) =>
-      PrismaUserMapper.toDomain(lt.user)
-    );
-    const pupils = prismaLesson.pupils.map((lp) =>
-      PrismaUserMapper.toDomain(lp.user)
-    );
+  private toDomain(prismaLesson: {
+    id: string;
+    title: string;
+    startDate: Date;
+    endDate: Date;
+    description: string | null;
+    recurringPattern: unknown;
+    createdAt: Date;
+    updatedAt: Date;
+    teachers: Array<{ userId: string }>;
+    pupils: Array<{ userId: string }>;
+  }): Lesson {
+    const teacherIds = prismaLesson.teachers.map((t) => t.userId);
+    const pupilIds = prismaLesson.pupils.map((p) => p.userId);
     const recurringPattern = this.parseRecurringPattern(
       prismaLesson.recurringPattern
     );
@@ -97,10 +124,10 @@ export class PrismaLessonRepository implements LessonRepository {
     return new Lesson(
       prismaLesson.id,
       prismaLesson.title,
-      teachers,
+      teacherIds,
       prismaLesson.createdAt,
       prismaLesson.updatedAt,
-      pupils,
+      pupilIds,
       prismaLesson.startDate,
       prismaLesson.endDate,
       prismaLesson.description ?? undefined,
@@ -128,5 +155,15 @@ export class PrismaLessonRepository implements LessonRepository {
       data.endDate ? new Date(data.endDate) : null,
       data.occurrences ?? null
     );
+  }
+
+  private serializeRecurringPattern(pattern: RecurringPattern) {
+    return {
+      frequency: pattern.frequency,
+      interval: pattern.interval,
+      daysOfWeek: pattern.daysOfWeek,
+      endDate: pattern.endDate?.toISOString(),
+      occurrences: pattern.occurrences,
+    };
   }
 }
