@@ -18,6 +18,7 @@ describe('LoginUseCase', () => {
       findAll: vi.fn(),
       findById: vi.fn(),
       findByEmail: vi.fn(),
+      findByIds: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),

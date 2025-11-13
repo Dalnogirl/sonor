@@ -8,6 +8,6 @@ export type LessonResponseDTO = Pick<
   | 'startDate'
   | 'endDate'
   | 'recurringPattern'
-  | 'teachers'
-  | 'pupils'
+  | 'teacherIds'
+  | 'pupilIds'
 >;

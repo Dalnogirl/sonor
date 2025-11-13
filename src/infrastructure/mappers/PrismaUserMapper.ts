@@ -84,4 +84,29 @@ export class PrismaUserMapper {
   static toDomainArray(prismaUsers: PrismaUserRecord[]): User[] {
     return prismaUsers.map((prismaUser) => this.toDomain(prismaUser));
   }
+
+  /**
+   * Maps User domain entity to Prisma data format for create/update.
+   *
+   * @param user - User domain entity
+   * @returns Plain object with fields matching Prisma schema
+   *
+   * @example
+   * ```typescript
+   * const user = User.createWithDefaults(...);
+   * const prismaData = PrismaUserMapper.toPrisma(user);
+   * await prisma.user.create({ data: prismaData });
+   * ```
+   */
+  static toPrisma(user: User): PrismaUserRecord {
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      password: user.password,
+      isEmailVerified: user.isEmailVerified,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
 }
