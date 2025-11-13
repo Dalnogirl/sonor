@@ -8,19 +8,17 @@ import {
   Textarea,
   MultiSelect,
   Group,
+  Flex,
 } from '@mantine/core';
-import { DatePickerInput } from '@mantine/dates';
+import { DatePickerInput, TimePicker } from '@mantine/dates';
 import { useForm } from '@mantine/form';
+import { zodResolver } from 'mantine-form-zod-resolver';
 import React from 'react';
-
-interface CreateLessonFormValues {
-  title: string;
-  description: string;
-  pupilIds: string[];
-  teacherIds: string[];
-  startDate: Date | null;
-  endDate: Date | null;
-}
+import { useUserOptions } from '@/adapters/ui/hooks/useUserOptions';
+import {
+  createLessonSchema,
+  type CreateLessonFormValues,
+} from '@/adapters/ui/validation/lesson-form.schema';
 
 interface CreateLessonModalProps {
   opened: boolean;
@@ -31,27 +29,19 @@ export const CreateLessonModal = ({
   opened,
   onClose,
 }: CreateLessonModalProps) => {
+  const { options: userOptions, isLoading: usersLoading } = useUserOptions();
+
   const form = useForm<CreateLessonFormValues>({
     initialValues: {
       title: '',
       description: '',
       pupilIds: [],
       teacherIds: [],
-      startDate: null,
-      endDate: null,
+      day: null as unknown as Date,
+      startTime: '',
+      endTime: '',
     },
-    validate: {
-      title: (value) =>
-        value.trim().length === 0 ? 'Title is required' : null,
-      startDate: (value) => (value === null ? 'Start date is required' : null),
-      endDate: (value, values) => {
-        if (value === null) return 'End date is required';
-        if (values.startDate && value < values.startDate) {
-          return 'End date must be after start date';
-        }
-        return null;
-      },
-    },
+    validate: zodResolver(createLessonSchema),
   });
 
   const handleSubmit = (values: CreateLessonFormValues) => {
@@ -60,6 +50,8 @@ export const CreateLessonModal = ({
     form.reset();
     onClose();
   };
+
+  console.log('errors: ', JSON.stringify(form.errors));
 
   return (
     <Modal
@@ -77,7 +69,7 @@ export const CreateLessonModal = ({
           <TextInput
             label="Title"
             placeholder="Enter lesson title"
-            required
+            withAsterisk
             {...form.getInputProps('title')}
           />
 
@@ -85,22 +77,27 @@ export const CreateLessonModal = ({
             label="Description"
             placeholder="Enter lesson description"
             minRows={3}
+            withAsterisk
             {...form.getInputProps('description')}
           />
 
           <MultiSelect
             label="Pupils"
             placeholder="Select pupils"
-            data={[]}
+            data={userOptions}
             searchable
+            disabled={usersLoading}
+            withAsterisk
             {...form.getInputProps('pupilIds')}
           />
 
           <MultiSelect
             label="Teachers"
             placeholder="Select teachers"
-            data={[]}
+            data={userOptions}
             searchable
+            disabled={usersLoading}
+            withAsterisk
             {...form.getInputProps('teacherIds')}
           />
 
@@ -108,10 +105,22 @@ export const CreateLessonModal = ({
             <DatePickerInput
               label="Day"
               placeholder="Pick day"
-              required
+              withAsterisk
               {...form.getInputProps('day')}
             />
           </Group>
+          <Flex justify="space-between">
+            <TimePicker
+              label="Start"
+              withAsterisk
+              {...form.getInputProps('startTime')}
+            />{' '}
+            <TimePicker
+              label="End"
+              withAsterisk
+              {...form.getInputProps('endTime')}
+            />
+          </Flex>
 
           <Button type="submit" fullWidth mt="md">
             Create Lesson
