@@ -6,8 +6,15 @@ import { httpBatchLink } from '@trpc/client';
 import { useState } from 'react';
 import { MantineProvider } from '@mantine/core';
 import { SessionProvider } from 'next-auth/react';
+import { Session } from 'next-auth';
 
-export const Providers = ({ children }: { children: React.ReactNode }) => {
+export const Providers = ({
+  children,
+  session
+}: {
+  children: React.ReactNode;
+  session: Session | null;
+}) => {
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() =>
     trpc.createClient({
@@ -19,7 +26,7 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
     })
   );
   return (
-    <SessionProvider>
+    <SessionProvider session={session}>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
           <CustomMantineProvider>{children}</CustomMantineProvider>
