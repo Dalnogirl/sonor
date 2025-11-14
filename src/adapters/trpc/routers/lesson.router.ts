@@ -19,8 +19,8 @@ export const lessonRouter = router({
   getMyTeachingLessonsForPeriod: protectedProcedure
     .input(
       z.object({
-        startDate: z.date(),
-        endDate: z.date(),
+        startDate: z.coerce.date(), // Coerce ISO string to Date
+        endDate: z.coerce.date(), // Coerce ISO string to Date
       })
     )
     .query(async ({ ctx, input }) => {
