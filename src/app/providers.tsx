@@ -5,8 +5,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink } from '@trpc/client';
 import { useState } from 'react';
 import { MantineProvider } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
 import { SessionProvider } from 'next-auth/react';
 import { Session } from 'next-auth';
+import '@mantine/notifications/styles.css';
 
 export const Providers = ({
   children,
@@ -57,6 +59,7 @@ function CustomMantineProvider({ children }: { children: React.ReactNode }) {
         },
       }}
     >
+      <Notifications />
       {children}
     </MantineProvider>
   );

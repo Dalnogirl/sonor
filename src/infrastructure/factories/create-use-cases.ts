@@ -5,6 +5,7 @@ import { BcryptPasswordHasher } from '@/infrastructure/services/BcryptPasswordHa
 import { UserMapper } from '@/infrastructure/mappers/UserMapper';
 import { Repositories } from './create-repositories';
 import { GetMyTeachingLessonsForPeriod } from '@/application/use-cases/lesson/GetMyTeachingLessonsForPeriod';
+import { CreateLesson } from '@/application/use-cases/lesson/CreateLesson';
 
 /**
  * Dependency Injection Factory
@@ -45,6 +46,7 @@ export const createUseCases = (repositories: Repositories) => {
       getMyTeachingLessonsForPeriod: new GetMyTeachingLessonsForPeriod(
         repositories.lessonRepository
       ),
+      createLesson: new CreateLesson(repositories.lessonRepository),
     },
   };
 };

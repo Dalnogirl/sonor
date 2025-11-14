@@ -1,11 +1,23 @@
 import { z } from 'zod';
 import { router } from '../init';
 import { protectedProcedure } from '../procedures/protected';
+import { createLessonRequestSchema } from '@/application/dto/lesson/CreateLessonRequestDTO.schema';
 
 export const lessonRouter = router({
+  /**
+   * Create a new lesson
+   * Protected endpoint - requires authentication
+   *
+   * Uses createLessonRequestSchema to ensure tRPC input matches CreateLessonRequestDTO
+   */
+  create: protectedProcedure
+    .input(createLessonRequestSchema)
+    .mutation(async ({ ctx, input }) => {
+      return ctx.useCases.lesson.createLesson.execute(input);
+    }),
+
   getMyTeachingLessonsForPeriod: protectedProcedure
     .input(
-      // Define input schema here, e.g., using zod
       z.object({
         startDate: z.date(),
         endDate: z.date(),

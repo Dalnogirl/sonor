@@ -30,6 +30,7 @@
     "@mantine/dates": "^8.3.6",
     "@mantine/form": "^8.3.6",
     "@mantine/hooks": "^8.3.6",
+    "@mantine/notifications": "^8.3.7",
     "@prisma/client": "^5.22.0",
     "@t3-oss/env-nextjs": "^0.11.1",
     "@tabler/icons-react": "^3.35.0",

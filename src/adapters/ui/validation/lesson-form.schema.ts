@@ -12,10 +12,10 @@ import { z } from 'zod';
 export const createLessonSchema = z
   .object({
     title: z.string().min(1, 'Title is required'),
-    description: z.string().min(1, 'Description is required'),
+    description: z.string().optional(),
     pupilIds: z.array(z.string()).min(1, 'At least one pupil is required'),
     teacherIds: z.array(z.string()).min(1, 'At least one teacher is required'),
-    day: z.date({ required_error: 'Day is required' }),
+    day: z.coerce.date({ required_error: 'Day is required' }), // Coerce to Date if string
     startTime: z.string().min(1, 'Start time is required'),
     endTime: z.string().min(1, 'End time is required'),
   })

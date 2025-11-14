@@ -19,6 +19,9 @@ import {
   createLessonSchema,
   type CreateLessonFormValues,
 } from '@/adapters/ui/validation/lesson-form.schema';
+import { LessonFormMapper } from '@/adapters/ui/mappers/lesson-form.mapper';
+import { trpc } from '@/lib/trpc';
+import { notifications } from '@mantine/notifications';
 
 interface CreateLessonModalProps {
   opened: boolean;
@@ -44,11 +47,33 @@ export const CreateLessonModal = ({
     validate: zodResolver(createLessonSchema),
   });
 
+  console.log('values', JSON.stringify(form.values));
+
+  const utils = trpc.useUtils();
+  const createMutation = trpc.lesson.create.useMutation({
+    onSuccess: () => {
+      notifications.show({
+        title: 'Success',
+        message: 'Lesson created successfully',
+        color: 'green',
+      });
+      utils.lesson.getMyTeachingLessonsForPeriod.invalidate();
+      form.reset();
+      onClose();
+    },
+    onError: (error: { message?: string }) => {
+      notifications.show({
+        title: 'Error',
+        message: error.message || 'Failed to create lesson',
+        color: 'red',
+      });
+    },
+  });
+
   const handleSubmit = (values: CreateLessonFormValues) => {
-    // TODO: Implement lesson creation logic with use case
-    console.log('Creating lesson with values:', values);
-    form.reset();
-    onClose();
+    // Map form data to DTO using adapter
+    const dto = LessonFormMapper.toCreateDTO(values);
+    createMutation.mutate(dto);
   };
 
   console.log('errors: ', JSON.stringify(form.errors));
@@ -77,7 +102,6 @@ export const CreateLessonModal = ({
             label="Description"
             placeholder="Enter lesson description"
             minRows={3}
-            withAsterisk
             {...form.getInputProps('description')}
           />
 
@@ -122,7 +146,12 @@ export const CreateLessonModal = ({
             />
           </Flex>
 
-          <Button type="submit" fullWidth mt="md">
+          <Button
+            type="submit"
+            fullWidth
+            mt="md"
+            loading={createMutation.isPending}
+          >
             Create Lesson
           </Button>
         </Stack>
