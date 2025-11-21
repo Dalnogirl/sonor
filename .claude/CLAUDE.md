@@ -20,48 +20,155 @@
 
 ### Project Structure
 
+**Pragmatic Decision:** `src/app/` follows Next.js conventions (not nested under `adapters/ui/app/`), but still considered part of Adapter Layer. Maintains framework ergonomics while preserving hexagonal principles.
+
 ```
 src/
-├── app/                    # Next.js App Router (UI Adapter - framework conventions)
-├── domain/                 # Pure business logic (no external deps)
-│   ├── models/            # Entities & Value Objects
-│   ├── services/          # Domain services
-│   └── ports/             # Interfaces (repositories, services)
-├── application/           # Use Cases (application orchestration)
-│   ├── use-cases/
-│   └── dto/
-├── infrastructure/        # Framework & external implementations
+├── app/                           # Next.js App Router (UI Adapter - follows framework conventions)
+│   ├── layout.tsx                 # Root layout
+│   ├── page.tsx                   # Home page
+│   ├── (auth)/                    # Route groups for organization
+│   ├── (dashboard)/
+│   └── api/trpc/[trpc]/route.ts   # tRPC HTTP handler
+├── domain/                        # Pure business logic (no external deps)
+│   ├── models/                    # Entities & Value Objects with business rules
+│   ├── services/                  # Domain services (complex multi-entity rules)
+│   ├── errors/                    # Domain-specific errors
+│   └── ports/                     # Interfaces (repositories, services, utils)
+│       ├── repositories/
+│       ├── services/
+│       └── utils/
+├── application/                   # Use Cases (application orchestration)
+│   ├── use-cases/                 # Organized by domain context
+│   │   ├── user/
+│   │   ├── post/
+│   │   └── auth/
+│   └── dto/                       # Data Transfer Objects
+├── infrastructure/                # Framework & external implementations
 │   ├── database/
-│   │   └── repositories/
+│   │   ├── prisma/
+│   │   └── repositories/          # Implement domain/ports, map domain↔persistence
 │   ├── email/
-│   └── factories/         # Dependency wiring
+│   ├── storage/
+│   └── factories/                 # Dependency wiring (Creator pattern)
+│       ├── create-repositories.ts
+│       └── create-use-cases.ts
 └── adapters/
-    ├── trpc/              # tRPC adapters (API layer)
-    └── ui/                # Reusable UI components/hooks
+    ├── trpc/                      # tRPC adapters (API layer)
+    │   ├── context.ts             # Wire dependencies here
+    │   ├── routers/
+    │   ├── procedures/
+    │   └── init.ts
+    └── ui/                        # Reusable UI logic (separate from app/)
+        ├── components/
+        ├── hooks/
+        └── actions/               # Server Actions
 ```
 
 ## Layer Rules
 
 ### Domain Layer (`domain/`)
+**Contains:** Entities (identity), Value Objects (immutable), Domain Services (multi-entity rules), Ports (interfaces)
+
 - ✅ Pure TypeScript classes/interfaces
+- ✅ Business rules INSIDE entities (e.g., `post.publish()` enforces rules)
 - ✅ Testable with zero mocking
 - ❌ NO imports from `infrastructure/`, `adapters/`, `application/`
 - ❌ NO framework dependencies (Next.js, tRPC, Prisma, React)
+- ❌ NO persistence logic in entities
+
+**Example:**
+```typescript
+// domain/models/Post.ts - Business rules in entity
+export class Post {
+  publish(): void {
+    if (this.content.length < 100) throw new Error('Min 100 chars');
+    if (this.status === PostStatus.PUBLISHED) throw new Error('Already published');
+    this.status = PostStatus.PUBLISHED;
+    this.updatedAt = new Date();
+  }
+
+  canBeEditedBy(userId: string): boolean {
+    return this.authorId === userId && this.status !== PostStatus.ARCHIVED;
+  }
+}
+```
 
 ### Application Layer (`application/`)
+**Contains:** Use Cases (workflows), DTOs (input/output structures)
+
 - ✅ Orchestrate business workflows (use cases)
 - ✅ Depend on domain layer (models, ports)
+- ✅ Define transaction boundaries
 - ❌ NO dependencies on infrastructure/adapters
 - ❌ NO framework-specific code
 
+**Example:**
+```typescript
+// application/use-cases/post/PublishPostUseCase.ts
+export class PublishPostUseCase {
+  constructor(
+    private postRepository: PostRepository,
+    private emailService: EmailService,
+  ) {}
+
+  async execute(postId: string, userId: string): Promise<Post> {
+    const post = await this.postRepository.findById(postId);
+    if (!post) throw new NotFoundError('Post not found');
+
+    if (!post.canBeEditedBy(userId)) throw new UnauthorizedError('Cannot publish');
+
+    post.publish(); // Domain method enforces rules
+
+    await this.postRepository.save(post);
+    await this.emailService.sendPostPublishedNotification(post);
+
+    return post;
+  }
+}
+```
+
 ### Infrastructure Layer (`infrastructure/`)
+**Contains:** Repository implementations, External service clients, Factories
+
 - ✅ Implement interfaces from `domain/ports/`
 - ✅ Handle tech-specific concerns (SQL, HTTP, file system)
-- ✅ Map between domain models and persistence models
+- ✅ Map between domain models ↔ persistence models (toDomain/toPersistence methods)
+
+**Repository Pattern:**
+```typescript
+// infrastructure/database/repositories/PrismaPostRepository.ts
+export class PrismaPostRepository implements PostRepository {
+  constructor(private prisma: PrismaClient) {}
+
+  async findById(id: string): Promise<Post | null> {
+    const record = await this.prisma.post.findUnique({ where: { id } });
+    return record ? this.toDomain(record) : null;
+  }
+
+  async save(post: Post): Promise<void> {
+    await this.prisma.post.upsert({
+      where: { id: post.id },
+      create: this.toPersistence(post),
+      update: this.toPersistence(post),
+    });
+  }
+
+  private toDomain(record: any): Post {
+    return new Post(record.id, record.title, record.content, /*...*/);
+  }
+
+  private toPersistence(post: Post) {
+    return { id: post.id, title: post.title, content: post.content, /*...*/ };
+  }
+}
+```
 
 ### Adapters Layer (`adapters/`)
+**Contains:** tRPC routers, UI components, Server Actions
+
 - ✅ Connect external world to business logic
-- ✅ tRPC routers: thin layer calling use cases
+- ✅ tRPC routers: thin layer calling use cases, map domain errors to tRPC errors
 - ✅ UI components: presentation logic only
 - ❌ NO business logic in routers/components
 
@@ -185,15 +292,60 @@ export const postRouter = router({
 
 ## Common Anti-Patterns to Avoid
 
-❌ **Domain entities importing Prisma**
-❌ **Use cases depending on tRPC/Next.js**
-❌ **Business logic in tRPC routers**
-❌ **Business logic in React components/hooks**
+### ❌ Domain entities importing framework code
+```typescript
+// BAD - Domain importing Prisma
+import { PrismaClient } from '@prisma/client';
+export class Post {
+  async save() {
+    const prisma = new PrismaClient();
+    await prisma.post.create({ data: this });
+  }
+}
+```
+✅ **Use repositories:** Persistence via `PostRepository` port, implemented by `PrismaPostRepository` in infrastructure
 
-✅ **Use repositories for persistence**
-✅ **Use cases throw domain errors**
-✅ **Routers delegate to use cases**
-✅ **Components call use cases via tRPC**
+### ❌ Use cases importing tRPC/Next.js
+```typescript
+// BAD - Use case throwing tRPC error
+import { TRPCError } from '@trpc/server';
+export class CreatePostUseCase {
+  async execute() {
+    throw new TRPCError({ code: 'UNAUTHORIZED' });
+  }
+}
+```
+✅ **Throw domain errors:** Use case throws `UnauthorizedError`, tRPC router maps to `TRPCError`
+
+### ❌ Business logic in tRPC routers
+```typescript
+// BAD - Logic in router
+export const postRouter = router({
+  create: protectedProcedure.mutation(async ({ ctx, input }) => {
+    if (input.title.length < 3) throw new Error('Title too short');
+    const post = await ctx.prisma.post.create({ data: input });
+    await sendEmail(post.authorId);
+    return post;
+  }),
+});
+```
+✅ **Delegate to use cases:** Router validates input (Zod), calls `ctx.useCases.post.createPost.execute()`
+
+### ❌ Business rules in React components/hooks
+```typescript
+// BAD - Business logic in component
+function PublishButton({ post }: { post: Post }) {
+  const handlePublish = async () => {
+    if (post.content.length < 100) {
+      alert('Post too short');
+      return;
+    }
+    await trpc.post.publish.mutate({ postId: post.id });
+  };
+  return <button onClick={handlePublish}>Publish</button>;
+}
+```
+✅ **Logic in domain/use cases:** Component calls `trpc.post.publish.mutate()`, use case validates via `post.publish()`
 
 ## Testing Strategy
 1. **Domain Layer:** Pure unit tests, no mocking
@@ -204,16 +356,71 @@ export const postRouter = router({
 ## Patterns to Apply
 
 ### Query vs Command Separation (CQRS-lite)
-- Queries: read operations (simpler)
-- Commands: write operations (full use case pattern)
+**Queries:** Simple read operations, can bypass use case ceremony
+```typescript
+// application/queries/ListPostsQuery.ts
+export class ListPostsQuery {
+  constructor(private postRepository: PostRepository) {}
 
-### Domain Events
-- Use EventBus for cross-module communication
-- Keep modules decoupled
+  async execute(filters: PostFilters): Promise<Post[]> {
+    return this.postRepository.findPublished(filters);
+  }
+}
+```
+
+**Commands:** Write operations, full use case with orchestration
+```typescript
+// application/use-cases/post/PublishPostCommand.ts
+export class PublishPostCommand {
+  constructor(
+    private postRepository: PostRepository,
+    private emailService: EmailService,
+  ) {}
+
+  async execute(postId: string, userId: string): Promise<void> {
+    // Complex orchestration, side effects, events
+  }
+}
+```
+
+### Domain Events (for decoupling modules)
+```typescript
+// domain/events/PostPublishedEvent.ts
+export class PostPublishedEvent {
+  constructor(
+    public readonly postId: string,
+    public readonly authorId: string,
+    public readonly publishedAt: Date,
+  ) {}
+}
+
+// Use case emits event
+await this.postRepository.save(post);
+this.eventBus.publish(new PostPublishedEvent(post.id, post.authorId, new Date()));
+```
 
 ### Server Actions Integration
-- Server actions can call use cases directly
-- Revalidate paths after mutations
+```typescript
+// adapters/ui/actions/post.actions.ts
+'use server';
+import { createAppDependencies } from '@/config/dependencies';
+import { revalidatePath } from 'next/cache';
+
+export async function publishPostAction(postId: string) {
+  const { useCases } = createAppDependencies();
+  const session = await getServerSession();
+
+  if (!session?.user?.id) throw new Error('Unauthorized');
+
+  await useCases.post.publishPost.execute(postId, session.user.id);
+  revalidatePath('/posts');
+}
+
+// Usage in component
+<form action={() => publishPostAction(postId)}>
+  <button type="submit">Publish</button>
+</form>
+```
 
 ## Code Quality Principles
 
@@ -235,14 +442,23 @@ export const postRouter = router({
 - Indirection: Use intermediary to reduce coupling
 - Protected Variations: Shield from variations with interfaces
 
-## When Implementing Features
+## Feature Implementation Workflow
 
-1. Start with domain models (entities, value objects)
-2. Define ports (interfaces) for external dependencies
-3. Implement use cases using ports
-4. Create infrastructure implementations
-5. Wire dependencies in factories
-6. Add tRPC procedures calling use cases
-7. Build UI components using tRPC hooks
-8. Write tests at each layer
-**Remember:** Keep business logic in domain, orchestration in use cases, framework concerns in adapters.
+**Always follow this order (Dependency Inversion - build from inside out):**
+
+1. **Domain First:** Create/update entities with business rules, define ports (interfaces)
+2. **Use Cases:** Implement application workflows using domain models + ports
+3. **Infrastructure:** Implement ports (repositories, services) with real tech (Prisma, etc.)
+4. **Wire Dependencies:** Update factories (`create-repositories.ts`, `create-use-cases.ts`)
+5. **tRPC Adapter:** Add thin procedures calling use cases, map domain errors to tRPC errors
+6. **UI Adapter:** Build components/hooks consuming tRPC endpoints
+7. **Tests:** Unit (domain) → Integration (use cases) → E2E (tRPC) → Component (UI)
+
+**Critical Rules:**
+- Business logic ONLY in domain/application layers
+- Repositories map domain ↔ persistence (toDomain/toPersistence)
+- Use cases orchestrate, entities enforce rules
+- Adapters (tRPC/UI) are thin - just delegation + error mapping
+- Dependencies point inward: UI → tRPC → Use Cases → Domain ← Infrastructure
+
+**When uncertain about layer placement, ask:** "If I swap Prisma for Drizzle, does this change?" If yes → infrastructure. "If I swap tRPC for REST?" If yes → adapter. "Is this a business rule?" If yes → domain.
