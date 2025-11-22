@@ -6,6 +6,8 @@ import { UserMapper } from '@/infrastructure/mappers/UserMapper';
 import { Repositories } from './create-repositories';
 import { GetMyTeachingLessonsForPeriod } from '@/application/use-cases/lesson/GetMyTeachingLessonsForPeriod';
 import { CreateLesson } from '@/application/use-cases/lesson/CreateLesson';
+import { GetLessonUseCase } from '@/application/use-cases/lesson/GetLesson';
+import { LessonMapper } from '../mappers/LessonMapper';
 
 /**
  * Dependency Injection Factory
@@ -21,6 +23,7 @@ export const createUseCases = (repositories: Repositories) => {
   // Infrastructure implementations
   const passwordHasher = new BcryptPasswordHasher();
   const userMapper = new UserMapper();
+  const lessonMapper = new LessonMapper(userMapper);
 
   return {
     user: {
@@ -47,6 +50,11 @@ export const createUseCases = (repositories: Repositories) => {
         repositories.lessonRepository
       ),
       createLesson: new CreateLesson(repositories.lessonRepository),
+      getLesson: new GetLessonUseCase(
+        repositories.lessonRepository,
+        repositories.userRepository,
+        lessonMapper
+      ),
     },
   };
 };

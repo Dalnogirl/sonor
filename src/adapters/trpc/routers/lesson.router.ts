@@ -1,7 +1,10 @@
-import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
 import { router } from '../init';
 import { protectedProcedure } from '../procedures/protected';
 import { createLessonRequestSchema } from '@/application/dto/lesson/CreateLessonRequestDTO.schema';
+import { getLessonRequestSchema } from '@/application/dto/lesson/GetLessonRequestDTO.schema';
+import { getMyTeachingLessonsForPeriodRequestSchema } from '@/application/dto/lesson/GetMyTeachingLessonsForPeriodRequestDTO.schema';
+import { LessonNotFoundError } from '@/domain/errors/LessonErrors';
 
 export const lessonRouter = router({
   /**
@@ -17,12 +20,7 @@ export const lessonRouter = router({
     }),
 
   getMyTeachingLessonsForPeriod: protectedProcedure
-    .input(
-      z.object({
-        startDate: z.coerce.date(), // Coerce ISO string to Date
-        endDate: z.coerce.date(), // Coerce ISO string to Date
-      })
-    )
+    .input(getMyTeachingLessonsForPeriodRequestSchema)
     .query(async ({ ctx, input }) => {
       const { startDate, endDate } = input;
       const lessons =
@@ -32,5 +30,21 @@ export const lessonRouter = router({
           endDate,
         });
       return lessons;
+    }),
+  getLessonById: protectedProcedure
+    .input(getLessonRequestSchema)
+    .query(async ({ ctx, input }) => {
+      try {
+        const lesson = await ctx.useCases.lesson.getLesson.execute(input);
+        return lesson;
+      } catch (error: unknown) {
+        if (error instanceof LessonNotFoundError) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: error.message,
+          });
+        }
+        throw error;
+      }
     }),
 });

@@ -1,5 +1,4 @@
-export interface LessonDTO {
-  userId: string;
+export interface GetMyTeachingLessonsForPeriodRequestDTO {
   startDate: Date;
   endDate: Date;
 }

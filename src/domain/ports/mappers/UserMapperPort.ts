@@ -1,5 +1,6 @@
 import { User } from '@/domain/models/User';
 import { UserResponseDTO } from '@/application/dto/UserResponseDTO';
+import { UserSummaryDTO } from '@/application/dto/user/UserSummaryDTO';
 
 /**
  * UserMapperPort - Domain Port (Interface)
@@ -31,5 +32,5 @@ export interface UserMapperPort {
    * Convert User to minimal summary DTO
    * For use in lists, cards, or other condensed views
    */
-  toSummaryDTO(user: User): Pick<UserResponseDTO, 'id' | 'name' | 'email'>;
+  toSummaryDTO(user: User): UserSummaryDTO;
 }
