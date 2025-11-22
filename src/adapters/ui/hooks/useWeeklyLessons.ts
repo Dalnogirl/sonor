@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
 import { getWeekStart, getWeekEnd, generateWeekDays } from '@/adapters/ui/utils/date-utils';
 
@@ -10,6 +10,7 @@ import { getWeekStart, getWeekEnd, generateWeekDays } from '@/adapters/ui/utils/
  * - Manages tRPC data fetching
  * - Provides derived state (weekEnd, weekDays)
  * - Shields component from state complexity
+ * - Syncs with parent state management (URL)
  *
  * **Applies:**
  * - Single Responsibility (SOLID): Only manages weekly view state
@@ -22,10 +23,28 @@ import { getWeekStart, getWeekEnd, generateWeekDays } from '@/adapters/ui/utils/
  * - Extracts stateful logic from components
  * - Enables logic reuse across components
  * - Testable independently from UI
+ * - Controlled component pattern (accepts external state)
  */
-export const useWeeklyLessons = () => {
+
+interface UseWeeklyLessonsOptions {
+  initialDate?: Date | null;
+  onDateChange?: (date: Date) => void;
+}
+
+export const useWeeklyLessons = (options: UseWeeklyLessonsOptions = {}) => {
+  const { initialDate, onDateChange } = options;
+
   // Week navigation state
-  const [currentWeekStart, setCurrentWeekStart] = useState(() => getWeekStart(new Date()));
+  const [currentWeekStart, setCurrentWeekStart] = useState(() =>
+    getWeekStart(initialDate || new Date())
+  );
+
+  // Sync with external date changes (from URL)
+  useEffect(() => {
+    if (initialDate) {
+      setCurrentWeekStart(getWeekStart(initialDate));
+    }
+  }, [initialDate]);
 
   // Derived state (memoized for performance)
   const weekEnd = useMemo(() => getWeekEnd(currentWeekStart), [currentWeekStart]);
@@ -42,16 +61,20 @@ export const useWeeklyLessons = () => {
     const prev = new Date(currentWeekStart);
     prev.setDate(prev.getDate() - 7);
     setCurrentWeekStart(prev);
+    onDateChange?.(prev);
   };
 
   const goToNextWeek = () => {
     const next = new Date(currentWeekStart);
     next.setDate(next.getDate() + 7);
     setCurrentWeekStart(next);
+    onDateChange?.(next);
   };
 
   const goToToday = () => {
-    setCurrentWeekStart(getWeekStart(new Date()));
+    const today = getWeekStart(new Date());
+    setCurrentWeekStart(today);
+    onDateChange?.(today);
   };
 
   return {

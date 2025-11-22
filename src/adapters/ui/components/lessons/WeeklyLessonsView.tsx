@@ -2,8 +2,14 @@
 
 import { Button, Group, Text, Box, Stack, Card, Loader, Center } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
+import Link from 'next/link';
 import { useWeeklyLessons } from '@/adapters/ui/hooks/useWeeklyLessons';
-import { isSameDay } from '@/adapters/ui/utils/date-utils';
+import {
+  isSameDay,
+  formatDayName,
+  formatWeekRange,
+  formatTimeRange,
+} from '@/adapters/ui/utils/date-utils';
 
 /**
  * SerializedLesson - Type representing lesson data after tRPC serialization
@@ -30,6 +36,7 @@ type SerializedLesson = {
  * - Pure UI rendering - no business logic
  * - Delegates state management to useWeeklyLessons hook
  * - Transforms serialized data into UI elements
+ * - Controlled component (accepts external state)
  *
  * **Applies:**
  * - Single Responsibility (SOLID): Only renders UI
@@ -37,17 +44,18 @@ type SerializedLesson = {
  * - Low Coupling: Depends on hook interface, not implementation
  * - Separation of Concerns: UI separated from state logic
  *
- * **Pattern:** Container/Presenter
+ * **Pattern:** Container/Presenter + Controlled Component
  * - Hook = container (state logic)
  * - Component = presenter (UI rendering)
+ * - Parent controls date via props
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface WeeklyLessonsViewProps {
-  // Could add filters later: teacherId, pupilId, etc.
+  initialDate?: Date | null;
+  onDateChange?: (date: Date) => void;
 }
 
-export const WeeklyLessonsView = ({}: WeeklyLessonsViewProps) => {
+export const WeeklyLessonsView = ({ initialDate, onDateChange }: WeeklyLessonsViewProps) => {
   const {
     currentWeekStart,
     weekEnd,
@@ -57,7 +65,7 @@ export const WeeklyLessonsView = ({}: WeeklyLessonsViewProps) => {
     goToPreviousWeek,
     goToNextWeek,
     goToToday,
-  } = useWeeklyLessons();
+  } = useWeeklyLessons({ initialDate, onDateChange });
 
   return (
     <Stack gap="md">
@@ -88,21 +96,23 @@ export const WeeklyLessonsView = ({}: WeeklyLessonsViewProps) => {
       </Group>
 
       {/* Week Grid */}
-      {isLoading ? (
-        <Center h={400}>
-          <Loader />
-        </Center>
-      ) : (
-        <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
-          {weekDays.map((day) => (
-            <DayColumn
-              key={day.toISOString()}
-              day={day}
-              lessons={getLessonsForDay(lessons, day)}
-            />
-          ))}
-        </Box>
-      )}
+      <Box style={{ minHeight: '400px' }}>
+        {isLoading ? (
+          <Center h="100%">
+            <Loader />
+          </Center>
+        ) : (
+          <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
+            {weekDays.map((day) => (
+              <DayColumn
+                key={day.toISOString()}
+                day={day}
+                lessons={getLessonsForDay(lessons, day)}
+              />
+            ))}
+          </Box>
+        )}
+      </Box>
     </Stack>
   );
 };
@@ -156,21 +166,23 @@ interface LessonCardProps {
 
 const LessonCard = ({ lesson }: LessonCardProps) => {
   return (
-    <Card padding="xs" withBorder>
-      <Stack gap={4}>
-        <Text size="sm" fw={600} lineClamp={1}>
-          {lesson.title}
-        </Text>
-        <Text size="xs" c="dimmed">
-          {formatTimeRange(new Date(lesson.startDate), new Date(lesson.endDate))}
-        </Text>
-        {lesson.description && (
-          <Text size="xs" c="dimmed" lineClamp={2}>
-            {lesson.description}
+    <Link href={`/lessons/${lesson.id}`} style={{ textDecoration: 'none' }}>
+      <Card padding="xs" withBorder style={{ cursor: 'pointer' }}>
+        <Stack gap={4}>
+          <Text size="sm" fw={600} lineClamp={1}>
+            {lesson.title}
           </Text>
-        )}
-      </Stack>
-    </Card>
+          <Text size="xs" c="dimmed">
+            {formatTimeRange(new Date(lesson.startDate), new Date(lesson.endDate))}
+          </Text>
+          {lesson.description && (
+            <Text size="xs" c="dimmed" lineClamp={2}>
+              {lesson.description}
+            </Text>
+          )}
+        </Stack>
+      </Card>
+    </Link>
   );
 };
 
@@ -180,20 +192,4 @@ function getLessonsForDay(lessons: SerializedLesson[], day: Date): SerializedLes
   return lessons
     .filter((lesson) => isSameDay(new Date(lesson.startDate), day))
     .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-}
-
-function formatDayName(date: Date): string {
-  return date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
-}
-
-function formatWeekRange(start: Date, end: Date): string {
-  const startStr = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  const endStr = end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  return `${startStr} - ${endStr}`;
-}
-
-function formatTimeRange(start: Date, end: Date): string {
-  const startTime = start.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-  const endTime = end.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-  return `${startTime} - ${endTime}`;
 }

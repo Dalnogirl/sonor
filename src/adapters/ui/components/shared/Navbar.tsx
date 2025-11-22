@@ -44,7 +44,7 @@ export function Navbar() {
               variant={pathname === '/lessons' ? 'filled' : 'subtle'}
               leftSection={<IconSchool size={18} />}
             >
-              Lessons
+              My Lessons
             </Button>
             {session?.user ? (
               <UserInfo />

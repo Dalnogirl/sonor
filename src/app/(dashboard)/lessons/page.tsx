@@ -1,13 +1,32 @@
 'use client';
 
-import { Button, Container, Stack, Title } from '@mantine/core';
+import { Button, Container, Stack, Title, SegmentedControl } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import React from 'react';
 import { CreateLessonModal } from '@/adapters/ui/components/lessons/CreateLessonModal';
 import { WeeklyLessonsView } from '@/adapters/ui/components/lessons/WeeklyLessonsView';
+import { MonthlyLessonsView } from '@/adapters/ui/components/lessons/MonthlyLessonsView';
+import { useLessonsViewState } from '@/adapters/ui/hooks/useLessonsViewState';
+
+/**
+ * LessonsPage - Main page for viewing and managing lessons
+ *
+ * **Architectural Role:** Page component (adapter/UI layer)
+ * - Pure presentation - delegates state to hook
+ * - Coordinates view mode selection (weekly/monthly)
+ * - Delegates rendering to specialized view components
+ *
+ * **Applies:**
+ * - Single Responsibility: Only renders UI, delegates state to hook
+ * - Open/Closed (SOLID): Easy to add new view types without modifying existing code
+ * - Polymorphism (GRASP): Different view components implement same interface
+ * - Low Coupling: Depends on hook interface, not implementation
+ * - Separation of Concerns: UI logic separate from state logic
+ */
 
 const LessonsPage = () => {
   const [opened, { open, close }] = useDisclosure(false);
+  const { viewMode, currentDate, setViewMode, setCurrentDate } = useLessonsViewState();
 
   return (
     <Container size="xl" py="xl">
@@ -17,7 +36,22 @@ const LessonsPage = () => {
           <Button onClick={open}>Create Lesson</Button>
         </div>
 
-        <WeeklyLessonsView />
+        {/* View Mode Toggle */}
+        <SegmentedControl
+          value={viewMode}
+          onChange={(value) => setViewMode(value as 'weekly' | 'monthly')}
+          data={[
+            { label: 'Weekly View', value: 'weekly' },
+            { label: 'Monthly View', value: 'monthly' },
+          ]}
+        />
+
+        {/* Conditional View Rendering */}
+        {viewMode === 'weekly' ? (
+          <WeeklyLessonsView initialDate={currentDate} onDateChange={setCurrentDate} />
+        ) : (
+          <MonthlyLessonsView initialDate={currentDate} onDateChange={setCurrentDate} />
+        )}
       </Stack>
 
       <CreateLessonModal opened={opened} onClose={close} />
