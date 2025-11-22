@@ -2,8 +2,10 @@ import {
   RecurringPattern,
   RecurringFrequency,
 } from '../models/RecurringPattern';
+import { DateService } from '../ports/services/DateService';
 
 export class RecurrenceService {
+  constructor(private dateService: DateService) {}
   generateOccurrences(
     startDate: Date,
     pattern: RecurringPattern,
@@ -29,14 +31,16 @@ export class RecurrenceService {
     pattern: RecurringPattern
   ): Date[] {
     const result: Date[] = [];
-    const currentDate = new Date(startDate);
+    let currentDate = startDate;
 
     const effectiveEndDate =
-      pattern.endDate && pattern.endDate < endDate ? pattern.endDate : endDate;
+      pattern.endDate && this.dateService.isBefore(pattern.endDate, endDate)
+        ? pattern.endDate
+        : endDate;
 
-    while (currentDate <= effectiveEndDate) {
-      result.push(new Date(currentDate));
-      currentDate.setDate(currentDate.getDate() + pattern.interval);
+    while (this.dateService.isSameOrBefore(currentDate, effectiveEndDate)) {
+      result.push(currentDate);
+      currentDate = this.dateService.addDays(currentDate, pattern.interval);
     }
 
     return result;
@@ -48,25 +52,35 @@ export class RecurrenceService {
     pattern: RecurringPattern
   ): Date[] {
     const result = [];
-    const weekStart = this.getStartOfWeek(new Date(startDate));
+    const weekStart = this.dateService.startOfWeek(startDate);
     let weekNumber = 0;
 
-    while (weekStart <= endDate) {
-      const currentWeekStart = new Date(weekStart);
-      currentWeekStart.setDate(
-        currentWeekStart.getDate() + weekNumber * 7 * pattern.interval
+    while (this.dateService.isSameOrBefore(weekStart, endDate)) {
+      const currentWeekStart = this.dateService.addWeeks(
+        weekStart,
+        weekNumber * pattern.interval
       );
 
-      if (currentWeekStart > endDate) break;
-      if (pattern.endDate && currentWeekStart > pattern.endDate) break;
+      if (this.dateService.isAfter(currentWeekStart, endDate)) break;
+      if (
+        pattern.endDate &&
+        this.dateService.isAfter(currentWeekStart, pattern.endDate)
+      )
+        break;
 
       for (const dayOfWeek of pattern.daysOfWeek.sort()) {
-        const occurrenceDate = new Date(currentWeekStart);
-        occurrenceDate.setDate(occurrenceDate.getDate() + dayOfWeek);
+        const occurrenceDate = this.dateService.addDays(
+          currentWeekStart,
+          dayOfWeek
+        );
 
-        if (occurrenceDate < startDate) continue;
-        if (occurrenceDate > endDate) break;
-        if (pattern.endDate && occurrenceDate > pattern.endDate) break;
+        if (this.dateService.isBefore(occurrenceDate, startDate)) continue;
+        if (this.dateService.isAfter(occurrenceDate, endDate)) break;
+        if (
+          pattern.endDate &&
+          this.dateService.isAfter(occurrenceDate, pattern.endDate)
+        )
+          break;
 
         result.push(occurrenceDate);
       }
@@ -83,45 +97,16 @@ export class RecurrenceService {
     pattern: RecurringPattern
   ): Date[] {
     const result: Date[] = [];
-    const targetDayOfMonth = startDate.getDate();
-    const hours = startDate.getHours();
-    const minutes = startDate.getMinutes();
-    const seconds = startDate.getSeconds();
-    const milliseconds = startDate.getMilliseconds();
+    let currentDate = startDate;
 
     const effectiveEndDate =
-      pattern.endDate && pattern.endDate < endDate ? pattern.endDate : endDate;
+      pattern.endDate && this.dateService.isBefore(pattern.endDate, endDate)
+        ? pattern.endDate
+        : endDate;
 
-    let year = startDate.getFullYear();
-    let month = startDate.getMonth();
-    let currentDay = targetDayOfMonth;
-
-    while (true) {
-      const clampedDay = Math.min(currentDay, this.getDaysInMonth(year, month));
-
-      const occurrenceDate = new Date(
-        year,
-        month,
-        clampedDay,
-        hours,
-        minutes,
-        seconds,
-        milliseconds
-      );
-
-      if (occurrenceDate > effectiveEndDate) {
-        break;
-      }
-
-      result.push(occurrenceDate);
-
-      currentDay = clampedDay;
-
-      month += pattern.interval;
-      while (month >= 12) {
-        month -= 12;
-        year++;
-      }
+    while (this.dateService.isSameOrBefore(currentDate, effectiveEndDate)) {
+      result.push(currentDate);
+      currentDate = this.dateService.addMonths(currentDate, pattern.interval);
     }
 
     return result;
@@ -133,16 +118,18 @@ export class RecurrenceService {
     limit: number
   ): Date[] {
     const occurrences: Date[] = [];
-    const currentDate = new Date(startDate);
+    let currentDate = startDate;
 
     while (occurrences.length < limit) {
-      if (pattern.endDate && currentDate > pattern.endDate) {
+      if (
+        pattern.endDate &&
+        this.dateService.isAfter(currentDate, pattern.endDate)
+      ) {
         break;
       }
 
-      occurrences.push(new Date(currentDate));
-
-      currentDate.setDate(currentDate.getDate() + pattern.interval);
+      occurrences.push(currentDate);
+      currentDate = this.dateService.addDays(currentDate, pattern.interval);
     }
 
     return occurrences;
@@ -154,26 +141,29 @@ export class RecurrenceService {
     limit: number
   ): Date[] {
     const occurrences: Date[] = [];
-    let weekStart = new Date(startDate);
-    weekStart = this.getStartOfWeek(weekStart);
-
+    const weekStart = this.dateService.startOfWeek(startDate);
     let weekNumber = 0;
 
     while (occurrences.length < limit) {
-      const currentWeekStart = new Date(weekStart);
-      currentWeekStart.setDate(
-        currentWeekStart.getDate() + weekNumber * 7 * pattern.interval
+      const currentWeekStart = this.dateService.addWeeks(
+        weekStart,
+        weekNumber * pattern.interval
       );
 
       for (const dayOfWeek of pattern.daysOfWeek.sort()) {
-        const occurrenceDate = new Date(currentWeekStart);
-        occurrenceDate.setDate(occurrenceDate.getDate() + dayOfWeek);
+        const occurrenceDate = this.dateService.addDays(
+          currentWeekStart,
+          dayOfWeek
+        );
 
-        if (occurrenceDate < startDate) {
+        if (this.dateService.isBefore(occurrenceDate, startDate)) {
           continue;
         }
 
-        if (pattern.endDate && occurrenceDate > pattern.endDate) {
+        if (
+          pattern.endDate &&
+          this.dateService.isAfter(occurrenceDate, pattern.endDate)
+        ) {
           return occurrences;
         }
 
@@ -196,55 +186,20 @@ export class RecurrenceService {
     limit: number
   ): Date[] {
     const occurrences: Date[] = [];
-    const targetDayOfMonth = startDate.getDate();
-    const hours = startDate.getHours();
-    const minutes = startDate.getMinutes();
-    const seconds = startDate.getSeconds();
-    const milliseconds = startDate.getMilliseconds();
-
-    let year = startDate.getFullYear();
-    let month = startDate.getMonth();
-    let currentDay = targetDayOfMonth;
+    let currentDate = startDate;
 
     while (occurrences.length < limit) {
-      const clampedDay = Math.min(currentDay, this.getDaysInMonth(year, month));
-
-      const occurrenceDate = new Date(
-        year,
-        month,
-        clampedDay,
-        hours,
-        minutes,
-        seconds,
-        milliseconds
-      );
-
-      if (pattern.endDate && occurrenceDate > pattern.endDate) {
+      if (
+        pattern.endDate &&
+        this.dateService.isAfter(currentDate, pattern.endDate)
+      ) {
         break;
       }
 
-      occurrences.push(occurrenceDate);
-
-      currentDay = clampedDay;
-
-      month += pattern.interval;
-      while (month >= 12) {
-        month -= 12;
-        year++;
-      }
+      occurrences.push(currentDate);
+      currentDate = this.dateService.addMonths(currentDate, pattern.interval);
     }
 
     return occurrences;
-  }
-
-  private getStartOfWeek(date: Date): Date {
-    const result = new Date(date);
-    const day = result.getDay();
-    result.setDate(result.getDate() - day);
-    return result;
-  }
-
-  private getDaysInMonth(year: number, month: number): number {
-    return new Date(year, month + 1, 0).getDate();
   }
 }

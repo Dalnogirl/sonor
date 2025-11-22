@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { RecurrenceService } from '@/domain/services/RecurrenceService';
+import { DayjsDateService } from '@/infrastructure/services/DayjsDateService';
 import {
   RecurringPattern,
   RecurringFrequency,
@@ -10,7 +11,8 @@ describe('RecurrenceService', () => {
   let service: RecurrenceService;
 
   beforeEach(() => {
-    service = new RecurrenceService();
+    const dateService = new DayjsDateService();
+    service = new RecurrenceService(dateService);
   });
 
   describe('generateOccurrences - DAILY', () => {
