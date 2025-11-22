@@ -4,6 +4,7 @@ import { LoginUseCase } from '@/application/use-cases/auth/LoginUseCase';
 import { BcryptPasswordHasher } from '@/infrastructure/services/BcryptPasswordHasher';
 import { DayjsDateService } from '@/infrastructure/services/DayjsDateService';
 import { RecurrenceService } from '@/domain/services/RecurrenceService';
+import { OccurrenceGeneratorService } from '@/domain/services/OccurrenceGeneratorService';
 import { UserMapper } from '@/infrastructure/mappers/UserMapper';
 import { Repositories } from './create-repositories';
 import { GetMyTeachingLessonsForPeriod } from '@/application/use-cases/lesson/GetMyTeachingLessonsForPeriod';
@@ -32,6 +33,10 @@ export const createUseCases = (repositories: Repositories) => {
 
   // Domain services
   const recurrenceService = new RecurrenceService(dateService);
+  const occurrenceGeneratorService = new OccurrenceGeneratorService(
+    recurrenceService,
+    dateService
+  );
 
   return {
     user: {
@@ -55,7 +60,9 @@ export const createUseCases = (repositories: Repositories) => {
     },
     lesson: {
       getMyTeachingLessonsForPeriod: new GetMyTeachingLessonsForPeriod(
-        repositories.lessonRepository
+        repositories.lessonRepository,
+        repositories.lessonExceptionRepository,
+        occurrenceGeneratorService
       ),
       createLesson: new CreateLesson(repositories.lessonRepository),
       getLesson: new GetLessonUseCase(

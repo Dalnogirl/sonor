@@ -64,6 +64,31 @@ export class PrismaLessonExceptionRepository
     return prismaExceptions.map((e) => this.toDomain(e));
   }
 
+  async findByLessonIdsAndDateRange(
+    lessonIds: string[],
+    startDate: Date,
+    endDate: Date
+  ): Promise<LessonException[]> {
+    if (lessonIds.length === 0) {
+      return [];
+    }
+
+    const prismaExceptions = await this.prisma.lessonException.findMany({
+      where: {
+        lessonId: {
+          in: lessonIds,
+        },
+        originalDate: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      orderBy: { originalDate: 'asc' },
+    });
+
+    return prismaExceptions.map((e) => this.toDomain(e));
+  }
+
   async create(exception: LessonException): Promise<LessonException> {
     await this.prisma.lessonException.create({
       data: this.toPersistence(exception),

@@ -31,6 +31,16 @@ export interface LessonExceptionRepository {
   findByDateRange(startDate: Date, endDate: Date): Promise<LessonException[]>;
 
   /**
+   * Find exceptions for specific lessons within a date range
+   * Optimized for bulk operations (prevents N+1 queries)
+   */
+  findByLessonIdsAndDateRange(
+    lessonIds: string[],
+    startDate: Date,
+    endDate: Date
+  ): Promise<LessonException[]>;
+
+  /**
    * Create a new exception
    * Use case validates no duplicate exists
    */

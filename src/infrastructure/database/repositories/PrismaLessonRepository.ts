@@ -51,8 +51,21 @@ export class PrismaLessonRepository implements LessonRepository {
       where: {
         AND: [
           { teachers: { some: { userId } } },
-          { startDate: { gte: startDate } },
-          { endDate: { lte: endDate } },
+          {
+            OR: [
+              // Non-recurring lessons: startDate within period
+              {
+                recurringPattern: { equals: Prisma.JsonNull },
+                startDate: { gte: startDate, lte: endDate },
+              },
+              // Recurring lessons: started before period ends
+              // (OccurrenceGeneratorService will filter by recurringPattern.endDate)
+              {
+                NOT: { recurringPattern: { equals: Prisma.JsonNull } },
+                startDate: { lte: endDate },
+              },
+            ],
+          },
         ],
       },
       include: {

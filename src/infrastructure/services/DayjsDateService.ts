@@ -21,6 +21,10 @@ export class DayjsDateService implements DateService {
     return dayjs(date).add(months, 'month').toDate();
   }
 
+  addMinutes(date: Date, minutes: number): Date {
+    return dayjs(date).add(minutes, 'minute').toDate();
+  }
+
   startOfWeek(date: Date): Date {
     return dayjs(date).weekday(0).toDate();
   }
@@ -43,5 +47,13 @@ export class DayjsDateService implements DateService {
 
   isSameOrAfter(date1: Date, date2: Date): boolean {
     return dayjs(date1).isSameOrAfter(date2, 'day');
+  }
+
+  diffInMinutes(date1: Date, date2: Date): number {
+    return dayjs(date1).diff(date2, 'minute');
+  }
+
+  formatISO(date: Date): string {
+    return dayjs(date).toISOString();
   }
 }
