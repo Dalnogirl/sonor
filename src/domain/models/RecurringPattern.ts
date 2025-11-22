@@ -26,14 +26,16 @@ export class RecurringPattern {
     interval: number,
     daysOfWeek: DayOfWeek[] = [],
     endDate: Date | null = null,
-    occurrences: number | null = null
+    occurrences: number | null = null,
+    referenceDate?: Date
   ) {
     this.validateInvariants(
       frequency,
       interval,
       daysOfWeek,
       endDate,
-      occurrences
+      occurrences,
+      referenceDate
     );
 
     this.frequency = frequency;
@@ -48,7 +50,8 @@ export class RecurringPattern {
     interval: number,
     daysOfWeek: DayOfWeek[],
     endDate: Date | null,
-    occurrences: number | null
+    occurrences: number | null,
+    referenceDate: Date = new Date()
   ): void {
     if (interval < 1) {
       throw new Error('Interval must be at least 1');
@@ -60,6 +63,10 @@ export class RecurringPattern {
 
     if (endDate !== null && occurrences !== null) {
       throw new Error('Cannot specify both endDate and occurrences');
+    }
+
+    if (endDate !== null && endDate < referenceDate) {
+      throw new Error('endDate must be in the future');
     }
 
     if (frequency === RecurringFrequency.WEEKLY && daysOfWeek.length === 0) {
@@ -83,14 +90,16 @@ export class RecurringPattern {
   static daily(
     interval: number = 1,
     endDate?: Date,
-    occurrences?: number
+    occurrences?: number,
+    referenceDate?: Date
   ): RecurringPattern {
     return new RecurringPattern(
       RecurringFrequency.DAILY,
       interval,
       [],
       endDate ?? null,
-      occurrences ?? null
+      occurrences ?? null,
+      referenceDate
     );
   }
 
@@ -98,28 +107,32 @@ export class RecurringPattern {
     daysOfWeek: DayOfWeek[],
     interval: number = 1,
     endDate?: Date,
-    occurrences?: number
+    occurrences?: number,
+    referenceDate?: Date
   ): RecurringPattern {
     return new RecurringPattern(
       RecurringFrequency.WEEKLY,
       interval,
       daysOfWeek,
       endDate ?? null,
-      occurrences ?? null
+      occurrences ?? null,
+      referenceDate
     );
   }
 
   static monthly(
     interval: number = 1,
     endDate?: Date,
-    occurrences?: number
+    occurrences?: number,
+    referenceDate?: Date
   ): RecurringPattern {
     return new RecurringPattern(
       RecurringFrequency.MONTHLY,
       interval,
       [],
       endDate ?? null,
-      occurrences ?? null
+      occurrences ?? null,
+      referenceDate
     );
   }
 
@@ -132,7 +145,10 @@ export class RecurringPattern {
     const otherDays = [...other.daysOfWeek].sort();
     if (!thisDays.every((day, i) => day === otherDays[i])) return false;
 
-    if (this.endDate?.getTime() !== other.endDate?.getTime()) return false;
+    const thisTime = this.endDate?.getTime() ?? null;
+    const otherTime = other.endDate?.getTime() ?? null;
+    if (thisTime !== otherTime) return false;
+
     if (this.occurrences !== other.occurrences) return false;
 
     return true;

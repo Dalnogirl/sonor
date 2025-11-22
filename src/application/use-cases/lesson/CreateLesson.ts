@@ -15,7 +15,6 @@ export class CreateLesson {
   constructor(private lessonRepository: LessonRepository) {}
 
   async execute(lessonData: CreateLessonRequestDTO): Promise<Lesson> {
-    // Create lesson directly with IDs - no hydration needed
     const lesson = Lesson.create(
       lessonData.title,
       lessonData.teacherIds,
