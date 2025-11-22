@@ -4,6 +4,7 @@ import { Button, Container, Stack, Title, SegmentedControl } from '@mantine/core
 import { useDisclosure } from '@mantine/hooks';
 import React from 'react';
 import { CreateLessonModal } from '@/adapters/ui/components/lessons/CreateLessonModal';
+import { DailyLessonsView } from '@/adapters/ui/components/lessons/DailyLessonsView';
 import { WeeklyLessonsView } from '@/adapters/ui/components/lessons/WeeklyLessonsView';
 import { MonthlyLessonsView } from '@/adapters/ui/components/lessons/MonthlyLessonsView';
 import { useLessonsViewState } from '@/adapters/ui/hooks/useLessonsViewState';
@@ -39,15 +40,18 @@ const LessonsPage = () => {
         {/* View Mode Toggle */}
         <SegmentedControl
           value={viewMode}
-          onChange={(value) => setViewMode(value as 'weekly' | 'monthly')}
+          onChange={(value) => setViewMode(value as 'daily' | 'weekly' | 'monthly')}
           data={[
-            { label: 'Weekly View', value: 'weekly' },
-            { label: 'Monthly View', value: 'monthly' },
+            { label: 'Daily', value: 'daily' },
+            { label: 'Weekly', value: 'weekly' },
+            { label: 'Monthly', value: 'monthly' },
           ]}
         />
 
         {/* Conditional View Rendering */}
-        {viewMode === 'weekly' ? (
+        {viewMode === 'daily' ? (
+          <DailyLessonsView initialDate={currentDate} onDateChange={setCurrentDate} />
+        ) : viewMode === 'weekly' ? (
           <WeeklyLessonsView initialDate={currentDate} onDateChange={setCurrentDate} />
         ) : (
           <MonthlyLessonsView initialDate={currentDate} onDateChange={setCurrentDate} />

@@ -20,11 +20,12 @@ import { useRouter, useSearchParams } from 'next/navigation';
  * - Testable independently from UI
  *
  * **URL Format:**
+ * - `/lessons?view=daily&date=2024-01-15` (specific day)
  * - `/lessons?view=weekly&date=2024-01-15` (week containing date)
  * - `/lessons?view=monthly&date=2024-01-01` (month containing date)
  */
 
-export type ViewMode = 'weekly' | 'monthly';
+export type ViewMode = 'daily' | 'weekly' | 'monthly';
 
 interface LessonsViewState {
   viewMode: ViewMode;
@@ -46,7 +47,9 @@ export const useLessonsViewState = (): UseLessonsViewStateReturn => {
   // Parse view mode from URL (default: 'weekly')
   const viewParam = searchParams.get('view');
   const viewMode: ViewMode =
-    viewParam === 'monthly' || viewParam === 'weekly' ? viewParam : 'weekly';
+    viewParam === 'daily' || viewParam === 'weekly' || viewParam === 'monthly'
+      ? viewParam
+      : 'weekly';
 
   // Parse date from URL (null = use today)
   const dateParam = searchParams.get('date');
