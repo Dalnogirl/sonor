@@ -74,10 +74,28 @@ model Lesson {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  teachers LessonTeacher[]
-  pupils   LessonPupil[]
+  teachers   LessonTeacher[]
+  pupils     LessonPupil[]
+  exceptions LessonException[]
 
   @@index([startDate, endDate])
+}
+
+model LessonException {
+  id            String   @id @default(cuid())
+  lessonId      String
+  originalDate  DateTime
+  type          String // 'SKIP' | 'RESCHEDULE' | 'MODIFY'
+  newDate       DateTime?
+  modifications Json? // Partial lesson modifications
+
+  createdAt DateTime @default(now())
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, originalDate])
+  @@index([originalDate])
+  @@index([lessonId])
 }
 
 model LessonTeacher {

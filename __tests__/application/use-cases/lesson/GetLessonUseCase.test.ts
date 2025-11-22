@@ -17,11 +17,8 @@ describe('GetLessonUseCase', () => {
     // Create mocks (Dependency Injection pattern)
     mockLessonRepository = {
       findById: vi.fn(),
-      findAll: vi.fn(),
       create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      findByTeacherIdForPeriod: vi.fn(),
+      findMyTeachingLessonsForPeriod: vi.fn(),
     };
 
     mockUserRepository = {
@@ -152,7 +149,7 @@ describe('GetLessonUseCase', () => {
 
       // Assert
       expect(result).toEqual(expectedDTO);
-      expect(result.pupils).toHaveLength(0);
+      expect(result?.pupils).toHaveLength(0);
     });
   });
 

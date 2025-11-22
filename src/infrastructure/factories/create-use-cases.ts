@@ -7,6 +7,8 @@ import { Repositories } from './create-repositories';
 import { GetMyTeachingLessonsForPeriod } from '@/application/use-cases/lesson/GetMyTeachingLessonsForPeriod';
 import { CreateLesson } from '@/application/use-cases/lesson/CreateLesson';
 import { GetLessonUseCase } from '@/application/use-cases/lesson/GetLesson';
+import { SkipLessonOccurrence } from '@/application/use-cases/lesson/SkipLessonOccurrence';
+import { RescheduleLessonOccurrence } from '@/application/use-cases/lesson/RescheduleLessonOccurrence';
 import { LessonMapper } from '../mappers/LessonMapper';
 
 /**
@@ -54,6 +56,14 @@ export const createUseCases = (repositories: Repositories) => {
         repositories.lessonRepository,
         repositories.userRepository,
         lessonMapper
+      ),
+      skipOccurrence: new SkipLessonOccurrence(
+        repositories.lessonRepository,
+        repositories.lessonExceptionRepository
+      ),
+      rescheduleOccurrence: new RescheduleLessonOccurrence(
+        repositories.lessonRepository,
+        repositories.lessonExceptionRepository
       ),
     },
   };
