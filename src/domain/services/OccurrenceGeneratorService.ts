@@ -59,22 +59,27 @@ export class OccurrenceGeneratorService {
 
     const pattern = lesson.recurringPattern;
 
+    // Use the later of lesson.startDate and periodStart to avoid generating
+    // occurrences before the requested period
+    const effectiveStart =
+      lesson.startDate > periodStart ? lesson.startDate : periodStart;
+
     switch (pattern.frequency) {
       case RecurringFrequency.DAILY:
         return this.recurrenceService.generateDailyOccurrencesForPeriod(
-          lesson.startDate,
+          effectiveStart,
           periodEnd,
           pattern
         );
       case RecurringFrequency.WEEKLY:
         return this.recurrenceService.generateWeeklyOccurrencesForPeriod(
-          lesson.startDate,
+          effectiveStart,
           periodEnd,
           pattern
         );
       case RecurringFrequency.MONTHLY:
         return this.recurrenceService.generateMonthlyOccurrencesForPeriod(
-          lesson.startDate,
+          effectiveStart,
           periodEnd,
           pattern
         );

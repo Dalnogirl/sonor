@@ -425,6 +425,201 @@ describe('OccurrenceGeneratorService', () => {
     });
   });
 
+  describe('Boundary Conditions - Period vs Lesson Start Date', () => {
+    it('should only generate occurrences within period when periodStart > lesson.startDate (daily)', () => {
+      const recurringPattern = RecurringPattern.daily(1);
+      const lesson = new Lesson(
+        'lesson1',
+        'Daily Math',
+        ['teacher1'],
+        new Date(),
+        new Date(),
+        ['pupil1'],
+        new Date('2024-10-01T10:00:00Z'), // Lesson started 3 months ago
+        new Date('2024-10-01T11:00:00Z'),
+        'Daily lesson',
+        recurringPattern
+      );
+
+      // Request occurrences for only 3 days in January (not from October!)
+      const periodStart = new Date('2025-01-15T00:00:00Z');
+      const periodEnd = new Date('2025-01-18T00:00:00Z'); // Use start of next day for cleaner boundary
+
+      const occurrences = service.generateOccurrencesForPeriod(
+        lesson,
+        [],
+        periodStart,
+        periodEnd
+      );
+
+      // CRITICAL: Verify we didn't generate 100+ occurrences from October
+      // This is the main bug - without the fix, this would be 100+
+      expect(occurrences.length).toBeLessThan(10);
+
+      // Should get approximately 3 occurrences (Jan 15, 16, 17)
+      expect(occurrences.length).toBeGreaterThanOrEqual(3);
+      expect(occurrences.length).toBeLessThanOrEqual(5);
+
+      // Verify occurrences are in January 2025 (not October 2024!)
+      // This is the key assertion - without the fix, we'd get October dates
+      occurrences.forEach((occurrence) => {
+        const dateStr = dateService.formatISO(occurrence.startDate);
+        expect(dateStr.startsWith('2025-01')).toBe(true);
+      });
+    });
+
+    it('should only generate occurrences within period when periodStart > lesson.startDate (weekly)', () => {
+      const recurringPattern = RecurringPattern.weekly([
+        DayOfWeek.MONDAY,
+        DayOfWeek.FRIDAY,
+      ]);
+      const lesson = new Lesson(
+        'lesson1',
+        'Weekly Math',
+        ['teacher1'],
+        new Date(),
+        new Date(),
+        ['pupil1'],
+        new Date('2024-09-02T10:00:00'), // Started 4 months ago (Monday)
+        new Date('2024-09-02T11:00:00'),
+        'Weekly lesson',
+        recurringPattern
+      );
+
+      // Request occurrences for only one week in January
+      const periodStart = new Date('2025-01-13T00:00:00'); // Monday
+      const periodEnd = new Date('2025-01-19T23:59:59'); // Sunday
+
+      const occurrences = service.generateOccurrencesForPeriod(
+        lesson,
+        [],
+        periodStart,
+        periodEnd
+      );
+
+      // Should only get 4 occurrences (2 Mondays + 2 Fridays in this week)
+      expect(occurrences.length).toBeLessThanOrEqual(4);
+      occurrences.forEach((occurrence) => {
+        expect(occurrence.startDate.getTime()).toBeGreaterThanOrEqual(
+          periodStart.getTime()
+        );
+        expect(occurrence.startDate.getTime()).toBeLessThanOrEqual(
+          periodEnd.getTime()
+        );
+      });
+    });
+
+    it('should return empty array when periodEnd < lesson.startDate', () => {
+      const recurringPattern = RecurringPattern.daily(1);
+      const lesson = new Lesson(
+        'lesson1',
+        'Future Lesson',
+        ['teacher1'],
+        new Date(),
+        new Date(),
+        ['pupil1'],
+        new Date('2025-06-01T10:00:00'), // Starts in June
+        new Date('2025-06-01T11:00:00'),
+        'Future lesson',
+        recurringPattern
+      );
+
+      // Request occurrences for January (before lesson starts)
+      const periodStart = new Date('2025-01-01T00:00:00');
+      const periodEnd = new Date('2025-01-31T23:59:59');
+
+      const occurrences = service.generateOccurrencesForPeriod(
+        lesson,
+        [],
+        periodStart,
+        periodEnd
+      );
+
+      expect(occurrences).toHaveLength(0);
+    });
+
+    it('should handle partial overlap - lesson starts mid-period (daily)', () => {
+      const recurringPattern = RecurringPattern.daily(1);
+      const lesson = new Lesson(
+        'lesson1',
+        'Daily Math',
+        ['teacher1'],
+        new Date(),
+        new Date(),
+        ['pupil1'],
+        new Date('2025-01-10T10:00:00'), // Starts on Jan 10
+        new Date('2025-01-10T11:00:00'),
+        'Daily lesson',
+        recurringPattern
+      );
+
+      // Request occurrences from Jan 5 to Jan 15
+      const periodStart = new Date('2025-01-05T00:00:00');
+      const periodEnd = new Date('2025-01-15T23:59:59');
+
+      const occurrences = service.generateOccurrencesForPeriod(
+        lesson,
+        [],
+        periodStart,
+        periodEnd
+      );
+
+      // Should get 6 occurrences (Jan 10, 11, 12, 13, 14, 15)
+      expect(occurrences).toHaveLength(6);
+      expect(occurrences[0].startDate).toEqual(new Date('2025-01-10T10:00:00'));
+      expect(occurrences[5].startDate).toEqual(new Date('2025-01-15T10:00:00'));
+    });
+
+    it('should respect pattern endDate when it falls within period', () => {
+      const lessonStartDate = new Date('2025-01-01T10:00:00Z');
+      const patternEndDate = new Date('2025-01-12T23:59:59Z');
+
+      // Pass referenceDate to avoid validation error when test runs after pattern end
+      const recurringPattern = RecurringPattern.daily(
+        1,
+        patternEndDate,
+        undefined,
+        lessonStartDate // Use lesson start as reference
+      );
+
+      const lesson = new Lesson(
+        'lesson1',
+        'Limited Daily Math',
+        ['teacher1'],
+        new Date(),
+        new Date(),
+        ['pupil1'],
+        lessonStartDate,
+        new Date('2025-01-01T11:00:00Z'),
+        'Daily lesson with end date',
+        recurringPattern
+      );
+
+      // Request occurrences from Jan 1 to Jan 20
+      const periodStart = new Date('2025-01-01T00:00:00Z');
+      const periodEnd = new Date('2025-01-20T00:00:00Z');
+
+      const occurrences = service.generateOccurrencesForPeriod(
+        lesson,
+        [],
+        periodStart,
+        periodEnd
+      );
+
+      // Should get ~12 occurrences (Jan 1-12) since pattern ends on Jan 12
+      // Allowing 11-14 due to boundary date handling
+      expect(occurrences.length).toBeGreaterThanOrEqual(11);
+      expect(occurrences.length).toBeLessThanOrEqual(14);
+
+      // Verify pattern endDate is being respected - no occurrences far after Jan 12
+      occurrences.forEach((occurrence) => {
+        const dateStr = dateService.formatISO(occurrence.startDate);
+        // All occurrences should be before Jan 15 (gives 2 days buffer for boundaries)
+        expect(dateStr <= '2025-01-15').toBe(true);
+      });
+    });
+  });
+
   describe('Complex Scenarios', () => {
     it('should handle mixed exception types', () => {
       const recurringPattern = RecurringPattern.daily(1);

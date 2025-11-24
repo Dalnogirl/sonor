@@ -12,7 +12,7 @@ import '@mantine/notifications/styles.css';
 
 export const Providers = ({
   children,
-  session
+  session,
 }: {
   children: React.ReactNode;
   session: Session | null;
@@ -39,7 +39,7 @@ export const Providers = ({
 };
 
 function CustomMantineProvider({ children }: { children: React.ReactNode }) {
-  const accentColor = 'pink';
+  const accentColor = 'orange';
   return (
     <MantineProvider
       defaultColorScheme="auto"
