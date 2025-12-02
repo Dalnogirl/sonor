@@ -1,6 +1,15 @@
 'use client';
 
-import { Button, Group, Text, Box, Stack, Card, Loader, Center } from '@mantine/core';
+import {
+  Button,
+  Group,
+  Text,
+  Box,
+  Stack,
+  Card,
+  Loader,
+  Center,
+} from '@mantine/core';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useMonthlyLessons } from '@/adapters/ui/hooks/useMonthlyLessons';
@@ -62,7 +71,10 @@ interface MonthlyLessonsViewProps {
   onDateChange?: (date: Date) => void;
 }
 
-export const MonthlyLessonsView = ({ initialDate, onDateChange }: MonthlyLessonsViewProps) => {
+export const MonthlyLessonsView = ({
+  initialDate,
+  onDateChange,
+}: MonthlyLessonsViewProps) => {
   const {
     currentMonthStart,
     monthDays,
@@ -97,7 +109,11 @@ export const MonthlyLessonsView = ({ initialDate, onDateChange }: MonthlyLessons
               Previous
             </Box>
           </Button>
-          <Button variant="outline" onClick={goToToday} size={isMobile ? 'xs' : 'sm'}>
+          <Button
+            variant="outline"
+            onClick={goToToday}
+            size={isMobile ? 'xs' : 'sm'}
+          >
             Today
           </Button>
           <Button
@@ -145,10 +161,14 @@ export const MonthlyLessonsView = ({ initialDate, onDateChange }: MonthlyLessons
 interface MonthlyDesktopLayoutProps {
   monthDays: Date[];
   lessons: SerializedLesson[];
-  paddingDays: (null)[];
+  paddingDays: null[];
 }
 
-const MonthlyDesktopLayout = ({ monthDays, lessons, paddingDays }: MonthlyDesktopLayoutProps) => {
+const MonthlyDesktopLayout = ({
+  monthDays,
+  lessons,
+  paddingDays,
+}: MonthlyDesktopLayoutProps) => {
   return (
     <Box>
       {/* Weekday Headers */}
@@ -182,7 +202,11 @@ const MonthlyDesktopLayout = ({ monthDays, lessons, paddingDays }: MonthlyDeskto
 
         {/* Actual days */}
         {monthDays.map((day) => (
-          <DayCell key={day.toISOString()} day={day} lessons={getLessonsForDay(lessons, day)} />
+          <DayCell
+            key={day.toISOString()}
+            day={day}
+            lessons={getLessonsForDay(lessons, day)}
+          />
         ))}
       </Box>
     </Box>
@@ -198,7 +222,10 @@ interface MonthlyMobileLayoutProps {
   lessons: SerializedLesson[];
 }
 
-const MonthlyMobileLayout = ({ monthDays, lessons }: MonthlyMobileLayoutProps) => {
+const MonthlyMobileLayout = ({
+  monthDays,
+  lessons,
+}: MonthlyMobileLayoutProps) => {
   // Group days by week
   const weeks: Date[][] = [];
   let currentWeek: Date[] = [];
@@ -241,7 +268,9 @@ const MonthlyMobileLayout = ({ monthDays, lessons }: MonthlyMobileLayoutProps) =
                   padding="sm"
                   withBorder
                   style={{
-                    backgroundColor: isToday ? 'var(--mantine-color-blue-light)' : undefined,
+                    backgroundColor: isToday
+                      ? 'var(--mantine-color-blue-light)'
+                      : undefined,
                   }}
                 >
                   <Group justify="space-between" align="center">
@@ -258,7 +287,8 @@ const MonthlyMobileLayout = ({ monthDays, lessons }: MonthlyMobileLayoutProps) =
                     {dayLessons.length > 0 ? (
                       <Group gap="xs">
                         <Text size="xs" c="dimmed">
-                          {dayLessons.length} lesson{dayLessons.length > 1 ? 's' : ''}
+                          {dayLessons.length} lesson
+                          {dayLessons.length > 1 ? 's' : ''}
                         </Text>
                         {dayLessons.length > 0 && (
                           <Stack gap={2}>
@@ -312,7 +342,9 @@ const DayCell = ({ day, lessons }: DayCellProps) => {
       withBorder
       style={{
         minHeight: '100px',
-        backgroundColor: isToday ? 'var(--mantine-color-blue-light)' : undefined,
+        backgroundColor: isToday
+          ? 'var(--mantine-color-blue-light)'
+          : undefined,
       }}
     >
       <Stack gap="xs">
@@ -326,7 +358,9 @@ const DayCell = ({ day, lessons }: DayCellProps) => {
               No lessons
             </Text>
           ) : (
-            lessons.map((lesson) => <CompactLessonCard key={lesson.id} lesson={lesson} />)
+            lessons.map((lesson) => (
+              <CompactLessonCard key={lesson.id} lesson={lesson} />
+            ))
           )}
         </Stack>
       </Stack>
@@ -349,8 +383,12 @@ const CompactLessonCard = ({ lesson }: CompactLessonCardProps) => {
           <Text size="xs" fw={600} lineClamp={1}>
             {lesson.title}
           </Text>
+
           <Text size="xs" c="dimmed">
-            {formatTimeRange(new Date(lesson.startDate), new Date(lesson.endDate))}
+            {formatTimeRange(
+              new Date(lesson.startDate),
+              new Date(lesson.endDate)
+            )}
           </Text>
         </Stack>
       </Card>
@@ -360,8 +398,14 @@ const CompactLessonCard = ({ lesson }: CompactLessonCardProps) => {
 
 // Helper functions
 
-function getLessonsForDay(lessons: SerializedLesson[], day: Date): SerializedLesson[] {
+function getLessonsForDay(
+  lessons: SerializedLesson[],
+  day: Date
+): SerializedLesson[] {
   return lessons
     .filter((lesson) => isSameDay(new Date(lesson.startDate), day))
-    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+    .sort(
+      (a, b) =>
+        new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+    );
 }

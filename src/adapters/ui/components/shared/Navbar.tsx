@@ -6,7 +6,7 @@ import {
   IconUsers,
   IconUserPlus,
   IconLogin,
-  IconSchool
+  IconSchool,
 } from '@tabler/icons-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -38,14 +38,16 @@ export function Navbar() {
             >
               Users
             </Button>
-            <Button
-              component={Link}
-              href="/lessons"
-              variant={pathname === '/lessons' ? 'filled' : 'subtle'}
-              leftSection={<IconSchool size={18} />}
-            >
-              My Lessons
-            </Button>
+            {session?.user && (
+              <Button
+                component={Link}
+                href="/lessons"
+                variant={pathname === '/lessons' ? 'filled' : 'subtle'}
+                leftSection={<IconSchool size={18} />}
+              >
+                My Lessons
+              </Button>
+            )}
             {session?.user ? (
               <UserInfo />
             ) : (

@@ -1,6 +1,12 @@
 'use client';
 
-import { Button, Container, Stack, Title, SegmentedControl } from '@mantine/core';
+import {
+  Button,
+  Container,
+  Stack,
+  Title,
+  SegmentedControl,
+} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import React from 'react';
 import { CreateLessonModal } from '@/adapters/ui/components/lessons/CreateLessonModal';
@@ -8,6 +14,7 @@ import { DailyLessonsView } from '@/adapters/ui/components/lessons/DailyLessonsV
 import { WeeklyLessonsView } from '@/adapters/ui/components/lessons/WeeklyLessonsView';
 import { MonthlyLessonsView } from '@/adapters/ui/components/lessons/MonthlyLessonsView';
 import { useLessonsViewState } from '@/adapters/ui/hooks/useLessonsViewState';
+import { withPrivatePage } from '@/adapters/ui/components/shared/withPrivatePage';
 
 /**
  * LessonsPage - Main page for viewing and managing lessons
@@ -27,12 +34,19 @@ import { useLessonsViewState } from '@/adapters/ui/hooks/useLessonsViewState';
 
 const LessonsPage = () => {
   const [opened, { open, close }] = useDisclosure(false);
-  const { viewMode, currentDate, setViewMode, setCurrentDate } = useLessonsViewState();
+  const { viewMode, currentDate, setViewMode, setCurrentDate } =
+    useLessonsViewState();
 
   return (
     <Container size="xl" py="xl">
       <Stack gap="xl">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
           <Title order={1}>Lessons</Title>
           <Button onClick={open}>Create Lesson</Button>
         </div>
@@ -40,7 +54,9 @@ const LessonsPage = () => {
         {/* View Mode Toggle */}
         <SegmentedControl
           value={viewMode}
-          onChange={(value) => setViewMode(value as 'daily' | 'weekly' | 'monthly')}
+          onChange={(value) =>
+            setViewMode(value as 'daily' | 'weekly' | 'monthly')
+          }
           data={[
             { label: 'Daily', value: 'daily' },
             { label: 'Weekly', value: 'weekly' },
@@ -50,11 +66,20 @@ const LessonsPage = () => {
 
         {/* Conditional View Rendering */}
         {viewMode === 'daily' ? (
-          <DailyLessonsView initialDate={currentDate} onDateChange={setCurrentDate} />
+          <DailyLessonsView
+            initialDate={currentDate}
+            onDateChange={setCurrentDate}
+          />
         ) : viewMode === 'weekly' ? (
-          <WeeklyLessonsView initialDate={currentDate} onDateChange={setCurrentDate} />
+          <WeeklyLessonsView
+            initialDate={currentDate}
+            onDateChange={setCurrentDate}
+          />
         ) : (
-          <MonthlyLessonsView initialDate={currentDate} onDateChange={setCurrentDate} />
+          <MonthlyLessonsView
+            initialDate={currentDate}
+            onDateChange={setCurrentDate}
+          />
         )}
       </Stack>
 
@@ -62,4 +87,4 @@ const LessonsPage = () => {
     </Container>
   );
 };
-export default LessonsPage;
+export default withPrivatePage(LessonsPage);
