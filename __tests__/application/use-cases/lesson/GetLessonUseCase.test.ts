@@ -19,6 +19,7 @@ describe('GetLessonUseCase', () => {
       findById: vi.fn(),
       create: vi.fn(),
       findMyTeachingLessonsForPeriod: vi.fn(),
+      save: vi.fn(),
     };
 
     mockUserRepository = {

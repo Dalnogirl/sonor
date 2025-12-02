@@ -37,6 +37,7 @@ export class Lesson {
   public endDate: Date;
   public description?: string;
   public recurringPattern?: RecurringPattern;
+  public deletedAt?: Date;
 
   constructor(
     id: string,
@@ -48,7 +49,8 @@ export class Lesson {
     startDate: Date,
     endDate: Date,
     description?: string,
-    recurringPattern?: RecurringPattern
+    recurringPattern?: RecurringPattern,
+    deletedAt?: Date
   ) {
     // Validate business rules
     if (teacherIds.length === 0) {
@@ -68,6 +70,7 @@ export class Lesson {
     this.updatedAt = updatedAt;
     this.description = description;
     this.recurringPattern = recurringPattern;
+    this.deletedAt = deletedAt;
   }
 
   static create(
@@ -113,5 +116,25 @@ export class Lesson {
 
   get isUpcoming(): boolean {
     return this.startDate > new Date();
+  }
+
+  get isDeleted(): boolean {
+    return !!this.deletedAt;
+  }
+
+  delete(): void {
+    if (this.deletedAt) {
+      throw new Error('Lesson is already deleted');
+    }
+    this.deletedAt = new Date();
+    this.updatedAt = new Date();
+  }
+
+  restore(): void {
+    if (!this.deletedAt) {
+      throw new Error('Lesson is not deleted');
+    }
+    this.deletedAt = undefined;
+    this.updatedAt = new Date();
   }
 }

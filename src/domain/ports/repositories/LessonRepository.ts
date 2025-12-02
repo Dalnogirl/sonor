@@ -36,4 +36,9 @@ export interface LessonRepository {
    * Finds a lesson by ID.
    */
   findById(id: string): Promise<Lesson | null>;
+
+  /**
+   * Saves (updates) an existing lesson.
+   */
+  save(lesson: Lesson): Promise<void>;
 }

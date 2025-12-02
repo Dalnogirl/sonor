@@ -13,6 +13,8 @@ import { GetLessonUseCase } from '@/application/use-cases/lesson/GetLesson';
 import { SkipLessonOccurrence } from '@/application/use-cases/lesson/SkipLessonOccurrence';
 import { RescheduleLessonOccurrence } from '@/application/use-cases/lesson/RescheduleLessonOccurrence';
 import { LessonMapper } from '../mappers/LessonMapper';
+import { DeleteLessonUseCase } from '@/application/use-cases/lesson/DeleteLesson';
+import { Logger } from '../services/Logger';
 
 /**
  * Dependency Injection Factory
@@ -30,6 +32,7 @@ export const createUseCases = (repositories: Repositories) => {
   const dateService = new DayjsDateService();
   const userMapper = new UserMapper();
   const lessonMapper = new LessonMapper(userMapper);
+  const logger = new Logger();
 
   // Domain services
   const recurrenceService = new RecurrenceService(dateService);
@@ -69,6 +72,10 @@ export const createUseCases = (repositories: Repositories) => {
         repositories.lessonRepository,
         repositories.userRepository,
         lessonMapper
+      ),
+      deleteLesson: new DeleteLessonUseCase(
+        repositories.lessonRepository,
+        logger
       ),
       skipOccurrence: new SkipLessonOccurrence(
         repositories.lessonRepository,

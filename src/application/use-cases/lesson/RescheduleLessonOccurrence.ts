@@ -1,6 +1,7 @@
 import { LessonException } from '@/domain/models/LessonException';
 import { LessonRepository } from '@/domain/ports/repositories/LessonRepository';
 import { LessonExceptionRepository } from '@/domain/ports/repositories/LessonExceptionRepository';
+import { LessonNotFoundError } from '@/domain/errors/LessonErrors';
 
 /**
  * RescheduleLessonOccurrence Use Case
@@ -27,7 +28,7 @@ export class RescheduleLessonOccurrence {
     // Validate lesson exists
     const lesson = await this.lessonRepository.findById(lessonId);
     if (!lesson) {
-      throw new Error('Lesson not found');
+      throw new LessonNotFoundError(lessonId);
     }
 
     // Validate lesson is recurring
@@ -36,10 +37,11 @@ export class RescheduleLessonOccurrence {
     }
 
     // Check if exception already exists
-    const existingException = await this.exceptionRepository.findByLessonAndDate(
-      lessonId,
-      originalDate
-    );
+    const existingException =
+      await this.exceptionRepository.findByLessonAndDate(
+        lessonId,
+        originalDate
+      );
 
     if (existingException) {
       throw new Error('Exception already exists for this occurrence');

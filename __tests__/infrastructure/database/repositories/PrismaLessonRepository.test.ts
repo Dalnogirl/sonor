@@ -224,4 +224,122 @@ describe('PrismaLessonRepository Integration Tests', () => {
       expect(saved?.pupils).toHaveLength(2);
     });
   });
+
+  describe('save', () => {
+    it('should update lesson fields including deletedAt', async () => {
+      // Arrange
+      const lesson = await prisma.lesson.create({
+        data: {
+          id: crypto.randomUUID(),
+          title: 'Original Title',
+          startDate: new Date('2025-11-10T10:00:00Z'),
+          endDate: new Date('2025-11-10T11:00:00Z'),
+        },
+      });
+
+      await prisma.lessonTeacher.create({
+        data: { lessonId: lesson.id, userId: testTeacherId },
+      });
+
+      // Load via repository, modify, save
+      const domainLesson = await repository.findById(lesson.id);
+      expect(domainLesson).not.toBeNull();
+
+      domainLesson!.title = 'Updated Title';
+      domainLesson!.delete(); // Sets deletedAt
+
+      await repository.save(domainLesson!);
+
+      // Assert - check raw DB record
+      const updated = await prisma.lesson.findUnique({
+        where: { id: lesson.id },
+      });
+      expect(updated?.title).toBe('Updated Title');
+      expect(updated?.deletedAt).toBeInstanceOf(Date);
+    });
+
+    it('should throw when saving non-existent lesson', async () => {
+      const fakeLesson = new Lesson(
+        'non-existent-id',
+        'Fake',
+        [testTeacherId],
+        new Date(),
+        new Date(),
+        [],
+        new Date('2025-11-10T10:00:00Z'),
+        new Date('2025-11-10T11:00:00Z')
+      );
+
+      await expect(repository.save(fakeLesson)).rejects.toThrow();
+    });
+  });
+
+  describe('soft delete filtering', () => {
+    it('findById should return null for soft-deleted lesson', async () => {
+      // Arrange - create and soft-delete
+      const lesson = await prisma.lesson.create({
+        data: {
+          id: crypto.randomUUID(),
+          title: 'Soft Deleted',
+          startDate: new Date('2025-11-10T10:00:00Z'),
+          endDate: new Date('2025-11-10T11:00:00Z'),
+          deletedAt: new Date(),
+        },
+      });
+
+      await prisma.lessonTeacher.create({
+        data: { lessonId: lesson.id, userId: testTeacherId },
+      });
+
+      // Act
+      const result = await repository.findById(lesson.id);
+
+      // Assert - filtered out
+      expect(result).toBeNull();
+    });
+
+    it('findMyTeachingLessonsForPeriod should exclude soft-deleted lessons', async () => {
+      const startDate = new Date('2025-11-01T00:00:00Z');
+      const endDate = new Date('2025-11-30T23:59:59Z');
+
+      // Create active lesson
+      const activeLesson = await prisma.lesson.create({
+        data: {
+          id: crypto.randomUUID(),
+          title: 'Active Lesson',
+          startDate: new Date('2025-11-10T10:00:00Z'),
+          endDate: new Date('2025-11-10T11:00:00Z'),
+        },
+      });
+
+      // Create soft-deleted lesson
+      const deletedLesson = await prisma.lesson.create({
+        data: {
+          id: crypto.randomUUID(),
+          title: 'Deleted Lesson',
+          startDate: new Date('2025-11-15T10:00:00Z'),
+          endDate: new Date('2025-11-15T11:00:00Z'),
+          deletedAt: new Date(),
+        },
+      });
+
+      await prisma.lessonTeacher.createMany({
+        data: [
+          { lessonId: activeLesson.id, userId: testTeacherId },
+          { lessonId: deletedLesson.id, userId: testTeacherId },
+        ],
+      });
+
+      // Act
+      const results = await repository.findMyTeachingLessonsForPeriod(
+        testTeacherId,
+        startDate,
+        endDate
+      );
+
+      // Assert - only active lesson returned
+      expect(results).toHaveLength(1);
+      expect(results[0].id).toBe(activeLesson.id);
+    });
+  });
 });

@@ -64,12 +64,13 @@ model VerificationToken {
 }
 
 model Lesson {
-  id               String   @id @default(cuid())
+  id               String    @id @default(cuid())
   title            String
   description      String?
   startDate        DateTime
   endDate          DateTime
   recurringPattern Json?
+  deletedAt        DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -79,6 +80,7 @@ model Lesson {
   exceptions LessonException[]
 
   @@index([startDate, endDate])
+  @@index([deletedAt])
 }
 
 model LessonException {

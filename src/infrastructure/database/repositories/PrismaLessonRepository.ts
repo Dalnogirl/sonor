@@ -20,7 +20,7 @@ export class PrismaLessonRepository implements LessonRepository {
 
   async findById(id: string): Promise<Lesson | null> {
     const prismaLesson = await this.prisma.lesson.findUnique({
-      where: { id },
+      where: { id, deletedAt: null },
       include: {
         teachers: {
           select: {
@@ -50,6 +50,7 @@ export class PrismaLessonRepository implements LessonRepository {
     const prismaLessons = await this.prisma.lesson.findMany({
       where: {
         AND: [
+          { deletedAt: null },
           { teachers: { some: { userId } } },
           {
             OR: [
@@ -116,6 +117,22 @@ export class PrismaLessonRepository implements LessonRepository {
     return lesson;
   }
 
+  async save(lesson: Lesson): Promise<void> {
+    await this.prisma.lesson.update({
+      where: { id: lesson.id },
+      data: {
+        title: lesson.title,
+        description: lesson.description,
+        startDate: lesson.startDate,
+        endDate: lesson.endDate,
+        recurringPattern: lesson.recurringPattern
+          ? this.serializeRecurringPattern(lesson.recurringPattern)
+          : Prisma.DbNull,
+        deletedAt: lesson.deletedAt ?? null,
+        updatedAt: lesson.updatedAt,
+      },
+    });
+  }
   private toDomain(prismaLesson: {
     id: string;
     title: string;
@@ -125,6 +142,7 @@ export class PrismaLessonRepository implements LessonRepository {
     recurringPattern: unknown;
     createdAt: Date;
     updatedAt: Date;
+    deletedAt: Date | null;
     teachers: Array<{ userId: string }>;
     pupils: Array<{ userId: string }>;
   }): Lesson {
@@ -144,7 +162,8 @@ export class PrismaLessonRepository implements LessonRepository {
       prismaLesson.startDate,
       prismaLesson.endDate,
       prismaLesson.description ?? undefined,
-      recurringPattern
+      recurringPattern,
+      prismaLesson.deletedAt ?? undefined
     );
   }
 
