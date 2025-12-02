@@ -7,6 +7,7 @@ import { getMyTeachingLessonsForPeriodRequestSchema } from '@/application/dto/le
 import { skipLessonOccurrenceRequestSchema } from '@/application/dto/lesson/SkipLessonOccurrenceRequestDTO.schema';
 import { rescheduleLessonOccurrenceRequestSchema } from '@/application/dto/lesson/RescheduleLessonOccurrenceRequestDTO.schema';
 import { LessonNotFoundError } from '@/domain/errors/LessonErrors';
+import { UnauthorizedError } from '@/domain/errors/AuthorizationErrors';
 
 export const lessonRouter = router({
   /**
@@ -43,6 +44,32 @@ export const lessonRouter = router({
         if (error instanceof LessonNotFoundError) {
           throw new TRPCError({
             code: 'NOT_FOUND',
+            message: error.message,
+          });
+        }
+        throw error;
+      }
+    }),
+
+  delete: protectedProcedure
+    .input(getLessonRequestSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await ctx.useCases.lesson.deleteLesson.execute(
+          input.lessonId,
+          ctx.session.user.id
+        );
+        return { success: true };
+      } catch (error: unknown) {
+        if (error instanceof LessonNotFoundError) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: error.message,
+          });
+        }
+        if (error instanceof UnauthorizedError) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
             message: error.message,
           });
         }

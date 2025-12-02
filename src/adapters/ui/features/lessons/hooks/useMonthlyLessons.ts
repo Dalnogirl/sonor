@@ -1,30 +1,15 @@
 import { useState, useMemo, useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
-import { getMonthStart, getMonthEnd, generateMonthDays } from '@/adapters/ui/utils/date-utils';
+import { getMonthStart, getMonthEnd, generateMonthDays, getISODayOfWeek } from '@/adapters/ui/utils/date-utils';
+import { getLessonsForDay, groupDaysByWeek, type SerializedLesson } from '../services/lessonViewService';
 
 /**
- * useMonthlyLessons - Custom hook for monthly lesson view state management
- *
- * **Architectural Role:** State management hook (adapter layer)
- * - Encapsulates month navigation logic
- * - Manages tRPC data fetching
- * - Provides derived state (monthEnd, monthDays)
- * - Shields component from state complexity
- * - Syncs with parent state management (URL)
+ * useMonthlyLessons - Monthly lesson view state management
  *
  * **Applies:**
- * - Single Responsibility (SOLID): Only manages monthly view state
- * - Information Expert (GRASP): Knows how to navigate months
+ * - Single Responsibility: Only manages monthly view state
  * - Controller (GRASP): Coordinates month state and data fetching
- * - Low Coupling: Component depends on hook interface, not implementation
- * - Reusability: Other components can use same hook
- *
- * **Pattern:** Custom Hook (React pattern)
- * - Extracts stateful logic from components
- * - Enables logic reuse across components
- * - Testable independently from UI
- * - Parallel to useWeeklyLessons (consistent interface design)
- * - Controlled component pattern (accepts external state)
+ * - Information Expert: Knows how to navigate months
  */
 
 interface UseMonthlyLessonsOptions {
@@ -35,29 +20,38 @@ interface UseMonthlyLessonsOptions {
 export const useMonthlyLessons = (options: UseMonthlyLessonsOptions = {}) => {
   const { initialDate, onDateChange } = options;
 
-  // Month navigation state
   const [currentMonthStart, setCurrentMonthStart] = useState(() =>
     getMonthStart(initialDate || new Date())
   );
 
-  // Sync with external date changes (from URL)
   useEffect(() => {
     if (initialDate) {
       setCurrentMonthStart(getMonthStart(initialDate));
     }
   }, [initialDate]);
 
-  // Derived state (memoized for performance)
   const monthEnd = useMemo(() => getMonthEnd(currentMonthStart), [currentMonthStart]);
   const monthDays = useMemo(() => generateMonthDays(currentMonthStart), [currentMonthStart]);
 
-  // Fetch lessons for current month
+  // Calendar grid padding (for first week alignment)
+  const paddingDays = useMemo(() => {
+    const firstDayOfWeek = getISODayOfWeek(monthDays[0]);
+    return Array.from({ length: firstDayOfWeek }, () => null);
+  }, [monthDays]);
+
+  // Week groups for mobile layout
+  const weeks = useMemo(() => groupDaysByWeek(monthDays), [monthDays]);
+
   const { data: lessons, isLoading, error } = trpc.lesson.getMyTeachingLessonsForPeriod.useQuery({
     startDate: currentMonthStart,
     endDate: monthEnd,
   });
 
-  // Navigation actions
+  const getLessonsForDayMemo = useMemo(() => {
+    const lessonsArray = (lessons || []) as SerializedLesson[];
+    return (day: Date) => getLessonsForDay(lessonsArray, day);
+  }, [lessons]);
+
   const goToPreviousMonth = () => {
     const prev = new Date(currentMonthStart);
     prev.setMonth(prev.getMonth() - 1);
@@ -79,25 +73,19 @@ export const useMonthlyLessons = (options: UseMonthlyLessonsOptions = {}) => {
   };
 
   return {
-    // State
     currentMonthStart,
     monthEnd,
     monthDays,
-
-    // Data
-    lessons: lessons || [],
+    paddingDays,
+    weeks,
+    lessons: (lessons || []) as SerializedLesson[],
+    getLessonsForDay: getLessonsForDayMemo,
     isLoading,
     error,
-
-    // Actions
     goToPreviousMonth,
     goToNextMonth,
     goToToday,
   };
 };
 
-/**
- * Return type for useMonthlyLessons hook
- * Useful for TypeScript consumers
- */
 export type UseMonthlyLessonsReturn = ReturnType<typeof useMonthlyLessons>;

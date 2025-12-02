@@ -56,7 +56,7 @@ export class PrismaLessonRepository implements LessonRepository {
             OR: [
               // Non-recurring lessons: startDate within period
               {
-                recurringPattern: { equals: Prisma.JsonNull },
+                recurringPattern: { equals: Prisma.DbNull },
                 startDate: { gte: startDate, lte: endDate },
               },
               // Recurring lessons: started before period ends

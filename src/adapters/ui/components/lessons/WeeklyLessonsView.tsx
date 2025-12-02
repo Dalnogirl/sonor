@@ -3,7 +3,11 @@
 import { Button, Group, Text, Box, Stack, Card, Loader, Center } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import Link from 'next/link';
-import { useWeeklyLessons } from '@/adapters/ui/hooks/useWeeklyLessons';
+import {
+  useWeeklyLessons,
+  type SerializedLesson,
+  buildLessonDetailUrl,
+} from '@/adapters/ui/features/lessons';
 import { useIsMobile } from '@/adapters/ui/hooks/useIsMobile';
 import {
   isSameDay,
@@ -12,22 +16,6 @@ import {
   formatTimeRange,
   formatFullDate,
 } from '@/adapters/ui/utils/date-utils';
-
-/**
- * SerializedLesson - Type representing lesson data after tRPC serialization
- * Dates are serialized to ISO strings over the wire
- */
-type SerializedLesson = {
-  id: string;
-  title: string;
-  description?: string;
-  teacherIds: string[];
-  pupilIds: string[];
-  startDate: string; // ISO string
-  endDate: string; // ISO string
-  createdAt: string;
-  updatedAt: string;
-};
 
 /**
  * WeeklyLessonsView Component
@@ -65,7 +53,7 @@ export const WeeklyLessonsView = ({ initialDate, onDateChange }: WeeklyLessonsVi
     currentWeekStart,
     weekEnd,
     weekDays,
-    lessons,
+    getLessonsForDay,
     isLoading,
     goToPreviousWeek,
     goToNextWeek,
@@ -118,10 +106,10 @@ export const WeeklyLessonsView = ({ initialDate, onDateChange }: WeeklyLessonsVi
         ) : (
           <>
             <Box hiddenFrom="sm">
-              <WeeklyMobileLayout weekDays={weekDays} lessons={lessons} />
+              <WeeklyMobileLayout weekDays={weekDays} getLessonsForDay={getLessonsForDay} />
             </Box>
             <Box visibleFrom="sm">
-              <WeeklyDesktopLayout weekDays={weekDays} lessons={lessons} />
+              <WeeklyDesktopLayout weekDays={weekDays} getLessonsForDay={getLessonsForDay} />
             </Box>
           </>
         )}
@@ -135,14 +123,14 @@ export const WeeklyLessonsView = ({ initialDate, onDateChange }: WeeklyLessonsVi
  */
 interface WeeklyDesktopLayoutProps {
   weekDays: Date[];
-  lessons: SerializedLesson[];
+  getLessonsForDay: (day: Date) => SerializedLesson[];
 }
 
-const WeeklyDesktopLayout = ({ weekDays, lessons }: WeeklyDesktopLayoutProps) => {
+const WeeklyDesktopLayout = ({ weekDays, getLessonsForDay }: WeeklyDesktopLayoutProps) => {
   return (
     <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
       {weekDays.map((day) => (
-        <DayColumn key={day.toISOString()} day={day} lessons={getLessonsForDay(lessons, day)} />
+        <DayColumn key={day.toISOString()} day={day} lessons={getLessonsForDay(day)} />
       ))}
     </Box>
   );
@@ -154,14 +142,14 @@ const WeeklyDesktopLayout = ({ weekDays, lessons }: WeeklyDesktopLayoutProps) =>
  */
 interface WeeklyMobileLayoutProps {
   weekDays: Date[];
-  lessons: SerializedLesson[];
+  getLessonsForDay: (day: Date) => SerializedLesson[];
 }
 
-const WeeklyMobileLayout = ({ weekDays, lessons }: WeeklyMobileLayoutProps) => {
+const WeeklyMobileLayout = ({ weekDays, getLessonsForDay }: WeeklyMobileLayoutProps) => {
   return (
     <Stack gap="md">
       {weekDays.map((day) => {
-        const dayLessons = getLessonsForDay(lessons, day);
+        const dayLessons = getLessonsForDay(day);
         const isToday = isSameDay(day, new Date());
 
         return (
@@ -220,7 +208,7 @@ interface MobileLessonCardProps {
 
 const MobileLessonCard = ({ lesson }: MobileLessonCardProps) => {
   return (
-    <Link href={`/lessons/${lesson.id}`} style={{ textDecoration: 'none' }}>
+    <Link href={buildLessonDetailUrl(lesson.id, lesson.startDate)} style={{ textDecoration: 'none' }}>
       <Card padding="sm" withBorder style={{ cursor: 'pointer' }}>
         <Group justify="space-between" align="start">
           <Stack gap={4} style={{ flex: 1 }}>
@@ -291,7 +279,7 @@ interface LessonCardProps {
 
 const LessonCard = ({ lesson }: LessonCardProps) => {
   return (
-    <Link href={`/lessons/${lesson.id}`} style={{ textDecoration: 'none' }}>
+    <Link href={buildLessonDetailUrl(lesson.id, lesson.startDate)} style={{ textDecoration: 'none' }}>
       <Card padding="xs" withBorder style={{ cursor: 'pointer' }}>
         <Stack gap={4}>
           <Text size="sm" fw={600} lineClamp={1}>
@@ -310,11 +298,3 @@ const LessonCard = ({ lesson }: LessonCardProps) => {
     </Link>
   );
 };
-
-// Helper functions
-
-function getLessonsForDay(lessons: SerializedLesson[], day: Date): SerializedLesson[] {
-  return lessons
-    .filter((lesson) => isSameDay(new Date(lesson.startDate), day))
-    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-}

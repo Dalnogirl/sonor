@@ -13,7 +13,7 @@ import { CreateLessonModal } from '@/adapters/ui/components/lessons/CreateLesson
 import { DailyLessonsView } from '@/adapters/ui/components/lessons/DailyLessonsView';
 import { WeeklyLessonsView } from '@/adapters/ui/components/lessons/WeeklyLessonsView';
 import { MonthlyLessonsView } from '@/adapters/ui/components/lessons/MonthlyLessonsView';
-import { useLessonsViewState } from '@/adapters/ui/hooks/useLessonsViewState';
+import { useLessonsViewState } from '@/adapters/ui/features/lessons';
 import { withPrivatePage } from '@/adapters/ui/components/shared/withPrivatePage';
 
 /**

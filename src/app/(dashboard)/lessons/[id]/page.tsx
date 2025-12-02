@@ -1,8 +1,8 @@
 'use client';
 
-import { Container, Stack, Title, Text, Loader, Center, Card, Group, Badge } from '@mantine/core';
-import { useParams } from 'next/navigation';
-import { trpc } from '@/lib/trpc';
+import { Container, Stack, Title, Text, Loader, Center, Card, Group, Badge, Button, Modal } from '@mantine/core';
+import { DatePickerInput } from '@mantine/dates';
+import { useLessonDetail } from '@/adapters/ui/features/lessons';
 import {
   formatFullDate,
   formatTimeRange,
@@ -13,24 +13,26 @@ import {
  * LessonDetailPage Component
  *
  * **Architectural Role:** UI Adapter (presentation layer)
- * - Fetches lesson data via tRPC adapter
- * - Pure presentation - delegates data fetching to tRPC
+ * - Pure presentation - delegates all logic to useLessonDetail hook
  *
  * **Applies:**
- * - Single Responsibility (SOLID): Only renders lesson details
- * - Low Coupling: Depends on tRPC interface, not use cases
+ * - Single Responsibility: Only renders lesson details
+ * - Low Coupling: Depends on hook interface, not implementation
  * - Separation of Concerns: UI separated from business logic
- *
- * **Pattern:** Smart Component (fetches data + renders)
  */
 const LessonDetailPage = () => {
-  const params = useParams();
-  const lessonId = params?.id as string;
-
-  const { data: lesson, isLoading, error } = trpc.lesson.getLessonById.useQuery(
-    { lessonId },
-    { enabled: !!lessonId }
-  );
+  const {
+    lesson,
+    isLoading,
+    error,
+    startDate,
+    endDate,
+    occurrenceDate,
+    isRecurring,
+    hasOccurrenceContext,
+    deleteModal,
+    skipModal,
+  } = useLessonDetail();
 
   if (isLoading) {
     return (
@@ -42,7 +44,7 @@ const LessonDetailPage = () => {
     );
   }
 
-  if (error || !lesson) {
+  if (error || !lesson || !startDate || !endDate) {
     return (
       <Container size="md" py="xl">
         <Card withBorder>
@@ -54,23 +56,98 @@ const LessonDetailPage = () => {
     );
   }
 
-  const startDate = new Date(lesson.startDate);
-  const endDate = new Date(lesson.endDate);
-
   return (
     <Container size="md" py="xl">
-      <Stack gap="lg">
-        <div>
-          <Title order={1}>{lesson.title}</Title>
-          <Group mt="xs" gap="xs">
-            <Badge variant="light" size="lg">
-              {formatFullDate(startDate)}
-            </Badge>
-            <Badge variant="light" size="lg">
-              {formatTimeRange(startDate, endDate)}
-            </Badge>
+      <Modal
+        opened={deleteModal.opened}
+        onClose={deleteModal.close}
+        title="Delete Lesson"
+        centered
+      >
+        <Stack>
+          <Text>Are you sure you want to delete &quot;{lesson.title}&quot;?</Text>
+          <Text size="sm" c="dimmed">This action cannot be undone.</Text>
+          {deleteModal.error && (
+            <Text c="red" size="sm">{deleteModal.error.message}</Text>
+          )}
+          <Group justify="flex-end" mt="md">
+            <Button variant="default" onClick={deleteModal.close}>
+              Cancel
+            </Button>
+            <Button
+              color="red"
+              onClick={deleteModal.onConfirm}
+              loading={deleteModal.isPending}
+            >
+              Delete
+            </Button>
           </Group>
-        </div>
+        </Stack>
+      </Modal>
+
+      <Modal
+        opened={skipModal.opened}
+        onClose={skipModal.close}
+        title="Skip Occurrence"
+        centered
+      >
+        <Stack>
+          <Text>Select the date of the occurrence you want to skip.</Text>
+          <DatePickerInput
+            label="Occurrence Date"
+            placeholder="Select date"
+            value={skipModal.date}
+            onChange={(value) => skipModal.setDate(value as Date | null)}
+          />
+          {skipModal.error && (
+            <Text c="red" size="sm">{skipModal.error.message}</Text>
+          )}
+          <Group justify="flex-end" mt="md">
+            <Button variant="default" onClick={skipModal.close}>
+              Cancel
+            </Button>
+            <Button
+              onClick={skipModal.onConfirm}
+              loading={skipModal.isPending}
+              disabled={!skipModal.date}
+            >
+              Skip
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      <Stack gap="lg">
+        <Group justify="space-between" align="flex-start">
+          <div>
+            <Title order={1}>{lesson.title}</Title>
+            <Group mt="xs" gap="xs">
+              <Badge variant="light" size="lg">
+                {hasOccurrenceContext
+                  ? formatFullDate(occurrenceDate!)
+                  : formatFullDate(startDate)}
+              </Badge>
+              <Badge variant="light" size="lg">
+                {formatTimeRange(startDate, endDate)}
+              </Badge>
+              {isRecurring && (
+                <Badge variant="light" color="blue" size="lg">
+                  Recurring
+                </Badge>
+              )}
+            </Group>
+          </div>
+          <Group>
+            {isRecurring && (
+              <Button color="orange" variant="outline" onClick={skipModal.open}>
+                Skip Occurrence
+              </Button>
+            )}
+            <Button color="red" variant="outline" onClick={deleteModal.open}>
+              Delete
+            </Button>
+          </Group>
+        </Group>
 
         {lesson.description && (
           <Card withBorder>
@@ -86,22 +163,31 @@ const LessonDetailPage = () => {
         <Card withBorder>
           <Stack gap="xs">
             <Text fw={600} size="sm">
-              Schedule
+              {hasOccurrenceContext ? 'Occurrence Schedule' : 'Schedule'}
             </Text>
-            <Group>
-              <div>
-                <Text size="xs" c="dimmed">
-                  Start
-                </Text>
-                <Text>{formatDateTime(startDate)}</Text>
-              </div>
-              <div>
-                <Text size="xs" c="dimmed">
-                  End
-                </Text>
-                <Text>{formatDateTime(endDate)}</Text>
-              </div>
-            </Group>
+            {hasOccurrenceContext ? (
+              <Group>
+                <div>
+                  <Text size="xs" c="dimmed">Date</Text>
+                  <Text>{formatFullDate(occurrenceDate!)}</Text>
+                </div>
+                <div>
+                  <Text size="xs" c="dimmed">Time</Text>
+                  <Text>{formatTimeRange(startDate, endDate)}</Text>
+                </div>
+              </Group>
+            ) : (
+              <Group>
+                <div>
+                  <Text size="xs" c="dimmed">Start</Text>
+                  <Text>{formatDateTime(startDate)}</Text>
+                </div>
+                <div>
+                  <Text size="xs" c="dimmed">End</Text>
+                  <Text>{formatDateTime(endDate)}</Text>
+                </div>
+              </Group>
+            )}
           </Stack>
         </Card>
 

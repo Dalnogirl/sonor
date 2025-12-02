@@ -3,28 +3,13 @@
 import { Button, Group, Text, Box, Stack, Card, Loader, Center } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import Link from 'next/link';
-import { useDailyLessons } from '@/adapters/ui/hooks/useDailyLessons';
 import {
-  isSameDay,
-  formatFullDate,
-  formatTimeRange,
-} from '@/adapters/ui/utils/date-utils';
-
-/**
- * SerializedLesson - Type representing lesson data after tRPC serialization
- * Dates are serialized to ISO strings over the wire
- */
-type SerializedLesson = {
-  id: string;
-  title: string;
-  description?: string;
-  teacherIds: string[];
-  pupilIds: string[];
-  startDate: string; // ISO string
-  endDate: string; // ISO string
-  createdAt: string;
-  updatedAt: string;
-};
+  useDailyLessons,
+  type SerializedLesson,
+  calculateDuration,
+  buildLessonDetailUrl,
+} from '@/adapters/ui/features/lessons';
+import { formatFullDate, formatTimeRange } from '@/adapters/ui/utils/date-utils';
 
 /**
  * DailyLessonsView Component
@@ -60,15 +45,11 @@ export const DailyLessonsView = ({ initialDate, onDateChange }: DailyLessonsView
     currentDay,
     lessons,
     isLoading,
+    isToday,
     goToPreviousDay,
     goToNextDay,
     goToToday,
   } = useDailyLessons({ initialDate, onDateChange });
-
-  const isToday = isSameDay(currentDay, new Date());
-  const sortedLessons = [...lessons].sort(
-    (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
-  );
 
   return (
     <Stack gap="md">
@@ -111,7 +92,7 @@ export const DailyLessonsView = ({ initialDate, onDateChange }: DailyLessonsView
           <Center h="100%">
             <Loader />
           </Center>
-        ) : sortedLessons.length === 0 ? (
+        ) : lessons.length === 0 ? (
           <Card withBorder>
             <Center h={200}>
               <Stack gap="xs" align="center">
@@ -126,7 +107,7 @@ export const DailyLessonsView = ({ initialDate, onDateChange }: DailyLessonsView
           </Card>
         ) : (
           <Stack gap="md">
-            {sortedLessons.map((lesson) => (
+            {lessons.map((lesson) => (
               <DetailedLessonCard key={lesson.id} lesson={lesson} />
             ))}
           </Stack>
@@ -146,7 +127,7 @@ interface DetailedLessonCardProps {
 
 const DetailedLessonCard = ({ lesson }: DetailedLessonCardProps) => {
   return (
-    <Link href={`/lessons/${lesson.id}`} style={{ textDecoration: 'none' }}>
+    <Link href={buildLessonDetailUrl(lesson.id, lesson.startDate)} style={{ textDecoration: 'none' }}>
       <Card padding="md" withBorder style={{ cursor: 'pointer' }}>
         <Group justify="space-between" align="start">
           <Stack gap="xs" style={{ flex: 1 }}>
@@ -186,20 +167,3 @@ const DetailedLessonCard = ({ lesson }: DetailedLessonCardProps) => {
     </Link>
   );
 };
-
-// Helper functions
-
-function calculateDuration(start: Date, end: Date): string {
-  const durationMs = end.getTime() - start.getTime();
-  const minutes = Math.floor(durationMs / 1000 / 60);
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
-
-  if (hours === 0) {
-    return `${minutes} min`;
-  }
-  if (remainingMinutes === 0) {
-    return `${hours} hr`;
-  }
-  return `${hours} hr ${remainingMinutes} min`;
-}

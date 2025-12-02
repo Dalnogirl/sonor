@@ -12,32 +12,18 @@ import {
 } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import Link from 'next/link';
-import { useMonthlyLessons } from '@/adapters/ui/hooks/useMonthlyLessons';
+import {
+  useMonthlyLessons,
+  type SerializedLesson,
+  buildLessonDetailUrl,
+} from '@/adapters/ui/features/lessons';
 import { useIsMobile } from '@/adapters/ui/hooks/useIsMobile';
 import {
   isSameDay,
   formatMonthYear,
   formatTimeRange,
   formatFullDate,
-  getISODayOfWeek,
-  getWeekStart,
 } from '@/adapters/ui/utils/date-utils';
-
-/**
- * SerializedLesson - Type representing lesson data after tRPC serialization
- * Dates are serialized to ISO strings over the wire
- */
-type SerializedLesson = {
-  id: string;
-  title: string;
-  description?: string;
-  teacherIds: string[];
-  pupilIds: string[];
-  startDate: string; // ISO string
-  endDate: string; // ISO string
-  createdAt: string;
-  updatedAt: string;
-};
 
 /**
  * MonthlyLessonsView Component
@@ -78,7 +64,9 @@ export const MonthlyLessonsView = ({
   const {
     currentMonthStart,
     monthDays,
-    lessons,
+    paddingDays,
+    weeks,
+    getLessonsForDay,
     isLoading,
     goToPreviousMonth,
     goToNextMonth,
@@ -86,10 +74,6 @@ export const MonthlyLessonsView = ({
   } = useMonthlyLessons({ initialDate, onDateChange });
 
   const isMobile = useIsMobile();
-
-  // Calculate padding days for calendar grid alignment (desktop only)
-  const firstDayOfWeek = getISODayOfWeek(monthDays[0]);
-  const paddingDays = Array.from({ length: firstDayOfWeek }, () => null);
 
   return (
     <Stack gap="md">
@@ -139,12 +123,12 @@ export const MonthlyLessonsView = ({
         ) : (
           <>
             <Box hiddenFrom="sm">
-              <MonthlyMobileLayout monthDays={monthDays} lessons={lessons} />
+              <MonthlyMobileLayout weeks={weeks} getLessonsForDay={getLessonsForDay} />
             </Box>
             <Box visibleFrom="sm" style={{ minHeight: '670px' }}>
               <MonthlyDesktopLayout
                 monthDays={monthDays}
-                lessons={lessons}
+                getLessonsForDay={getLessonsForDay}
                 paddingDays={paddingDays}
               />
             </Box>
@@ -160,13 +144,13 @@ export const MonthlyLessonsView = ({
  */
 interface MonthlyDesktopLayoutProps {
   monthDays: Date[];
-  lessons: SerializedLesson[];
+  getLessonsForDay: (day: Date) => SerializedLesson[];
   paddingDays: null[];
 }
 
 const MonthlyDesktopLayout = ({
   monthDays,
-  lessons,
+  getLessonsForDay,
   paddingDays,
 }: MonthlyDesktopLayoutProps) => {
   return (
@@ -205,7 +189,7 @@ const MonthlyDesktopLayout = ({
           <DayCell
             key={day.toISOString()}
             day={day}
-            lessons={getLessonsForDay(lessons, day)}
+            lessons={getLessonsForDay(day)}
           />
         ))}
       </Box>
@@ -218,38 +202,14 @@ const MonthlyDesktopLayout = ({
  * Shows days vertically with lesson counts
  */
 interface MonthlyMobileLayoutProps {
-  monthDays: Date[];
-  lessons: SerializedLesson[];
+  weeks: Date[][];
+  getLessonsForDay: (day: Date) => SerializedLesson[];
 }
 
 const MonthlyMobileLayout = ({
-  monthDays,
-  lessons,
+  weeks,
+  getLessonsForDay,
 }: MonthlyMobileLayoutProps) => {
-  // Group days by week
-  const weeks: Date[][] = [];
-  let currentWeek: Date[] = [];
-  let lastWeekStart: Date | null = null;
-
-  monthDays.forEach((day) => {
-    const weekStart = getWeekStart(day);
-    const weekKey = weekStart.toISOString();
-
-    if (lastWeekStart?.toISOString() !== weekKey) {
-      if (currentWeek.length > 0) {
-        weeks.push(currentWeek);
-      }
-      currentWeek = [];
-      lastWeekStart = weekStart;
-    }
-
-    currentWeek.push(day);
-  });
-
-  if (currentWeek.length > 0) {
-    weeks.push(currentWeek);
-  }
-
   return (
     <Stack gap="lg">
       {weeks.map((week, weekIndex) => (
@@ -259,7 +219,7 @@ const MonthlyMobileLayout = ({
           </Text>
           <Stack gap="xs">
             {week.map((day) => {
-              const dayLessons = getLessonsForDay(lessons, day);
+              const dayLessons = getLessonsForDay(day);
               const isToday = isSameDay(day, new Date());
 
               return (
@@ -377,7 +337,7 @@ interface CompactLessonCardProps {
 
 const CompactLessonCard = ({ lesson }: CompactLessonCardProps) => {
   return (
-    <Link href={`/lessons/${lesson.id}`} style={{ textDecoration: 'none' }}>
+    <Link href={buildLessonDetailUrl(lesson.id, lesson.startDate)} style={{ textDecoration: 'none' }}>
       <Card padding={4} withBorder style={{ cursor: 'pointer' }}>
         <Stack gap={2}>
           <Text size="xs" fw={600} lineClamp={1}>
@@ -395,17 +355,3 @@ const CompactLessonCard = ({ lesson }: CompactLessonCardProps) => {
     </Link>
   );
 };
-
-// Helper functions
-
-function getLessonsForDay(
-  lessons: SerializedLesson[],
-  day: Date
-): SerializedLesson[] {
-  return lessons
-    .filter((lesson) => isSameDay(new Date(lesson.startDate), day))
-    .sort(
-      (a, b) =>
-        new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
-    );
-}

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
-import { useWeeklyLessons } from '@/adapters/ui/hooks/useWeeklyLessons';
+import { useWeeklyLessons } from '@/adapters/ui/features/lessons';
 import { getWeekStart, getWeekEnd, generateWeekDays } from '@/adapters/ui/utils/date-utils';
 import * as trpcModule from '@/lib/trpc';
 

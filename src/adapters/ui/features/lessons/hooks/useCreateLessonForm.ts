@@ -9,20 +9,12 @@ import { LessonFormMapper } from '@/adapters/ui/mappers/lesson-form.mapper';
 import { trpc } from '@/lib/trpc';
 
 /**
- * useCreateLessonForm
- *
- * Custom hook that encapsulates lesson creation form logic
- *
- * **Architectural Role:**
- * - Separates form state management from UI presentation
- * - Handles mutation lifecycle (loading, success, error)
- * - Coordinates form submission with backend
+ * useCreateLessonForm - Lesson creation form state
  *
  * **Applies:**
- * - Single Responsibility (SOLID): Only manages form state & submission
+ * - Single Responsibility: Only manages form state & submission
  * - Separation of Concerns: UI components don't handle mutations directly
- * - Information Expert (GRASP): Knows how to submit lesson data
- * - Reusability: Can be used in different UI contexts
+ * - Information Expert: Knows how to submit lesson data
  */
 export const useCreateLessonForm = (onSuccess?: () => void) => {
   const form = useForm<CreateLessonFormValues>({

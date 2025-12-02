@@ -2,7 +2,7 @@
 
 import { Modal, Button, Stack } from '@mantine/core';
 import React from 'react';
-import { useCreateLessonForm } from '@/adapters/ui/hooks/useCreateLessonForm';
+import { useCreateLessonForm } from '@/adapters/ui/features/lessons';
 import { LessonBasicFields } from './fields/LessonBasicFields';
 import { LessonParticipantsFields } from './fields/LessonParticipantsFields';
 import { LessonScheduleFields } from './fields/LessonScheduleFields';
