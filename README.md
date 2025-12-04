@@ -31,8 +31,6 @@ src/
 └── lib/                # 🛠️ Shared utilities
 \`\`\`
 
-See [copilot-instructions.md](.github/copilot-instructions.md) for detailed architecture documentation.
-
 ## 🚀 Getting Started
 
 ### Prerequisites
