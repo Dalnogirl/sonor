@@ -1,7 +1,16 @@
 import { useState, useMemo, useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
-import { getMonthStart, getMonthEnd, generateMonthDays, getISODayOfWeek } from '@/adapters/ui/utils/date-utils';
-import { getLessonsForDay, groupDaysByWeek, type SerializedLesson } from '../services/lessonViewService';
+import {
+  getMonthStart,
+  getMonthEnd,
+  generateMonthDays,
+  getISODayOfWeek,
+} from '@/adapters/ui/utils/date-utils';
+import {
+  getLessonsForDay,
+  groupDaysByWeek,
+  type SerializedLesson,
+} from '../services/lessonViewService';
 
 /**
  * useMonthlyLessons - Monthly lesson view state management
@@ -30,8 +39,14 @@ export const useMonthlyLessons = (options: UseMonthlyLessonsOptions = {}) => {
     }
   }, [initialDate]);
 
-  const monthEnd = useMemo(() => getMonthEnd(currentMonthStart), [currentMonthStart]);
-  const monthDays = useMemo(() => generateMonthDays(currentMonthStart), [currentMonthStart]);
+  const monthEnd = useMemo(
+    () => getMonthEnd(currentMonthStart),
+    [currentMonthStart]
+  );
+  const monthDays = useMemo(
+    () => generateMonthDays(currentMonthStart),
+    [currentMonthStart]
+  );
 
   // Calendar grid padding (for first week alignment)
   const paddingDays = useMemo(() => {
@@ -42,10 +57,11 @@ export const useMonthlyLessons = (options: UseMonthlyLessonsOptions = {}) => {
   // Week groups for mobile layout
   const weeks = useMemo(() => groupDaysByWeek(monthDays), [monthDays]);
 
-  const { data: lessons, isLoading, error } = trpc.lesson.getMyTeachingLessonsForPeriod.useQuery({
-    startDate: currentMonthStart,
-    endDate: monthEnd,
-  });
+  const [data, { data: lessons, isLoading, error }] =
+    trpc.lesson.getMyTeachingLessonsForPeriod.useSuspenseQuery({
+      startDate: currentMonthStart,
+      endDate: monthEnd,
+    });
 
   const getLessonsForDayMemo = useMemo(() => {
     const lessonsArray = (lessons || []) as SerializedLesson[];

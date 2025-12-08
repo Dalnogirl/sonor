@@ -26,11 +26,8 @@ export const useLessonDetail = () => {
   const [skipDate, setSkipDate] = useState<Date | null>(occurrenceDate);
 
   // Queries
-  const {
-    data: lesson,
-    isLoading,
-    error,
-  } = trpc.lesson.getLessonById.useQuery({ lessonId }, { enabled: !!lessonId });
+  const [lesson, { isLoading, error }] =
+    trpc.lesson.getLessonById.useSuspenseQuery({ lessonId });
 
   // Mutations
   const deleteMutation = trpc.lesson.delete.useMutation({
