@@ -69,19 +69,22 @@ export class OccurrenceGeneratorService {
         return this.recurrenceService.generateDailyOccurrencesForPeriod(
           effectiveStart,
           periodEnd,
-          pattern
+          pattern,
+          lesson.startDate
         );
       case RecurringFrequency.WEEKLY:
         return this.recurrenceService.generateWeeklyOccurrencesForPeriod(
           effectiveStart,
           periodEnd,
-          pattern
+          pattern,
+          lesson.startDate
         );
       case RecurringFrequency.MONTHLY:
         return this.recurrenceService.generateMonthlyOccurrencesForPeriod(
           effectiveStart,
           periodEnd,
-          pattern
+          pattern,
+          lesson.startDate
         );
       default:
         throw new Error(`Unknown frequency: ${pattern.frequency}`);

@@ -1,6 +1,6 @@
 'use client';
 
-import { Container, Loader, Center, Card, Text } from '@mantine/core';
+import { Loader, Center, Card, Text } from '@mantine/core';
 import { useLessonDetail } from '@/adapters/ui/features/lessons';
 import { LessonDetailView } from './LessonDetailView';
 import { DeleteLessonModal } from './DeleteLessonModal';

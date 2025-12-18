@@ -23,6 +23,8 @@ export class GetMyTeachingLessonsForPeriod {
       lessonDTO.endDate
     );
 
+    console.log(baseLessons)
+
     if (baseLessons.length === 0) {
       return [];
     }

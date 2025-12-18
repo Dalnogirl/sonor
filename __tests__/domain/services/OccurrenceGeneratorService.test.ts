@@ -620,6 +620,171 @@ describe('OccurrenceGeneratorService', () => {
     });
   });
 
+  describe('Occurrence Count Limit', () => {
+    it('should respect occurrence count for daily pattern', () => {
+      const recurringPattern = RecurringPattern.daily(1, undefined, 5);
+      const lesson = new Lesson(
+        'lesson1',
+        'Limited Daily Math',
+        ['teacher1'],
+        new Date(),
+        new Date(),
+        ['pupil1'],
+        new Date('2025-01-01T10:00:00'),
+        new Date('2025-01-01T11:00:00'),
+        'Daily lesson with 5 occurrences max',
+        recurringPattern
+      );
+
+      // Request period longer than occurrence count allows
+      const periodStart = new Date('2025-01-01');
+      const periodEnd = new Date('2025-01-31');
+
+      const occurrences = service.generateOccurrencesForPeriod(
+        lesson,
+        [],
+        periodStart,
+        periodEnd
+      );
+
+      // Should only get 5 occurrences despite 31-day period
+      expect(occurrences).toHaveLength(5);
+      expect(occurrences[0].startDate).toEqual(new Date('2025-01-01T10:00:00'));
+      expect(occurrences[4].startDate).toEqual(new Date('2025-01-05T10:00:00'));
+    });
+
+    it('should respect occurrence count for weekly pattern', () => {
+      const recurringPattern = RecurringPattern.weekly(
+        [DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY],
+        1,
+        undefined,
+        3 // Only 3 total occurrences
+      );
+      const lesson = new Lesson(
+        'lesson1',
+        'Limited Weekly Math',
+        ['teacher1'],
+        new Date(),
+        new Date(),
+        ['pupil1'],
+        new Date('2025-01-06T10:00:00'), // Monday
+        new Date('2025-01-06T11:00:00'),
+        'Weekly lesson with 3 occurrences max',
+        recurringPattern
+      );
+
+      const periodStart = new Date('2025-01-06');
+      const periodEnd = new Date('2025-01-31');
+
+      const occurrences = service.generateOccurrencesForPeriod(
+        lesson,
+        [],
+        periodStart,
+        periodEnd
+      );
+
+      // Should only get 3 occurrences: Mon Jan 6, Wed Jan 8, Mon Jan 13
+      expect(occurrences).toHaveLength(3);
+    });
+
+    it('should stop at occurrence count even when period extends further', () => {
+      const recurringPattern = RecurringPattern.daily(2, undefined, 3); // Every 2 days, max 3
+      const lesson = new Lesson(
+        'lesson1',
+        'Limited Daily Math',
+        ['teacher1'],
+        new Date(),
+        new Date(),
+        ['pupil1'],
+        new Date('2025-01-01T10:00:00'),
+        new Date('2025-01-01T11:00:00'),
+        'Every 2 days, max 3 occurrences',
+        recurringPattern
+      );
+
+      const periodStart = new Date('2025-01-01');
+      const periodEnd = new Date('2025-12-31'); // Full year
+
+      const occurrences = service.generateOccurrencesForPeriod(
+        lesson,
+        [],
+        periodStart,
+        periodEnd
+      );
+
+      // Should get exactly 3: Jan 1, Jan 3, Jan 5
+      expect(occurrences).toHaveLength(3);
+      expect(occurrences[0].startDate).toEqual(new Date('2025-01-01T10:00:00'));
+      expect(occurrences[1].startDate).toEqual(new Date('2025-01-03T10:00:00'));
+      expect(occurrences[2].startDate).toEqual(new Date('2025-01-05T10:00:00'));
+    });
+
+    it('should return fewer occurrences if period ends before count reached', () => {
+      const recurringPattern = RecurringPattern.daily(1, undefined, 10);
+      const lesson = new Lesson(
+        'lesson1',
+        'Limited Daily Math',
+        ['teacher1'],
+        new Date(),
+        new Date(),
+        ['pupil1'],
+        new Date('2025-01-01T10:00:00'),
+        new Date('2025-01-01T11:00:00'),
+        'Daily lesson with 10 occurrences max',
+        recurringPattern
+      );
+
+      // Period only covers 3 days
+      const periodStart = new Date('2025-01-01');
+      const periodEnd = new Date('2025-01-03');
+
+      const occurrences = service.generateOccurrencesForPeriod(
+        lesson,
+        [],
+        periodStart,
+        periodEnd
+      );
+
+      // Should only get 3 (period constraint), not 10 (occurrence limit)
+      expect(occurrences).toHaveLength(3);
+    });
+
+    it('should handle occurrence count with exceptions (skipped still counts)', () => {
+      const recurringPattern = RecurringPattern.daily(1, undefined, 5);
+      const lesson = new Lesson(
+        'lesson1',
+        'Limited Daily Math',
+        ['teacher1'],
+        new Date(),
+        new Date(),
+        ['pupil1'],
+        new Date('2025-01-01T10:00:00'),
+        new Date('2025-01-01T11:00:00'),
+        'Daily lesson with 5 occurrences',
+        recurringPattern
+      );
+
+      const skipException = LessonException.skip(
+        'lesson1',
+        new Date('2025-01-03T10:00:00')
+      );
+
+      const periodStart = new Date('2025-01-01');
+      const periodEnd = new Date('2025-01-31');
+
+      const occurrences = service.generateOccurrencesForPeriod(
+        lesson,
+        [skipException],
+        periodStart,
+        periodEnd
+      );
+
+      // 5 generated, 1 skipped = 4 returned
+      // Skipped occurrence still counts toward limit
+      expect(occurrences).toHaveLength(4);
+    });
+  });
+
   describe('Complex Scenarios', () => {
     it('should handle mixed exception types', () => {
       const recurringPattern = RecurringPattern.daily(1);

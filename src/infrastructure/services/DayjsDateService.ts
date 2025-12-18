@@ -53,6 +53,14 @@ export class DayjsDateService implements DateService {
     return dayjs(date1).diff(date2, 'minute');
   }
 
+  diffInDays(date1: Date, date2: Date): number {
+    return dayjs(date1).diff(date2, 'day');
+  }
+
+  diffInMonths(date1: Date, date2: Date): number {
+    return dayjs(date1).diff(date2, 'month');
+  }
+
   formatISO(date: Date): string {
     return dayjs(date).toISOString();
   }
