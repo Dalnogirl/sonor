@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 /**
@@ -35,7 +36,10 @@ export const useLessonsViewState = (): UseLessonsViewStateReturn => {
       : 'weekly';
 
   const dateParam = searchParams.get('date');
-  const currentDate = dateParam ? parseDateParam(dateParam) : null;
+  const currentDate = useMemo(
+    () => (dateParam ? parseDateParam(dateParam) : null),
+    [dateParam]
+  );
 
   const updateURL = (newState: Partial<LessonsViewState>) => {
     const params = new URLSearchParams();

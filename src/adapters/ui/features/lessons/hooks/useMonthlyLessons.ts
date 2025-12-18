@@ -57,8 +57,8 @@ export const useMonthlyLessons = (options: UseMonthlyLessonsOptions = {}) => {
   // Week groups for mobile layout
   const weeks = useMemo(() => groupDaysByWeek(monthDays), [monthDays]);
 
-  const [data, { data: lessons, isLoading, error }] =
-    trpc.lesson.getMyTeachingLessonsForPeriod.useSuspenseQuery({
+  const { data: lessons, isLoading, error } =
+    trpc.lesson.getMyTeachingLessonsForPeriod.useQuery({
       startDate: currentMonthStart,
       endDate: monthEnd,
     });
