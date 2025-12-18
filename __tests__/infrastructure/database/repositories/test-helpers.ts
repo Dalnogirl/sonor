@@ -6,6 +6,8 @@ import { PrismaClient } from '@prisma/client';
  * This dynamically queries all tables in the public schema and truncates them,
  * making it schema-agnostic and future-proof for new tables.
  *
+ * **Safety:** Only runs on databases with '_test' suffix (Protected Variations).
+ *
  * **Benefits:**
  * - No need to manually specify table names
  * - Automatically handles foreign key constraints with CASCADE
@@ -31,6 +33,14 @@ import { PrismaClient } from '@prisma/client';
  * ```
  */
 export async function cleanDatabase(prisma: PrismaClient): Promise<void> {
+  const dbUrl = process.env.DATABASE_URL ?? '';
+  // Allow: _test suffix, test_db (testcontainers), or localhost with test in path
+  const isTestDb = dbUrl.includes('_test') || dbUrl.includes('test_db') || dbUrl.includes('/test');
+  if (!isTestDb) {
+    throw new Error(
+      `Refusing to truncate non-test database. DATABASE_URL must contain 'test'. Got: ${dbUrl}`
+    );
+  }
   // Query all table names from PostgreSQL
   const tables = await prisma.$queryRaw<Array<{ tablename: string }>>`
     SELECT tablename FROM pg_tables WHERE schemaname='public'

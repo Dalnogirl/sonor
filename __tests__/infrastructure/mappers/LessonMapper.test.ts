@@ -143,12 +143,13 @@ describe('LessonMapper', () => {
       expect(mockUserMapper.toSummaryDTO).toHaveBeenNthCalledWith(3, pupils[0], 0, pupils);
 
       // Assert - Should contain user summaries, not IDs
+      // DTOs use ISO strings for serialization (DTO pattern)
       expect(dto).toEqual({
         id: 'lesson-123',
         title: 'TypeScript Advanced',
         description: 'Advanced TypeScript patterns',
-        startDate: lesson.startDate,
-        endDate: lesson.endDate,
+        startDate: lesson.startDate.toISOString(),
+        endDate: lesson.endDate.toISOString(),
         recurringPattern: undefined,
         teachers: [
           { id: 'teacher-1', name: 'John Doe', email: 'john@example.com' },
@@ -281,8 +282,14 @@ describe('LessonMapper', () => {
       // Act
       const dto = lessonMapper.toDTOWithUsers(lesson, teachers, []);
 
-      // Assert
-      expect(dto.recurringPattern).toEqual(recurringPattern);
+      // Assert - DTO contains plain object, not class instance (DTO pattern)
+      expect(dto.recurringPattern).toEqual({
+        frequency: recurringPattern.frequency,
+        interval: recurringPattern.interval,
+        daysOfWeek: recurringPattern.daysOfWeek,
+        endDate: recurringPattern.endDate?.toISOString() ?? null,
+        occurrences: recurringPattern.occurrences,
+      });
     });
   });
 
