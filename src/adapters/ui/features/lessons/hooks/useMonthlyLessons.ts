@@ -58,10 +58,13 @@ export const useMonthlyLessons = (options: UseMonthlyLessonsOptions = {}) => {
   const weeks = useMemo(() => groupDaysByWeek(monthDays), [monthDays]);
 
   const { data: lessons, isLoading, error } =
-    trpc.lesson.getMyTeachingLessonsForPeriod.useQuery({
-      startDate: currentMonthStart,
-      endDate: monthEnd,
-    });
+    trpc.lesson.getMyTeachingLessonsForPeriod.useQuery(
+      {
+        startDate: currentMonthStart,
+        endDate: monthEnd,
+      },
+      { staleTime: 5 * 60 * 1000 }
+    );
 
   const getLessonsForDayMemo = useMemo(() => {
     const lessonsArray = (lessons || []) as SerializedLesson[];
