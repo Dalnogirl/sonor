@@ -101,7 +101,7 @@ export class OccurrenceGeneratorService {
     const rescheduledOccurrences = new Map<string, Lesson>();
 
     for (const occurrenceDate of occurrenceDates) {
-      const dateKey = this.dateService.formatISO(occurrenceDate);
+      const dateKey = this.dateService.formatDateOnly(occurrenceDate);
       const exception = exceptionMap.get(dateKey);
 
       if (exception?.type === ExceptionType.SKIP) {
@@ -141,7 +141,7 @@ export class OccurrenceGeneratorService {
   ): Map<string, LessonException> {
     const map = new Map<string, LessonException>();
     for (const exception of exceptions) {
-      const key = this.dateService.formatISO(exception.originalDate);
+      const key = this.dateService.formatDateOnly(exception.originalDate);
       map.set(key, exception);
     }
     return map;

@@ -64,4 +64,8 @@ export class DayjsDateService implements DateService {
   formatISO(date: Date): string {
     return dayjs(date).toISOString();
   }
+
+  formatDateOnly(date: Date): string {
+    return dayjs(date).format('YYYY-MM-DD');
+  }
 }

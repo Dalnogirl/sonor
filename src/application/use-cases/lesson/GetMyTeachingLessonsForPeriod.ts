@@ -23,8 +23,6 @@ export class GetMyTeachingLessonsForPeriod {
       lessonDTO.endDate
     );
 
-    console.log(baseLessons)
-
     if (baseLessons.length === 0) {
       return [];
     }
@@ -37,6 +35,7 @@ export class GetMyTeachingLessonsForPeriod {
         lessonDTO.endDate
       );
 
+    console.log('Fetched exceptions:', exceptions);
     const lessonIdExceptionMap = this.groupExceptionsByLessonId(exceptions);
 
     const allOccurrences = baseLessons.flatMap((lesson) => {

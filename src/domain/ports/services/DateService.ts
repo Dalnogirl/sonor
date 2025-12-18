@@ -13,4 +13,5 @@ export interface DateService {
   isSameOrBefore(date1: Date, date2: Date): boolean;
   isSameOrAfter(date1: Date, date2: Date): boolean;
   formatISO(date: Date): string;
+  formatDateOnly(date: Date): string;
 }
