@@ -1,5 +1,3 @@
-'use client';
-
 import {
   Container,
   Paper,
@@ -8,27 +6,15 @@ import {
   Group,
   Avatar,
   Stack,
-  Button,
 } from '@mantine/core';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { IconArrowLeft } from '@tabler/icons-react';
+import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
 
-export default function ProfilePage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-
-  if (status === 'loading') {
-    return (
-      <Container size="sm">
-        <Text>Loading...</Text>
-      </Container>
-    );
-  }
+export default async function ProfilePage() {
+  const session = await getServerSession();
 
   if (!session?.user) {
-    router.push('/login');
-    return null;
+    redirect('/login');
   }
 
   const { user } = session;
@@ -45,15 +31,6 @@ export default function ProfilePage() {
 
   return (
     <Container size="md">
-      <Button
-        variant="subtle"
-        leftSection={<IconArrowLeft size={16} />}
-        onClick={() => router.back()}
-        mb="lg"
-      >
-        Back
-      </Button>
-
       <Paper shadow="sm" p="xl" radius="md">
         <Stack gap="lg">
           <Group>
