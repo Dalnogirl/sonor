@@ -19,14 +19,12 @@ export const env = createEnv({
     // ),
   },
   client: {
-    // Add client-side env vars here if needed
-    // NEXT_PUBLIC_API_URL: z.string().url(),
+    NEXT_PUBLIC_APP_URL: z.string().url().optional(),
   },
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
-    // NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-    // NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
   emptyStringAsUndefined: true,

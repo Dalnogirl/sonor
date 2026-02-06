@@ -21,7 +21,7 @@ This project follows **Clean Architecture** and **Hexagonal Architecture** princ
 
 ## 📁 Project Structure
 
-\`\`\`
+```
 src/
 ├── domain/              # 🎯 Pure business logic (framework-agnostic)
 ├── application/         # 📋 Use cases (business workflows)
@@ -29,7 +29,7 @@ src/
 ├── adapters/           # 🔌 Framework adapters (tRPC, Next.js UI)
 ├── config/             # ⚙️ Configuration
 └── lib/                # 🛠️ Shared utilities
-\`\`\`
+```
 
 ## 🚀 Getting Started
 
@@ -40,7 +40,7 @@ src/
 
 ### Installation
 
-\`\`\`bash
+```bash
 # Install dependencies
 npm install
 
@@ -56,7 +56,7 @@ npm run db:push
 
 # Start development server
 npm run dev
-\`\`\`
+```
 
 Visit [http://localhost:3000](http://localhost:3000)
 
