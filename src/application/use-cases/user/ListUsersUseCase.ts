@@ -1,6 +1,6 @@
 import { UserRepository } from '@/domain/ports/repositories/UserRepository';
 import { UserResponseDTO } from '@/application/dto/UserResponseDTO';
-import { UserMapperPort } from '@/domain/ports/mappers/UserMapperPort';
+import { UserMapperPort } from '@/application/ports/mappers/UserMapperPort';
 import { ListUserRequestDTO } from '@/application/dto/user/ListUserRequestDTO';
 import { PaginationParams } from '@/domain/models/PaginationParams';
 

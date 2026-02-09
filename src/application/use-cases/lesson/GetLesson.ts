@@ -1,7 +1,7 @@
 import { GetLessonRequestDTO } from '@/application/dto/lesson/GetLessonRequestDTO';
 import { LessonWithUsersResponseDTO } from '@/application/dto/lesson/LessonWithUsersResponseDTO';
 import { LessonNotFoundError } from '@/domain/errors/LessonErrors';
-import { LessonMapperPort } from '@/domain/ports/mappers/LessonMapperPort';
+import { LessonMapperPort } from '@/application/ports/mappers/LessonMapperPort';
 import { LessonRepository } from '@/domain/ports/repositories/LessonRepository';
 import { UserRepository } from '@/domain/ports/repositories/UserRepository';
 

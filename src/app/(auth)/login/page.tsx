@@ -59,7 +59,6 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        debugger
         setMessage('Invalid email or password');
 
         setMessageType('error');

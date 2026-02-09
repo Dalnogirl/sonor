@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GetLessonUseCase } from '@/application/use-cases/lesson/GetLesson';
 import { LessonRepository } from '@/domain/ports/repositories/LessonRepository';
 import { UserRepository } from '@/domain/ports/repositories/UserRepository';
-import { LessonMapperPort } from '@/domain/ports/mappers/LessonMapperPort';
+import { LessonMapperPort } from '@/application/ports/mappers/LessonMapperPort';
 import { Lesson } from '@/domain/models/Lesson';
 import { User } from '@/domain/models/User';
 import { LessonNotFoundError } from '@/domain/errors/LessonErrors';

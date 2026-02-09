@@ -4,7 +4,7 @@ import { EmailAlreadyExistsError } from '@/domain/errors';
 import { User } from '@/domain/models/User';
 import { UserRepository } from '@/domain/ports/repositories/UserRepository';
 import { PasswordHasher } from '@/domain/ports/services/PasswordHasher';
-import { UserMapperPort } from '@/domain/ports/mappers/UserMapperPort';
+import { UserMapperPort } from '@/application/ports/mappers/UserMapperPort';
 
 export class RegisterUseCase {
   constructor(

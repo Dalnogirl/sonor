@@ -1,22 +1,19 @@
 /**
  * Environment Configuration using t3-env
- * 
- * This follows the Single Responsibility Principle (SRP) - 
+ *
+ * This follows the Single Responsibility Principle (SRP) -
  * one place to define and validate all environment variables.
  */
 
-import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod";
+import { createEnv } from '@t3-oss/env-nextjs';
+import { z } from 'zod';
 
 export const env = createEnv({
   server: {
     DATABASE_URL: z.string().url(),
-    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-    // NEXTAUTH_SECRET: z.string().min(1),
-    // NEXTAUTH_URL: z.preprocess(
-    //   (str) => process.env.VERCEL_URL ?? str,
-    //   z.string().url()
-    // ),
+    NODE_ENV: z
+      .enum(['development', 'test', 'production'])
+      .default('development'),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z.string().url().optional(),

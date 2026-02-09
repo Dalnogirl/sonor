@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { UserRepository } from '@/domain/ports/repositories/UserRepository';
 import { PasswordHasher } from '@/domain/ports/services/PasswordHasher';
-import { UserMapperPort } from '@/domain/ports/mappers/UserMapperPort';
+import { UserMapperPort } from '@/application/ports/mappers/UserMapperPort';
 import { User } from '@/domain/models/User';
 import { EmailAlreadyExistsError } from '@/domain/errors';
 import { RegisterUseCase } from '@/application/use-cases/auth/RegisterUseCase';

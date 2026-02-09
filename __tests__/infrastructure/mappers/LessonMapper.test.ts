@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { LessonMapper } from '@/infrastructure/mappers/LessonMapper';
-import { UserMapperPort } from '@/domain/ports/mappers/UserMapperPort';
+import { UserMapperPort } from '@/application/ports/mappers/UserMapperPort';
 import { Lesson } from '@/domain/models/Lesson';
 import { User } from '@/domain/models/User';
 import { RecurringPattern, RecurringFrequency, DayOfWeek } from '@/domain/models/RecurringPattern';

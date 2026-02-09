@@ -1,6 +1,6 @@
 import { User } from '@/domain/models/User';
 import { UserResponseDTO } from '@/application/dto/UserResponseDTO';
-import { UserMapperPort } from '@/domain/ports/mappers/UserMapperPort';
+import { UserMapperPort } from '@/application/ports/mappers/UserMapperPort';
 
 /**
  * UserMapper - Infrastructure Implementation

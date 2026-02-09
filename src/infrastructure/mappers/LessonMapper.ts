@@ -4,8 +4,8 @@ import { RecurringPatternDTO } from '@/application/dto/lesson/RecurringPatternDT
 import { Lesson } from '@/domain/models/Lesson';
 import { RecurringPattern } from '@/domain/models/RecurringPattern';
 import { User } from '@/domain/models/User';
-import { LessonMapperPort } from '@/domain/ports/mappers/LessonMapperPort';
-import { UserMapperPort } from '@/domain/ports/mappers/UserMapperPort';
+import { LessonMapperPort } from '@/application/ports/mappers/LessonMapperPort';
+import { UserMapperPort } from '@/application/ports/mappers/UserMapperPort';
 
 export class LessonMapper implements LessonMapperPort {
   constructor(private readonly userMapper: UserMapperPort) {}
