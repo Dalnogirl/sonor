@@ -9,7 +9,8 @@ export class PrismaUserRepository implements UserRepository {
 
   async findAll(paginationParams: PaginationParams): Promise<User[]> {
     const users = await this.prisma.user.findMany({
-      ...paginationParams.toPrisma(),
+      skip: paginationParams.offset,
+      take: paginationParams.limit,
     });
     return PrismaUserMapper.toDomainArray(users);
   }

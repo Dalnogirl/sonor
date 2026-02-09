@@ -18,11 +18,4 @@ export class PaginationParams {
   get limit(): number {
     return this.pageSize;
   }
-
-  toPrisma(): { skip: number; take: number } {
-    return {
-      skip: this.offset,
-      take: this.limit,
-    };
-  }
 }
