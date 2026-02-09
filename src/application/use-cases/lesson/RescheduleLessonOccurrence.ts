@@ -1,7 +1,11 @@
 import { LessonException } from '@/domain/models/LessonException';
+import {
+  LessonNotFoundError,
+  LessonNotRecurringError,
+  LessonExceptionAlreadyExistsError,
+} from '@/domain/errors/LessonErrors';
 import { LessonRepository } from '@/domain/ports/repositories/LessonRepository';
 import { LessonExceptionRepository } from '@/domain/ports/repositories/LessonExceptionRepository';
-import { LessonNotFoundError } from '@/domain/errors/LessonErrors';
 
 /**
  * RescheduleLessonOccurrence Use Case
@@ -31,12 +35,10 @@ export class RescheduleLessonOccurrence {
       throw new LessonNotFoundError(lessonId);
     }
 
-    // Validate lesson is recurring
     if (!lesson.recurringPattern) {
-      throw new Error('Cannot reschedule occurrence of non-recurring lesson');
+      throw new LessonNotRecurringError(lessonId);
     }
 
-    // Check if exception already exists
     const existingException =
       await this.exceptionRepository.findByLessonAndDate(
         lessonId,
@@ -44,7 +46,7 @@ export class RescheduleLessonOccurrence {
       );
 
     if (existingException) {
-      throw new Error('Exception already exists for this occurrence');
+      throw new LessonExceptionAlreadyExistsError(lessonId, originalDate);
     }
 
     // Create reschedule exception (domain factory validates newDate != originalDate)

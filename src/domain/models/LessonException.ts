@@ -1,3 +1,8 @@
+import {
+  InvalidLessonExceptionError,
+  SameDateRescheduleError,
+} from '@/domain/errors/LessonErrors';
+
 /**
  * LessonException Domain Entity
  *
@@ -43,21 +48,21 @@ export class LessonException {
 
   private validateInvariants(): void {
     if (this.type === ExceptionType.RESCHEDULE && !this.newDate) {
-      throw new Error('RESCHEDULE exception requires newDate');
+      throw new InvalidLessonExceptionError('RESCHEDULE exception requires newDate');
     }
 
     if (this.type === ExceptionType.RESCHEDULE && this.newDate) {
       if (this.newDate.getTime() === this.originalDate.getTime()) {
-        throw new Error('Cannot reschedule to same date');
+        throw new SameDateRescheduleError();
       }
     }
 
     if (this.type === ExceptionType.MODIFY && !this.modifications) {
-      throw new Error('MODIFY exception requires modifications');
+      throw new InvalidLessonExceptionError('MODIFY exception requires modifications');
     }
 
     if (this.type === ExceptionType.SKIP && (this.newDate || this.modifications)) {
-      throw new Error('SKIP exception cannot have newDate or modifications');
+      throw new InvalidLessonExceptionError('SKIP exception cannot have newDate or modifications');
     }
   }
 
