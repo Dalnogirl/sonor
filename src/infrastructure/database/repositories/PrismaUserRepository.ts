@@ -3,6 +3,7 @@ import { User } from '@/domain/models/User';
 import { UserRepository } from '@/domain/ports/repositories/UserRepository';
 import { PrismaClient } from '@prisma/client';
 import { PrismaUserMapper } from '@/infrastructure/mappers/PrismaUserMapper';
+import { handlePrismaError } from '../utils/handlePrismaError';
 
 export class PrismaUserRepository implements UserRepository {
   constructor(private prisma: PrismaClient) {}
@@ -21,22 +22,34 @@ export class PrismaUserRepository implements UserRepository {
   }
 
   async create(user: User): Promise<User> {
-    const created = await this.prisma.user.create({
-      data: PrismaUserMapper.toPrisma(user),
-    });
-    return PrismaUserMapper.toDomain(created);
+    try {
+      const created = await this.prisma.user.create({
+        data: PrismaUserMapper.toPrisma(user),
+      });
+      return PrismaUserMapper.toDomain(created);
+    } catch (error) {
+      throw handlePrismaError(error, { entity: 'user', id: user.email });
+    }
   }
 
   async update(user: User): Promise<User> {
-    const updated = await this.prisma.user.update({
-      where: { id: user.id },
-      data: PrismaUserMapper.toPrisma(user),
-    });
-    return PrismaUserMapper.toDomain(updated);
+    try {
+      const updated = await this.prisma.user.update({
+        where: { id: user.id },
+        data: PrismaUserMapper.toPrisma(user),
+      });
+      return PrismaUserMapper.toDomain(updated);
+    } catch (error) {
+      throw handlePrismaError(error, { entity: 'user', id: user.id });
+    }
   }
 
   async delete(id: string): Promise<void> {
-    await this.prisma.user.delete({ where: { id } });
+    try {
+      await this.prisma.user.delete({ where: { id } });
+    } catch (error) {
+      throw handlePrismaError(error, { entity: 'user', id });
+    }
   }
 
   async findByEmail(email: string): Promise<User | null> {

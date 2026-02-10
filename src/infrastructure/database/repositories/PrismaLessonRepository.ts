@@ -5,6 +5,7 @@ import {
 } from '@/domain/models/RecurringPattern';
 import { LessonRepository } from '@/domain/ports/repositories/LessonRepository';
 import { PrismaClient, Prisma } from '@prisma/client';
+import { handlePrismaError } from '../utils/handlePrismaError';
 
 /**
  * PrismaLessonRepository
@@ -87,65 +88,73 @@ export class PrismaLessonRepository implements LessonRepository {
   }
 
   async create(lesson: Lesson): Promise<Lesson> {
-    await this.prisma.lesson.create({
-      data: {
-        id: lesson.id,
-        title: lesson.title,
-        startDate: lesson.startDate,
-        endDate: lesson.endDate,
-        description: lesson.description,
-        recurringPattern: lesson.recurringPattern
-          ? this.serializeRecurringPattern(lesson.recurringPattern)
-          : Prisma.DbNull,
-        teachers: {
-          create: lesson.teacherIds.map((teacherId) => ({
-            user: {
-              connect: { id: teacherId },
-            },
-          })),
-        },
-        pupils: {
-          create: lesson.pupilIds.map((pupilId) => ({
-            user: {
-              connect: { id: pupilId },
-            },
-          })),
-        },
-      },
-    });
-
-    return lesson;
-  }
-
-  async save(lesson: Lesson): Promise<void> {
-    await this.prisma.$transaction([
-      this.prisma.lessonTeacher.deleteMany({ where: { lessonId: lesson.id } }),
-      this.prisma.lessonPupil.deleteMany({ where: { lessonId: lesson.id } }),
-      this.prisma.lesson.update({
-        where: { id: lesson.id },
+    try {
+      await this.prisma.lesson.create({
         data: {
+          id: lesson.id,
           title: lesson.title,
-          description: lesson.description,
           startDate: lesson.startDate,
           endDate: lesson.endDate,
+          description: lesson.description,
           recurringPattern: lesson.recurringPattern
             ? this.serializeRecurringPattern(lesson.recurringPattern)
             : Prisma.DbNull,
-          deletedAt: lesson.deletedAt ?? null,
-          updatedAt: lesson.updatedAt,
           teachers: {
             create: lesson.teacherIds.map((teacherId) => ({
-              user: { connect: { id: teacherId } },
+              user: {
+                connect: { id: teacherId },
+              },
             })),
           },
           pupils: {
             create: lesson.pupilIds.map((pupilId) => ({
-              user: { connect: { id: pupilId } },
+              user: {
+                connect: { id: pupilId },
+              },
             })),
           },
         },
-      }),
-    ]);
+      });
+
+      return lesson;
+    } catch (error) {
+      throw handlePrismaError(error, { entity: 'lesson', id: lesson.id });
+    }
+  }
+
+  async save(lesson: Lesson): Promise<void> {
+    try {
+      await this.prisma.$transaction([
+        this.prisma.lessonTeacher.deleteMany({ where: { lessonId: lesson.id } }),
+        this.prisma.lessonPupil.deleteMany({ where: { lessonId: lesson.id } }),
+        this.prisma.lesson.update({
+          where: { id: lesson.id },
+          data: {
+            title: lesson.title,
+            description: lesson.description,
+            startDate: lesson.startDate,
+            endDate: lesson.endDate,
+            recurringPattern: lesson.recurringPattern
+              ? this.serializeRecurringPattern(lesson.recurringPattern)
+              : Prisma.DbNull,
+            deletedAt: lesson.deletedAt ?? null,
+            updatedAt: lesson.updatedAt,
+            teachers: {
+              create: lesson.teacherIds.map((teacherId) => ({
+                user: { connect: { id: teacherId } },
+              })),
+            },
+            pupils: {
+              create: lesson.pupilIds.map((pupilId) => ({
+                user: { connect: { id: pupilId } },
+              })),
+            },
+          },
+        }),
+      ]);
+    } catch (error) {
+      throw handlePrismaError(error, { entity: 'lesson', id: lesson.id });
+    }
   }
   private toDomain(prismaLesson: {
     id: string;

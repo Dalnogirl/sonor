@@ -5,6 +5,7 @@ import {
 } from '@/domain/models/LessonException';
 import { LessonExceptionRepository } from '@/domain/ports/repositories/LessonExceptionRepository';
 import { PrismaClient, Prisma } from '@prisma/client';
+import { handlePrismaError } from '../utils/handlePrismaError';
 
 /**
  * PrismaLessonExceptionRepository
@@ -90,17 +91,24 @@ export class PrismaLessonExceptionRepository
   }
 
   async create(exception: LessonException): Promise<LessonException> {
-    await this.prisma.lessonException.create({
-      data: this.toPersistence(exception),
-    });
-
-    return exception;
+    try {
+      await this.prisma.lessonException.create({
+        data: this.toPersistence(exception),
+      });
+      return exception;
+    } catch (error) {
+      throw handlePrismaError(error, { entity: 'lessonException', id: exception.id });
+    }
   }
 
   async delete(id: string): Promise<void> {
-    await this.prisma.lessonException.delete({
-      where: { id },
-    });
+    try {
+      await this.prisma.lessonException.delete({
+        where: { id },
+      });
+    } catch (error) {
+      throw handlePrismaError(error, { entity: 'lessonException', id });
+    }
   }
 
   async exists(lessonId: string, originalDate: Date): Promise<boolean> {
