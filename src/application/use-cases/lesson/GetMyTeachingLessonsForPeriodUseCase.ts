@@ -6,7 +6,7 @@ import { LessonRepository } from '@/domain/ports/repositories/LessonRepository';
 import { LessonExceptionRepository } from '@/domain/ports/repositories/LessonExceptionRepository';
 import { OccurrenceGeneratorService } from '@/domain/services/OccurrenceGeneratorService';
 
-export class GetMyTeachingLessonsForPeriod {
+export class GetMyTeachingLessonsForPeriodUseCase {
   constructor(
     private repository: LessonRepository,
     private exceptionRepository: LessonExceptionRepository,

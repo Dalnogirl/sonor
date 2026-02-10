@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { DeleteLessonUseCase } from '@/application/use-cases/lesson/DeleteLesson';
+import { DeleteLessonUseCase } from '@/application/use-cases/lesson/DeleteLessonUseCase';
 import { LessonRepository } from '@/domain/ports/repositories/LessonRepository';
 import { Logger } from '@/domain/ports/services/Logger';
 import { Lesson } from '@/domain/models/Lesson';

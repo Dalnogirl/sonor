@@ -8,27 +8,23 @@ import { LessonRepository } from '@/domain/ports/repositories/LessonRepository';
 import { LessonExceptionRepository } from '@/domain/ports/repositories/LessonExceptionRepository';
 
 /**
- * RescheduleLessonOccurrence Use Case
+ * SkipLessonOccurrence Use Case
  *
- * Moves specific occurrence of recurring lesson to new date.
- * Validates lesson exists, has recurring pattern, and new date is valid.
+ * Marks specific occurrence of recurring lesson as skipped.
+ * Validates lesson exists and has recurring pattern.
  *
  * **Design Principles:**
- * - Single Responsibility: Only handles reschedule operation
- * - Controller (GRASP): Orchestrates validation + persistence
- * - Information Expert: Domain entity validates invariants
+ * - Single Responsibility: Only handles skip operation
+ * - Controller (GRASP): Orchestrates repositories + domain logic
+ * - Information Expert: Domain entity creates exception
  */
-export class RescheduleLessonOccurrence {
+export class SkipLessonOccurrenceUseCase {
   constructor(
     private lessonRepository: LessonRepository,
     private exceptionRepository: LessonExceptionRepository
   ) {}
 
-  async execute(
-    lessonId: string,
-    originalDate: Date,
-    newDate: Date
-  ): Promise<void> {
+  async execute(lessonId: string, occurrenceDate: Date): Promise<void> {
     // Validate lesson exists
     const lesson = await this.lessonRepository.findById(lessonId);
     if (!lesson) {
@@ -39,22 +35,17 @@ export class RescheduleLessonOccurrence {
       throw new LessonNotRecurringError(lessonId);
     }
 
-    const existingException =
-      await this.exceptionRepository.findByLessonAndDate(
-        lessonId,
-        originalDate
-      );
+    const existingException = await this.exceptionRepository.findByLessonAndDate(
+      lessonId,
+      occurrenceDate
+    );
 
     if (existingException) {
-      throw new LessonExceptionAlreadyExistsError(lessonId, originalDate);
+      throw new LessonExceptionAlreadyExistsError(lessonId, occurrenceDate);
     }
 
-    // Create reschedule exception (domain factory validates newDate != originalDate)
-    const exception = LessonException.reschedule(
-      lessonId,
-      originalDate,
-      newDate
-    );
+    // Create skip exception (domain factory method)
+    const exception = LessonException.skip(lessonId, occurrenceDate);
 
     // Persist
     await this.exceptionRepository.create(exception);

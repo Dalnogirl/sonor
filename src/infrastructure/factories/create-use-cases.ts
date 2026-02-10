@@ -8,13 +8,13 @@ import { RecurrenceService } from '@/domain/services/RecurrenceService';
 import { OccurrenceGeneratorService } from '@/domain/services/OccurrenceGeneratorService';
 import { UserMapper } from '@/infrastructure/mappers/UserMapper';
 import { Repositories } from './create-repositories';
-import { GetMyTeachingLessonsForPeriod } from '@/application/use-cases/lesson/GetMyTeachingLessonsForPeriod';
-import { CreateLesson } from '@/application/use-cases/lesson/CreateLesson';
-import { GetLessonUseCase } from '@/application/use-cases/lesson/GetLesson';
-import { SkipLessonOccurrence } from '@/application/use-cases/lesson/SkipLessonOccurrence';
-import { RescheduleLessonOccurrence } from '@/application/use-cases/lesson/RescheduleLessonOccurrence';
+import { GetMyTeachingLessonsForPeriodUseCase } from '@/application/use-cases/lesson/GetMyTeachingLessonsForPeriodUseCase';
+import { CreateLessonUseCase } from '@/application/use-cases/lesson/CreateLessonUseCase';
+import { GetLessonUseCase } from '@/application/use-cases/lesson/GetLessonUseCase';
+import { SkipLessonOccurrenceUseCase } from '@/application/use-cases/lesson/SkipLessonOccurrenceUseCase';
+import { RescheduleLessonOccurrenceUseCase } from '@/application/use-cases/lesson/RescheduleLessonOccurrenceUseCase';
 import { LessonMapper } from '../mappers/LessonMapper';
-import { DeleteLessonUseCase } from '@/application/use-cases/lesson/DeleteLesson';
+import { DeleteLessonUseCase } from '@/application/use-cases/lesson/DeleteLessonUseCase';
 import { ConsoleLogger } from '../services/Logger';
 
 /**
@@ -67,13 +67,13 @@ export const createUseCases = (repositories: Repositories) => {
       ),
     },
     lesson: {
-      getMyTeachingLessonsForPeriod: new GetMyTeachingLessonsForPeriod(
+      getMyTeachingLessonsForPeriod: new GetMyTeachingLessonsForPeriodUseCase(
         repositories.lessonRepository,
         repositories.lessonExceptionRepository,
         occurrenceGeneratorService,
         lessonMapper
       ),
-      createLesson: new CreateLesson(
+      createLesson: new CreateLessonUseCase(
         repositories.lessonRepository,
         lessonMapper
       ),
@@ -86,11 +86,11 @@ export const createUseCases = (repositories: Repositories) => {
         repositories.lessonRepository,
         logger
       ),
-      skipOccurrence: new SkipLessonOccurrence(
+      skipOccurrence: new SkipLessonOccurrenceUseCase(
         repositories.lessonRepository,
         repositories.lessonExceptionRepository
       ),
-      rescheduleOccurrence: new RescheduleLessonOccurrence(
+      rescheduleOccurrence: new RescheduleLessonOccurrenceUseCase(
         repositories.lessonRepository,
         repositories.lessonExceptionRepository
       ),

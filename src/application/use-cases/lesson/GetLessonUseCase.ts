@@ -13,7 +13,7 @@ export class GetLessonUseCase {
   ) {}
 
   async execute(
-    getLessonRequestDTO: GetLessonRequestDTO  
+    getLessonRequestDTO: GetLessonRequestDTO
   ): Promise<LessonWithUsersResponseDTO> {
     const lesson = await this.lessonRepository.findById(
       getLessonRequestDTO.lessonId

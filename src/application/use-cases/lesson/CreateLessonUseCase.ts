@@ -4,7 +4,7 @@ import { LessonMapperPort } from '@/application/ports/mappers/LessonMapperPort';
 import { Lesson } from '@/domain/models/Lesson';
 import { LessonRepository } from '@/domain/ports/repositories/LessonRepository';
 
-export class CreateLesson {
+export class CreateLessonUseCase {
   constructor(
     private lessonRepository: LessonRepository,
     private lessonMapper: LessonMapperPort

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { GetLessonUseCase } from '@/application/use-cases/lesson/GetLesson';
+import { GetLessonUseCase } from '@/application/use-cases/lesson/GetLessonUseCase';
 import { LessonRepository } from '@/domain/ports/repositories/LessonRepository';
 import { UserRepository } from '@/domain/ports/repositories/UserRepository';
 import { LessonMapperPort } from '@/application/ports/mappers/LessonMapperPort';
