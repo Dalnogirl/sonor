@@ -2,6 +2,10 @@ import { CreateLessonRequestDTO } from '@/application/dto/lesson/CreateLessonReq
 import { LessonResponseDTO } from '@/application/dto/lesson/LessonResponseDTO';
 import { LessonMapperPort } from '@/application/ports/mappers/LessonMapperPort';
 import { Lesson } from '@/domain/models/Lesson';
+import {
+  RecurringPattern,
+  DayOfWeek,
+} from '@/domain/models/RecurringPattern';
 import { LessonRepository } from '@/domain/ports/repositories/LessonRepository';
 
 export class CreateLessonUseCase {
@@ -11,6 +15,17 @@ export class CreateLessonUseCase {
   ) {}
 
   async execute(lessonData: CreateLessonRequestDTO): Promise<LessonResponseDTO> {
+    const recurringPattern = lessonData.recurringPattern
+      ? new RecurringPattern(
+          lessonData.recurringPattern.frequency,
+          lessonData.recurringPattern.interval,
+          (lessonData.recurringPattern.daysOfWeek as DayOfWeek[]) ?? [],
+          lessonData.recurringPattern.endDate ?? null,
+          lessonData.recurringPattern.occurrences ?? null,
+          lessonData.startDate
+        )
+      : undefined;
+
     const lesson = Lesson.create(
       lessonData.title,
       lessonData.teacherIds,
@@ -18,7 +33,7 @@ export class CreateLessonUseCase {
       lessonData.startDate,
       lessonData.endDate,
       lessonData.description,
-      lessonData.recurringPattern
+      recurringPattern
     );
 
     await this.lessonRepository.create(lesson);

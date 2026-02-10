@@ -310,8 +310,7 @@ describe('Lesson Validation Schemas', () => {
       }
     });
 
-    it('should accept optional recurringPattern', () => {
-      // Arrange
+    it('should accept valid recurringPattern', () => {
       const validInput = {
         title: 'Recurring Lesson',
         teacherIds: ['teacher-1'],
@@ -326,14 +325,66 @@ describe('Lesson Validation Schemas', () => {
         },
       };
 
-      // Act
       const result = createLessonRequestSchema.safeParse(validInput);
 
-      // Assert
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.recurringPattern).toBeDefined();
+        expect(result.data.recurringPattern!.frequency).toBe('WEEKLY');
+        expect(result.data.recurringPattern!.interval).toBe(1);
       }
+    });
+
+    it('should reject recurringPattern with invalid frequency', () => {
+      const invalidInput = {
+        title: 'Bad Frequency',
+        teacherIds: ['teacher-1'],
+        pupilIds: ['pupil-1'],
+        startDate: new Date('2025-11-10T10:00:00Z'),
+        endDate: new Date('2025-11-10T12:00:00Z'),
+        recurringPattern: {
+          frequency: 'BIWEEKLY',
+          interval: 1,
+        },
+      };
+
+      const result = createLessonRequestSchema.safeParse(invalidInput);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject recurringPattern with interval < 1', () => {
+      const invalidInput = {
+        title: 'Bad Interval',
+        teacherIds: ['teacher-1'],
+        pupilIds: ['pupil-1'],
+        startDate: new Date('2025-11-10T10:00:00Z'),
+        endDate: new Date('2025-11-10T12:00:00Z'),
+        recurringPattern: {
+          frequency: 'DAILY',
+          interval: 0,
+        },
+      };
+
+      const result = createLessonRequestSchema.safeParse(invalidInput);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject recurringPattern with invalid daysOfWeek values', () => {
+      const invalidInput = {
+        title: 'Bad Days',
+        teacherIds: ['teacher-1'],
+        pupilIds: ['pupil-1'],
+        startDate: new Date('2025-11-10T10:00:00Z'),
+        endDate: new Date('2025-11-10T12:00:00Z'),
+        recurringPattern: {
+          frequency: 'WEEKLY',
+          interval: 1,
+          daysOfWeek: [7],
+        },
+      };
+
+      const result = createLessonRequestSchema.safeParse(invalidInput);
+      expect(result.success).toBe(false);
     });
   });
 

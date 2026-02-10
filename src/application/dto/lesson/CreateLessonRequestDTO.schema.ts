@@ -1,21 +1,15 @@
 import { z } from 'zod';
+import { RecurringFrequency } from '@/domain/models/RecurringPattern';
 import { CreateLessonRequestDTO } from './CreateLessonRequestDTO';
 
-/**
- * Zod schema for CreateLessonRequestDTO
- *
- * **Purpose:** Ensures runtime validation matches compile-time DTO type
- *
- * **Pattern:** Schema-DTO alignment
- * - Schema defines validation rules
- * - TypeScript assertion ensures schema infers to DTO type
- * - Prevents schema drift from DTO definition
- *
- * **Applies:**
- * - Single Source of Truth: DTO defines contract, schema validates it
- * - Type Safety: Compile-time check that schema matches DTO
- * - Protected Variations: Changes to DTO force schema updates
- */
+const recurringPatternInputSchema = z.object({
+  frequency: z.nativeEnum(RecurringFrequency),
+  interval: z.number().int().min(1, 'Interval must be at least 1'),
+  daysOfWeek: z.array(z.number().int().min(0).max(6)).optional(),
+  endDate: z.coerce.date().optional(),
+  occurrences: z.number().int().min(1, 'Occurrences must be at least 1').optional(),
+});
+
 export const createLessonRequestSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().optional(),
@@ -23,7 +17,7 @@ export const createLessonRequestSchema = z.object({
   pupilIds: z.array(z.string()).min(1, 'At least one pupil required'),
   startDate: z.coerce.date(),
   endDate: z.coerce.date(),
-  recurringPattern: z.any().optional(),
+  recurringPattern: recurringPatternInputSchema.optional(),
 }) satisfies z.ZodType<CreateLessonRequestDTO>;
 
 /**
