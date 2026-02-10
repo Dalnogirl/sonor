@@ -1,5 +1,6 @@
 import { GetMyTeachingLessonsForPeriodRequestDTO } from '@/application/dto/lesson/GetMyTeachingLessonsForPeriodRequestDTO';
-import { Lesson } from '@/domain/models/Lesson';
+import { LessonResponseDTO } from '@/application/dto/lesson/LessonResponseDTO';
+import { LessonMapperPort } from '@/application/ports/mappers/LessonMapperPort';
 import { LessonException } from '@/domain/models/LessonException';
 import { LessonRepository } from '@/domain/ports/repositories/LessonRepository';
 import { LessonExceptionRepository } from '@/domain/ports/repositories/LessonExceptionRepository';
@@ -9,14 +10,13 @@ export class GetMyTeachingLessonsForPeriod {
   constructor(
     private repository: LessonRepository,
     private exceptionRepository: LessonExceptionRepository,
-    private occurrenceGenerator: OccurrenceGeneratorService
+    private occurrenceGenerator: OccurrenceGeneratorService,
+    private lessonMapper: LessonMapperPort
   ) {}
 
   async execute(
     lessonDTO: GetMyTeachingLessonsForPeriodRequestDTO & { userId: string }
-  ): Promise<Lesson[]> {
-    console.log('Getting lessons for DTO:', lessonDTO);
-
+  ): Promise<LessonResponseDTO[]> {
     const baseLessons = await this.repository.findMyTeachingLessonsForPeriod(
       lessonDTO.userId,
       lessonDTO.startDate,
@@ -35,7 +35,6 @@ export class GetMyTeachingLessonsForPeriod {
         lessonDTO.endDate
       );
 
-    console.log('Fetched exceptions:', exceptions);
     const lessonIdExceptionMap = this.groupExceptionsByLessonId(exceptions);
 
     const allOccurrences = baseLessons.flatMap((lesson) => {
@@ -48,9 +47,11 @@ export class GetMyTeachingLessonsForPeriod {
       );
     });
 
-    return allOccurrences.sort(
+    const sorted = allOccurrences.sort(
       (a, b) => a.startDate.getTime() - b.startDate.getTime()
     );
+
+    return sorted.map((lesson) => this.lessonMapper.toDTO(lesson));
   }
 
   private groupExceptionsByLessonId(

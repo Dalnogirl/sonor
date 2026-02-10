@@ -14,12 +14,10 @@ export class GetLessonUseCase {
 
   async execute(
     getLessonRequestDTO: GetLessonRequestDTO  
-  ): Promise<LessonWithUsersResponseDTO | null> {
+  ): Promise<LessonWithUsersResponseDTO> {
     const lesson = await this.lessonRepository.findById(
       getLessonRequestDTO.lessonId
     );
-
-    console.log('Fetched lesson:', lesson);
 
     if (!lesson) {
       throw new LessonNotFoundError(getLessonRequestDTO.lessonId);

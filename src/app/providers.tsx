@@ -4,6 +4,7 @@ import { trpc } from '@/lib/trpc';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink } from '@trpc/client';
 import { useState } from 'react';
+import { APP_CONFIG } from '@/config/constants';
 import { MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { SessionProvider } from 'next-auth/react';
@@ -22,7 +23,7 @@ export const Providers = ({
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: `${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/api/trpc`,
+          url: `${APP_CONFIG.url}/api/trpc`,
         }),
       ],
     })

@@ -6,7 +6,7 @@ export class User {
   public email: string;
   public readonly createdAt: Date;
   public updatedAt: Date;
-  public password: string;
+  private _password: string;
   public isEmailVerified: boolean;
 
   constructor(
@@ -23,8 +23,12 @@ export class User {
     this.email = email;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
-    this.password = password;
+    this._password = password;
     this.isEmailVerified = isEmailVerified;
+  }
+
+  get password(): string {
+    return this._password;
   }
 
   static validateEmail(email: string): boolean {

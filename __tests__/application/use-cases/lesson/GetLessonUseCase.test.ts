@@ -53,17 +53,17 @@ describe('GetLessonUseCase', () => {
       const teacher2Id = 'teacher-2';
       const pupil1Id = 'pupil-1';
 
-      const lesson = new Lesson(
-        lessonId,
-        'Introduction to TypeScript',
-        [teacher1Id, teacher2Id],
-        new Date('2025-11-01'),
-        new Date('2025-11-01'),
-        [pupil1Id],
-        new Date('2025-11-10T10:00:00Z'),
-        new Date('2025-11-10T12:00:00Z'),
-        'Learn TypeScript basics'
-      );
+      const lesson = new Lesson({
+        id: lessonId,
+        title: 'Introduction to TypeScript',
+        teacherIds: [teacher1Id, teacher2Id],
+        pupilIds: [pupil1Id],
+        startDate: new Date('2025-11-10T10:00:00Z'),
+        endDate: new Date('2025-11-10T12:00:00Z'),
+        createdAt: new Date('2025-11-01'),
+        updatedAt: new Date('2025-11-01'),
+        description: 'Learn TypeScript basics',
+      });
 
       const teachers = [
         User.createWithDefaults(teacher1Id, 'John Teacher', 'john@example.com', 'pass'),
@@ -113,16 +113,16 @@ describe('GetLessonUseCase', () => {
       const lessonId = 'lesson-456';
       const teacherId = 'teacher-1';
 
-      const lesson = new Lesson(
-        lessonId,
-        'Advanced TypeScript',
-        [teacherId],
-        new Date(),
-        new Date(),
-        [], // No pupils
-        new Date('2025-11-15T10:00:00Z'),
-        new Date('2025-11-15T12:00:00Z')
-      );
+      const lesson = new Lesson({
+        id: lessonId,
+        title: 'Advanced TypeScript',
+        teacherIds: [teacherId],
+        pupilIds: [], // No pupils
+        startDate: new Date('2025-11-15T10:00:00Z'),
+        endDate: new Date('2025-11-15T12:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
       const teachers = [
         User.createWithDefaults(teacherId, 'John Teacher', 'john@example.com', 'pass'),
@@ -180,16 +180,16 @@ describe('GetLessonUseCase', () => {
     it('should fetch users only after lesson is found (Controller pattern)', async () => {
       // Tests execution order - orchestration responsibility
       const lessonId = 'lesson-789';
-      const lesson = new Lesson(
-        lessonId,
-        'Test Lesson',
-        ['teacher-1'],
-        new Date(),
-        new Date(),
-        ['pupil-1'],
-        new Date('2025-11-20T10:00:00Z'),
-        new Date('2025-11-20T12:00:00Z')
-      );
+      const lesson = new Lesson({
+        id: lessonId,
+        title: 'Test Lesson',
+        teacherIds: ['teacher-1'],
+        pupilIds: ['pupil-1'],
+        startDate: new Date('2025-11-20T10:00:00Z'),
+        endDate: new Date('2025-11-20T12:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
       const callOrder: string[] = [];
 
@@ -224,16 +224,16 @@ describe('GetLessonUseCase', () => {
   describe('Integration with Multiple Aggregates', () => {
     it('should correctly pass teacher and pupil IDs to repository', async () => {
       // Tests aggregate boundary crossing
-      const lesson = new Lesson(
-        'lesson-1',
-        'Test',
-        ['t1', 't2', 't3'],
-        new Date(),
-        new Date(),
-        ['p1', 'p2'],
-        new Date('2025-11-20T10:00:00Z'),
-        new Date('2025-11-20T12:00:00Z')
-      );
+      const lesson = new Lesson({
+        id: 'lesson-1',
+        title: 'Test',
+        teacherIds: ['t1', 't2', 't3'],
+        pupilIds: ['p1', 'p2'],
+        startDate: new Date('2025-11-20T10:00:00Z'),
+        endDate: new Date('2025-11-20T12:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
       vi.mocked(mockLessonRepository.findById).mockResolvedValue(lesson);
       vi.mocked(mockUserRepository.findByIds).mockResolvedValue([]);

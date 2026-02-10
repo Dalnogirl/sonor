@@ -37,16 +37,16 @@ describe('DeleteLessonUseCase', () => {
     it('should soft-delete lesson when user is a teacher', async () => {
       // Arrange
       const lessonId = 'lesson-123';
-      const lesson = new Lesson(
-        lessonId,
-        'Math 101',
-        [teacherId],
-        new Date(),
-        new Date(),
-        ['pupil-1'],
-        new Date('2025-11-10T10:00:00Z'),
-        new Date('2025-11-10T11:00:00Z')
-      );
+      const lesson = new Lesson({
+        id: lessonId,
+        title: 'Math 101',
+        teacherIds: [teacherId],
+        pupilIds: ['pupil-1'],
+        startDate: new Date('2025-11-10T10:00:00Z'),
+        endDate: new Date('2025-11-10T11:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
       vi.mocked(mockLessonRepository.findById).mockResolvedValue(lesson);
       vi.mocked(mockLessonRepository.save).mockResolvedValue(undefined);
@@ -64,16 +64,16 @@ describe('DeleteLessonUseCase', () => {
     it('should log only after successful soft-delete', async () => {
       // Arrange
       const lessonId = 'lesson-456';
-      const lesson = new Lesson(
-        lessonId,
-        'Physics 101',
-        [teacherId],
-        new Date(),
-        new Date(),
-        [],
-        new Date('2025-11-15T10:00:00Z'),
-        new Date('2025-11-15T11:00:00Z')
-      );
+      const lesson = new Lesson({
+        id: lessonId,
+        title: 'Physics 101',
+        teacherIds: [teacherId],
+        pupilIds: [],
+        startDate: new Date('2025-11-15T10:00:00Z'),
+        endDate: new Date('2025-11-15T11:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
       vi.mocked(mockLessonRepository.findById).mockResolvedValue(lesson);
       vi.mocked(mockLessonRepository.save).mockResolvedValue(undefined);
@@ -91,16 +91,16 @@ describe('DeleteLessonUseCase', () => {
     it('should not log if save fails', async () => {
       // Arrange
       const lessonId = 'lesson-789';
-      const lesson = new Lesson(
-        lessonId,
-        'Chemistry 101',
-        [teacherId],
-        new Date(),
-        new Date(),
-        [],
-        new Date('2025-11-20T10:00:00Z'),
-        new Date('2025-11-20T11:00:00Z')
-      );
+      const lesson = new Lesson({
+        id: lessonId,
+        title: 'Chemistry 101',
+        teacherIds: [teacherId],
+        pupilIds: [],
+        startDate: new Date('2025-11-20T10:00:00Z'),
+        endDate: new Date('2025-11-20T11:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
       vi.mocked(mockLessonRepository.findById).mockResolvedValue(lesson);
       vi.mocked(mockLessonRepository.save).mockRejectedValue(
@@ -120,16 +120,16 @@ describe('DeleteLessonUseCase', () => {
     it('should throw UnauthorizedError when user is not a teacher', async () => {
       // Arrange
       const lessonId = 'lesson-123';
-      const lesson = new Lesson(
-        lessonId,
-        'Math 101',
-        [teacherId],
-        new Date(),
-        new Date(),
-        [otherUserId],
-        new Date('2025-11-10T10:00:00Z'),
-        new Date('2025-11-10T11:00:00Z')
-      );
+      const lesson = new Lesson({
+        id: lessonId,
+        title: 'Math 101',
+        teacherIds: [teacherId],
+        pupilIds: [otherUserId],
+        startDate: new Date('2025-11-10T10:00:00Z'),
+        endDate: new Date('2025-11-10T11:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
       vi.mocked(mockLessonRepository.findById).mockResolvedValue(lesson);
 
@@ -149,16 +149,16 @@ describe('DeleteLessonUseCase', () => {
       // Arrange
       const lessonId = 'lesson-multi';
       const secondTeacherId = 'teacher-2';
-      const lesson = new Lesson(
-        lessonId,
-        'Team Teaching',
-        [teacherId, secondTeacherId],
-        new Date(),
-        new Date(),
-        [],
-        new Date('2025-11-10T10:00:00Z'),
-        new Date('2025-11-10T11:00:00Z')
-      );
+      const lesson = new Lesson({
+        id: lessonId,
+        title: 'Team Teaching',
+        teacherIds: [teacherId, secondTeacherId],
+        pupilIds: [],
+        startDate: new Date('2025-11-10T10:00:00Z'),
+        endDate: new Date('2025-11-10T11:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
       vi.mocked(mockLessonRepository.findById).mockResolvedValue(lesson);
       vi.mocked(mockLessonRepository.save).mockResolvedValue(undefined);
@@ -194,16 +194,16 @@ describe('DeleteLessonUseCase', () => {
       const lessonId = 'lesson-order';
       const callOrder: string[] = [];
 
-      const lesson = new Lesson(
-        lessonId,
-        'Test Lesson',
-        [teacherId],
-        new Date(),
-        new Date(),
-        [],
-        new Date('2025-11-20T10:00:00Z'),
-        new Date('2025-11-20T11:00:00Z')
-      );
+      const lesson = new Lesson({
+        id: lessonId,
+        title: 'Test Lesson',
+        teacherIds: [teacherId],
+        pupilIds: [],
+        startDate: new Date('2025-11-20T10:00:00Z'),
+        endDate: new Date('2025-11-20T11:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
       vi.mocked(mockLessonRepository.findById).mockImplementation(async () => {
         callOrder.push('findById');

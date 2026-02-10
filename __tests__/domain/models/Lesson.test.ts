@@ -23,16 +23,16 @@ describe('Lesson', () => {
       const startDate = new Date('2025-11-05T10:00:00Z');
       const endDate = new Date('2025-11-05T12:00:00Z');
 
-      const lesson = new Lesson(
+      const lesson = new Lesson({
         id,
         title,
         teacherIds,
-        createdAt,
-        updatedAt,
         pupilIds,
         startDate,
-        endDate
-      );
+        endDate,
+        createdAt,
+        updatedAt,
+      });
 
       expect(lesson.id).toBe(id);
       expect(lesson.title).toBe(title);
@@ -51,16 +51,16 @@ describe('Lesson', () => {
 
       expect(
         () =>
-          new Lesson(
-            'lesson-1',
-            'No Teachers',
-            [],
-            now,
-            now,
-            [],
+          new Lesson({
+            id: 'lesson-1',
+            title: 'No Teachers',
+            teacherIds: [],
+            pupilIds: [],
             startDate,
-            endDate
-          )
+            endDate,
+            createdAt: now,
+            updatedAt: now,
+          })
       ).toThrow('Lesson must have at least one teacher');
     });
 
@@ -71,16 +71,16 @@ describe('Lesson', () => {
 
       expect(
         () =>
-          new Lesson(
-            'lesson-1',
-            'Invalid Time Range',
-            [teacher1Id],
-            now,
-            now,
-            [],
-            laterDate,
-            earlierDate
-          )
+          new Lesson({
+            id: 'lesson-1',
+            title: 'Invalid Time Range',
+            teacherIds: [teacher1Id],
+            pupilIds: [],
+            startDate: laterDate,
+            endDate: earlierDate,
+            createdAt: now,
+            updatedAt: now,
+          })
       ).toThrow('Lesson endDate must be after startDate');
     });
   });
@@ -119,16 +119,16 @@ describe('Lesson', () => {
       const startDate = new Date('2025-11-10T10:00:00Z');
       const endDate = new Date('2025-11-10T12:00:00Z');
 
-      const lesson = new Lesson(
-        'lesson-1',
-        'Test',
-        [teacher1Id, teacher2Id],
-        now,
-        now,
-        [],
+      const lesson = new Lesson({
+        id: 'lesson-1',
+        title: 'Test',
+        teacherIds: [teacher1Id, teacher2Id],
+        pupilIds: [],
         startDate,
-        endDate
-      );
+        endDate,
+        createdAt: now,
+        updatedAt: now,
+      });
 
       expect(lesson.hasTeacher(teacher1Id)).toBe(true);
       expect(lesson.hasTeacher(teacher2Id)).toBe(true);
@@ -139,16 +139,16 @@ describe('Lesson', () => {
       const startDate = new Date('2025-11-10T10:00:00Z');
       const endDate = new Date('2025-11-10T12:00:00Z');
 
-      const lesson = new Lesson(
-        'lesson-1',
-        'Test',
-        [teacher1Id],
-        now,
-        now,
-        [],
+      const lesson = new Lesson({
+        id: 'lesson-1',
+        title: 'Test',
+        teacherIds: [teacher1Id],
+        pupilIds: [],
         startDate,
-        endDate
-      );
+        endDate,
+        createdAt: now,
+        updatedAt: now,
+      });
 
       expect(lesson.hasTeacher(teacher2Id)).toBe(false);
     });
@@ -160,16 +160,16 @@ describe('Lesson', () => {
       const startDate = new Date('2025-11-10T10:00:00Z');
       const endDate = new Date('2025-11-10T12:00:00Z');
 
-      const lesson = new Lesson(
-        'lesson-1',
-        'Test',
-        [teacher1Id],
-        now,
-        now,
-        [pupil1Id, pupil2Id],
+      const lesson = new Lesson({
+        id: 'lesson-1',
+        title: 'Test',
+        teacherIds: [teacher1Id],
+        pupilIds: [pupil1Id, pupil2Id],
         startDate,
-        endDate
-      );
+        endDate,
+        createdAt: now,
+        updatedAt: now,
+      });
 
       expect(lesson.hasPupil(pupil1Id)).toBe(true);
       expect(lesson.hasPupil(pupil2Id)).toBe(true);
@@ -180,16 +180,16 @@ describe('Lesson', () => {
       const startDate = new Date('2025-11-10T10:00:00Z');
       const endDate = new Date('2025-11-10T12:00:00Z');
 
-      const lesson = new Lesson(
-        'lesson-1',
-        'Test',
-        [teacher1Id],
-        now,
-        now,
-        [pupil1Id],
+      const lesson = new Lesson({
+        id: 'lesson-1',
+        title: 'Test',
+        teacherIds: [teacher1Id],
+        pupilIds: [pupil1Id],
         startDate,
-        endDate
-      );
+        endDate,
+        createdAt: now,
+        updatedAt: now,
+      });
 
       expect(lesson.hasPupil(pupil2Id)).toBe(false);
     });

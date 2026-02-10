@@ -157,18 +157,18 @@ export class OccurrenceGeneratorService {
       duration
     );
 
-    return new Lesson(
-      baseLesson.id,
-      baseLesson.title,
-      baseLesson.teacherIds,
-      baseLesson.createdAt,
-      baseLesson.updatedAt,
-      baseLesson.pupilIds,
-      occurrenceDate,
-      occurrenceEnd,
-      baseLesson.description,
-      baseLesson.recurringPattern
-    );
+    return new Lesson({
+      id: baseLesson.id,
+      title: baseLesson.title,
+      teacherIds: [...baseLesson.teacherIds],
+      pupilIds: [...baseLesson.pupilIds],
+      startDate: occurrenceDate,
+      endDate: occurrenceEnd,
+      createdAt: baseLesson.createdAt,
+      updatedAt: baseLesson.updatedAt,
+      description: baseLesson.description,
+      recurringPattern: baseLesson.recurringPattern,
+    });
   }
 
   private createModifiedLesson(
@@ -186,17 +186,17 @@ export class OccurrenceGeneratorService {
       occurrenceDate
     );
 
-    return new Lesson(
-      baseOccurrence.id,
-      modifications.title ?? baseOccurrence.title,
-      modifications.teacherIds ?? baseOccurrence.teacherIds,
-      baseOccurrence.createdAt,
-      baseOccurrence.updatedAt,
-      modifications.pupilIds ?? baseOccurrence.pupilIds,
-      modifications.startDate ?? baseOccurrence.startDate,
-      modifications.endDate ?? baseOccurrence.endDate,
-      modifications.description ?? baseOccurrence.description,
-      baseOccurrence.recurringPattern
-    );
+    return new Lesson({
+      id: baseOccurrence.id,
+      title: modifications.title ?? baseOccurrence.title,
+      teacherIds: [...(modifications.teacherIds ?? baseOccurrence.teacherIds)],
+      pupilIds: [...(modifications.pupilIds ?? baseOccurrence.pupilIds)],
+      startDate: modifications.startDate ?? baseOccurrence.startDate,
+      endDate: modifications.endDate ?? baseOccurrence.endDate,
+      createdAt: baseOccurrence.createdAt,
+      updatedAt: baseOccurrence.updatedAt,
+      description: modifications.description ?? baseOccurrence.description,
+      recurringPattern: baseOccurrence.recurringPattern,
+    });
   }
 }

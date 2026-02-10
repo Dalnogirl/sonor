@@ -1,4 +1,6 @@
-export class Logger {
+import { Logger as LoggerPort } from '@/domain/ports/services/Logger';
+
+export class ConsoleLogger implements LoggerPort {
   info(message: string): void {
     console.log(`${message}`);
   }

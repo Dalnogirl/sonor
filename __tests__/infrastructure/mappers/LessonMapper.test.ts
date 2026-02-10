@@ -28,17 +28,17 @@ describe('LessonMapper', () => {
   describe('toDTO', () => {
     it('should map Lesson entity to LessonResponseDTO with IDs only', () => {
       // Arrange
-      const lesson = new Lesson(
-        'lesson-123',
-        'Introduction to TypeScript',
-        ['teacher-1', 'teacher-2'],
-        new Date('2025-11-01T10:00:00Z'),
-        new Date('2025-11-02T10:00:00Z'),
-        ['pupil-1', 'pupil-2', 'pupil-3'],
-        new Date('2025-11-10T10:00:00Z'),
-        new Date('2025-11-10T12:00:00Z'),
-        'Learn the basics of TypeScript'
-      );
+      const lesson = new Lesson({
+        id: 'lesson-123',
+        title: 'Introduction to TypeScript',
+        teacherIds: ['teacher-1', 'teacher-2'],
+        pupilIds: ['pupil-1', 'pupil-2', 'pupil-3'],
+        startDate: new Date('2025-11-10T10:00:00Z'),
+        endDate: new Date('2025-11-10T12:00:00Z'),
+        createdAt: new Date('2025-11-01T10:00:00Z'),
+        updatedAt: new Date('2025-11-02T10:00:00Z'),
+        description: 'Learn the basics of TypeScript',
+      });
 
       // Act
       const dto = lessonMapper.toDTO(lesson);
@@ -58,17 +58,17 @@ describe('LessonMapper', () => {
 
     it('should handle lessons without description', () => {
       // Arrange
-      const lesson = new Lesson(
-        'lesson-456',
-        'Quick Lesson',
-        ['teacher-1'],
-        new Date(),
-        new Date(),
-        [],
-        new Date('2025-11-15T10:00:00Z'),
-        new Date('2025-11-15T11:00:00Z')
+      const lesson = new Lesson({
+        id: 'lesson-456',
+        title: 'Quick Lesson',
+        teacherIds: ['teacher-1'],
+        pupilIds: [],
+        startDate: new Date('2025-11-15T10:00:00Z'),
+        endDate: new Date('2025-11-15T11:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
         // No description
-      );
+      });
 
       // Act
       const dto = lessonMapper.toDTO(lesson);
@@ -87,18 +87,18 @@ describe('LessonMapper', () => {
         null
       );
 
-      const lesson = new Lesson(
-        'lesson-789',
-        'Recurring Lesson',
-        ['teacher-1'],
-        new Date(),
-        new Date(),
-        ['pupil-1'],
-        new Date('2025-11-10T10:00:00Z'),
-        new Date('2025-11-10T11:00:00Z'),
-        'Weekly recurring lesson',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson-789',
+        title: 'Recurring Lesson',
+        teacherIds: ['teacher-1'],
+        pupilIds: ['pupil-1'],
+        startDate: new Date('2025-11-10T10:00:00Z'),
+        endDate: new Date('2025-11-10T11:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Weekly recurring lesson',
+        recurringPattern,
+      });
 
       // Act
       const dto = lessonMapper.toDTO(lesson);
@@ -111,17 +111,17 @@ describe('LessonMapper', () => {
   describe('toDTOWithUsers', () => {
     it('should map lesson with full teacher and pupil objects', () => {
       // Arrange
-      const lesson = new Lesson(
-        'lesson-123',
-        'TypeScript Advanced',
-        ['teacher-1', 'teacher-2'],
-        new Date('2025-11-01'),
-        new Date('2025-11-01'),
-        ['pupil-1'],
-        new Date('2025-11-10T10:00:00Z'),
-        new Date('2025-11-10T12:00:00Z'),
-        'Advanced TypeScript patterns'
-      );
+      const lesson = new Lesson({
+        id: 'lesson-123',
+        title: 'TypeScript Advanced',
+        teacherIds: ['teacher-1', 'teacher-2'],
+        pupilIds: ['pupil-1'],
+        startDate: new Date('2025-11-10T10:00:00Z'),
+        endDate: new Date('2025-11-10T12:00:00Z'),
+        createdAt: new Date('2025-11-01'),
+        updatedAt: new Date('2025-11-01'),
+        description: 'Advanced TypeScript patterns',
+      });
 
       const teachers = [
         User.createWithDefaults('teacher-1', 'John Doe', 'john@example.com', 'pass'),
@@ -163,16 +163,16 @@ describe('LessonMapper', () => {
 
     it('should handle empty pupils array', () => {
       // Arrange
-      const lesson = new Lesson(
-        'lesson-456',
-        'No Pupils Lesson',
-        ['teacher-1'],
-        new Date(),
-        new Date(),
-        [], // No pupils
-        new Date('2025-11-15T10:00:00Z'),
-        new Date('2025-11-15T12:00:00Z')
-      );
+      const lesson = new Lesson({
+        id: 'lesson-456',
+        title: 'No Pupils Lesson',
+        teacherIds: ['teacher-1'],
+        pupilIds: [], // No pupils
+        startDate: new Date('2025-11-15T10:00:00Z'),
+        endDate: new Date('2025-11-15T12:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
       const teachers = [
         User.createWithDefaults('teacher-1', 'John Teacher', 'john@example.com', 'pass'),
@@ -191,16 +191,16 @@ describe('LessonMapper', () => {
 
     it('should handle multiple teachers and pupils', () => {
       // Arrange
-      const lesson = new Lesson(
-        'lesson-789',
-        'Large Class',
-        ['t1', 't2', 't3'],
-        new Date(),
-        new Date(),
-        ['p1', 'p2', 'p3', 'p4', 'p5'],
-        new Date('2025-11-20T10:00:00Z'),
-        new Date('2025-11-20T12:00:00Z')
-      );
+      const lesson = new Lesson({
+        id: 'lesson-789',
+        title: 'Large Class',
+        teacherIds: ['t1', 't2', 't3'],
+        pupilIds: ['p1', 'p2', 'p3', 'p4', 'p5'],
+        startDate: new Date('2025-11-20T10:00:00Z'),
+        endDate: new Date('2025-11-20T12:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
       const teachers = [
         User.createWithDefaults('t1', 'Teacher 1', 't1@example.com', 'pass'),
@@ -229,16 +229,16 @@ describe('LessonMapper', () => {
       // Tests that LessonMapper delegates user mapping to UserMapper
       // (Single Responsibility + Indirection patterns)
 
-      const lesson = new Lesson(
-        'lesson-1',
-        'Test',
-        ['t1'],
-        new Date(),
-        new Date(),
-        ['p1'],
-        new Date('2025-11-20T10:00:00Z'),
-        new Date('2025-11-20T11:00:00Z')
-      );
+      const lesson = new Lesson({
+        id: 'lesson-1',
+        title: 'Test',
+        teacherIds: ['t1'],
+        pupilIds: ['p1'],
+        startDate: new Date('2025-11-20T10:00:00Z'),
+        endDate: new Date('2025-11-20T11:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
       const teacher = User.createWithDefaults('t1', 'Teacher', 't@example.com', 'pass');
       const pupil = User.createWithDefaults('p1', 'Pupil', 'p@example.com', 'pass');
@@ -262,18 +262,18 @@ describe('LessonMapper', () => {
         null
       );
 
-      const lesson = new Lesson(
-        'lesson-recurring',
-        'Daily Lesson',
-        ['teacher-1'],
-        new Date(),
-        new Date(),
-        [],
-        new Date('2025-11-10T10:00:00Z'),
-        new Date('2025-11-10T11:00:00Z'),
-        'Recurring every 2 days',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson-recurring',
+        title: 'Daily Lesson',
+        teacherIds: ['teacher-1'],
+        pupilIds: [],
+        startDate: new Date('2025-11-10T10:00:00Z'),
+        endDate: new Date('2025-11-10T11:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Recurring every 2 days',
+        recurringPattern,
+      });
 
       const teachers = [
         User.createWithDefaults('teacher-1', 'John', 'john@example.com', 'pass'),
@@ -296,16 +296,16 @@ describe('LessonMapper', () => {
   describe('Mapper Responsibilities', () => {
     it('should NOT include sensitive data in DTOs', () => {
       // Security test - ensures mapper filters sensitive data
-      const lesson = new Lesson(
-        'lesson-1',
-        'Test Lesson',
-        ['teacher-1'],
-        new Date(),
-        new Date(),
-        ['pupil-1'],
-        new Date('2025-11-20T10:00:00Z'),
-        new Date('2025-11-20T11:00:00Z')
-      );
+      const lesson = new Lesson({
+        id: 'lesson-1',
+        title: 'Test Lesson',
+        teacherIds: ['teacher-1'],
+        pupilIds: ['pupil-1'],
+        startDate: new Date('2025-11-20T10:00:00Z'),
+        endDate: new Date('2025-11-20T11:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
       const teacher = User.createWithDefaults('teacher-1', 'John', 'john@example.com', 'hashed-password-secret');
       const pupil = User.createWithDefaults('pupil-1', 'Alice', 'alice@example.com', 'hashed-password-secret');
@@ -321,16 +321,16 @@ describe('LessonMapper', () => {
 
     it('should NOT include timestamps (createdAt, updatedAt) in DTO', () => {
       // Design decision: Response DTOs don't expose internal timestamps
-      const lesson = new Lesson(
-        'lesson-1',
-        'Test',
-        ['t1'],
-        new Date('2025-01-01'),
-        new Date('2025-01-15'),
-        [],
-        new Date('2025-11-20T10:00:00Z'),
-        new Date('2025-11-20T11:00:00Z')
-      );
+      const lesson = new Lesson({
+        id: 'lesson-1',
+        title: 'Test',
+        teacherIds: ['t1'],
+        pupilIds: [],
+        startDate: new Date('2025-11-20T10:00:00Z'),
+        endDate: new Date('2025-11-20T11:00:00Z'),
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-15'),
+      });
 
       const dto = lessonMapper.toDTO(lesson);
 

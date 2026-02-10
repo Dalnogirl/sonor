@@ -1,37 +1,33 @@
 import { RecurringPattern } from './RecurringPattern';
+import {
+  InvalidLessonExceptionError,
+} from '@/domain/errors/LessonErrors';
+
+export interface LessonProps {
+  id: string;
+  title: string;
+  teacherIds: string[];
+  pupilIds: string[];
+  startDate: Date;
+  endDate: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  description?: string;
+  recurringPattern?: RecurringPattern;
+  deletedAt?: Date;
+}
 
 /**
  * Lesson Domain Entity
  *
  * **Design Decision: IDs for User References**
- * This entity stores user IDs (teacherIds, pupilIds) rather than full User entities.
- *
- * **Rationale:**
- * 1. **Simplicity** - No complex hydration logic needed in repositories
- * 2. **Performance** - Avoid unnecessary joins when user details aren't needed
- * 3. **Flexibility** - Load user details only when required (in specific use cases)
- * 4. **Database Reality** - Foreign keys store IDs, not entire objects
- * 5. **Pragmatic DDD** - Most successful apps use this approach
- *
- * **When you need full user data:**
- * Hydrate in the use case layer:
- * ```typescript
- * const lesson = await lessonRepo.findById(id);
- * const teachers = await userRepo.findByIds(lesson.teacherIds);
- * return { lesson, teachers }; // Compose in use case
- * ```
- *
- * **Trade-off:**
- * - ✅ Simpler code, better performance
- * - ⚠️ Can't access user.name directly from lesson.teachers
- * - Solution: Load users explicitly when needed
+ * Stores user IDs (teacherIds, pupilIds) rather than full User entities.
+ * Hydrate in use case layer when full user data needed.
  */
 export class Lesson {
-  public id: string;
+  public readonly id: string;
   public title: string;
-  public teacherIds: string[];
-  public pupilIds: string[];
-  public createdAt: Date;
+  public readonly createdAt: Date;
   public updatedAt: Date;
   public startDate: Date;
   public endDate: Date;
@@ -39,38 +35,36 @@ export class Lesson {
   public recurringPattern?: RecurringPattern;
   public deletedAt?: Date;
 
-  constructor(
-    id: string,
-    title: string,
-    teacherIds: string[],
-    createdAt: Date,
-    updatedAt: Date,
-    pupilIds: string[],
-    startDate: Date,
-    endDate: Date,
-    description?: string,
-    recurringPattern?: RecurringPattern,
-    deletedAt?: Date
-  ) {
-    // Validate business rules
-    if (teacherIds.length === 0) {
-      throw new Error('Lesson must have at least one teacher');
+  private _teacherIds: string[];
+  private _pupilIds: string[];
+
+  constructor(props: LessonProps) {
+    if (props.teacherIds.length === 0) {
+      throw new InvalidLessonExceptionError('Lesson must have at least one teacher');
     }
-    if (startDate >= endDate) {
-      throw new Error('Lesson endDate must be after startDate');
+    if (props.startDate >= props.endDate) {
+      throw new InvalidLessonExceptionError('Lesson endDate must be after startDate');
     }
 
-    this.id = id;
-    this.title = title;
-    this.teacherIds = teacherIds;
-    this.pupilIds = pupilIds;
-    this.startDate = startDate;
-    this.endDate = endDate;
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
-    this.description = description;
-    this.recurringPattern = recurringPattern;
-    this.deletedAt = deletedAt;
+    this.id = props.id;
+    this.title = props.title;
+    this._teacherIds = [...props.teacherIds];
+    this._pupilIds = [...props.pupilIds];
+    this.startDate = props.startDate;
+    this.endDate = props.endDate;
+    this.createdAt = props.createdAt;
+    this.updatedAt = props.updatedAt;
+    this.description = props.description;
+    this.recurringPattern = props.recurringPattern;
+    this.deletedAt = props.deletedAt;
+  }
+
+  get teacherIds(): readonly string[] {
+    return this._teacherIds;
+  }
+
+  get pupilIds(): readonly string[] {
+    return this._pupilIds;
   }
 
   static create(
@@ -83,26 +77,26 @@ export class Lesson {
     recurringPattern?: RecurringPattern
   ): Lesson {
     const now = new Date();
-    return new Lesson(
-      crypto.randomUUID(),
+    return new Lesson({
+      id: crypto.randomUUID(),
       title,
       teacherIds,
-      now,
-      now,
       pupilIds,
       startDate,
       endDate,
+      createdAt: now,
+      updatedAt: now,
       description,
-      recurringPattern
-    );
+      recurringPattern,
+    });
   }
 
   hasTeacher(teacherId: string): boolean {
-    return this.teacherIds.includes(teacherId);
+    return this._teacherIds.includes(teacherId);
   }
 
   hasPupil(pupilId: string): boolean {
-    return this.pupilIds.includes(pupilId);
+    return this._pupilIds.includes(pupilId);
   }
 
   get isPast(): boolean {
@@ -124,7 +118,7 @@ export class Lesson {
 
   delete(): void {
     if (this.deletedAt) {
-      throw new Error('Lesson is already deleted');
+      throw new InvalidLessonExceptionError('Lesson is already deleted');
     }
     this.deletedAt = new Date();
     this.updatedAt = new Date();
@@ -132,7 +126,7 @@ export class Lesson {
 
   restore(): void {
     if (!this.deletedAt) {
-      throw new Error('Lesson is not deleted');
+      throw new InvalidLessonExceptionError('Lesson is not deleted');
     }
     this.deletedAt = undefined;
     this.updatedAt = new Date();

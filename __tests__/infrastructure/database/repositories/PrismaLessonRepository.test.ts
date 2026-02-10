@@ -259,16 +259,16 @@ describe('PrismaLessonRepository Integration Tests', () => {
     });
 
     it('should throw when saving non-existent lesson', async () => {
-      const fakeLesson = new Lesson(
-        'non-existent-id',
-        'Fake',
-        [testTeacherId],
-        new Date(),
-        new Date(),
-        [],
-        new Date('2025-11-10T10:00:00Z'),
-        new Date('2025-11-10T11:00:00Z')
-      );
+      const fakeLesson = new Lesson({
+        id: 'non-existent-id',
+        title: 'Fake',
+        teacherIds: [testTeacherId],
+        pupilIds: [],
+        startDate: new Date('2025-11-10T10:00:00Z'),
+        endDate: new Date('2025-11-10T11:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
       await expect(repository.save(fakeLesson)).rejects.toThrow();
     });

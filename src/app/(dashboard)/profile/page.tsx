@@ -9,6 +9,7 @@ import {
 } from '@mantine/core';
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
+import { getInitials } from '@/adapters/ui/utils/string-utils';
 
 export default async function ProfilePage() {
   const session = await getServerSession();
@@ -19,15 +20,6 @@ export default async function ProfilePage() {
 
   const { user } = session;
   const displayName = user.name || user.email || 'User';
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
 
   return (
     <Container size="md">

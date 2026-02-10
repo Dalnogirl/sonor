@@ -4,6 +4,7 @@ import { Group, Avatar, Text, Menu, UnstyledButton, rem } from '@mantine/core';
 import { IconLogout, IconUser, IconChevronDown } from '@tabler/icons-react';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { getInitials } from '@/adapters/ui/utils/string-utils';
 
 export function UserInfo() {
   const { data: session, status } = useSession();
@@ -27,16 +28,6 @@ export function UserInfo() {
   const handleProfile = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     router.push('/profile' as any);
-  };
-
-  // Get initials from name for avatar fallback
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
   };
 
   const displayName = user.name || user.email || 'User';

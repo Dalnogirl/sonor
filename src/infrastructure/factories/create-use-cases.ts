@@ -1,6 +1,7 @@
 import { ListUsersUseCase } from '@/application/use-cases/user/ListUsersUseCase';
 import { RegisterUseCase } from '@/application/use-cases/auth/RegisterUseCase';
 import { LoginUseCase } from '@/application/use-cases/auth/LoginUseCase';
+import { GetCurrentUserUseCase } from '@/application/use-cases/auth/GetCurrentUserUseCase';
 import { BcryptPasswordHasher } from '@/infrastructure/services/BcryptPasswordHasher';
 import { DayjsDateService } from '@/infrastructure/services/DayjsDateService';
 import { RecurrenceService } from '@/domain/services/RecurrenceService';
@@ -14,7 +15,7 @@ import { SkipLessonOccurrence } from '@/application/use-cases/lesson/SkipLessonO
 import { RescheduleLessonOccurrence } from '@/application/use-cases/lesson/RescheduleLessonOccurrence';
 import { LessonMapper } from '../mappers/LessonMapper';
 import { DeleteLessonUseCase } from '@/application/use-cases/lesson/DeleteLesson';
-import { Logger } from '../services/Logger';
+import { ConsoleLogger } from '../services/Logger';
 
 /**
  * Dependency Injection Factory
@@ -32,7 +33,7 @@ export const createUseCases = (repositories: Repositories) => {
   const dateService = new DayjsDateService();
   const userMapper = new UserMapper();
   const lessonMapper = new LessonMapper(userMapper);
-  const logger = new Logger();
+  const logger = new ConsoleLogger();
 
   // Domain services
   const recurrenceService = new RecurrenceService(dateService);
@@ -60,14 +61,22 @@ export const createUseCases = (repositories: Repositories) => {
         passwordHasher,
         userMapper
       ),
+      getCurrentUser: new GetCurrentUserUseCase(
+        repositories.userRepository,
+        userMapper
+      ),
     },
     lesson: {
       getMyTeachingLessonsForPeriod: new GetMyTeachingLessonsForPeriod(
         repositories.lessonRepository,
         repositories.lessonExceptionRepository,
-        occurrenceGeneratorService
+        occurrenceGeneratorService,
+        lessonMapper
       ),
-      createLesson: new CreateLesson(repositories.lessonRepository),
+      createLesson: new CreateLesson(
+        repositories.lessonRepository,
+        lessonMapper
+      ),
       getLesson: new GetLessonUseCase(
         repositories.lessonRepository,
         repositories.userRepository,

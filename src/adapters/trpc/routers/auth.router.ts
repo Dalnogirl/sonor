@@ -2,16 +2,9 @@ import { z } from 'zod';
 import { router } from '@/adapters/trpc/init';
 import { publicProcedure } from '@/adapters/trpc/procedures/public';
 import { protectedProcedure } from '@/adapters/trpc/procedures/protected';
+import { mapDomainError } from '../utils/mapDomainError';
 
 export const authRouter = router({
-  /**
-   * Register a new user
-   * Public endpoint - anyone can register
-   *
-   * Validation:
-   * - Format validation: Zod schema (adapter layer)
-   * - Business validation: Use case (application layer)
-   */
   register: publicProcedure
     .input(
       z.object({
@@ -21,41 +14,24 @@ export const authRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Input IS the DTO - no mapping needed!
-      // Use case returns safe UserResponseDTO
-      return ctx.useCases.auth.register.execute(input);
+      try {
+        return await ctx.useCases.auth.register.execute(input);
+      } catch (error) {
+        throw mapDomainError(error);
+      }
     }),
 
-  /**
-   * Get current session
-   * Public endpoint - returns null if not logged in
-   */
   getSession: publicProcedure.query(async ({ ctx }) => {
     return ctx.session;
   }),
 
-  /**
-   * Get current user (protected)
-   * Requires authentication
-   */
   me: protectedProcedure.query(async ({ ctx }) => {
-    // Find user by ID from session
-    const user = await ctx.repositories.userRepository.findById(
-      ctx.session.user.id
-    );
-
-    if (!user) {
-      throw new Error('User not found');
+    try {
+      return await ctx.useCases.auth.getCurrentUser.execute(
+        ctx.session.user.id
+      );
+    } catch (error) {
+      throw mapDomainError(error);
     }
-
-    // Map domain entity to response DTO
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      isEmailVerified: user.isEmailVerified,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
   }),
 });

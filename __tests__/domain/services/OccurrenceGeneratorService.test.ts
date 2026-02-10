@@ -70,18 +70,18 @@ describe('OccurrenceGeneratorService', () => {
   describe('Recurring Lessons - Daily', () => {
     it('should generate daily occurrences within period', () => {
       const recurringPattern = RecurringPattern.daily(1);
-      const lesson = new Lesson(
-        'lesson1',
-        'Daily Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2025-01-01T10:00:00'),
-        new Date('2025-01-01T11:00:00'),
-        'Daily lesson',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Daily Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2025-01-01T10:00:00'),
+        endDate: new Date('2025-01-01T11:00:00'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Daily lesson',
+        recurringPattern,
+      });
 
       const periodStart = new Date('2025-01-01');
       const periodEnd = new Date('2025-01-05');
@@ -100,18 +100,18 @@ describe('OccurrenceGeneratorService', () => {
 
     it('should preserve lesson duration for each occurrence', () => {
       const recurringPattern = RecurringPattern.daily(1);
-      const lesson = new Lesson(
-        'lesson1',
-        'Daily Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2025-01-01T10:00:00'),
-        new Date('2025-01-01T11:30:00'),
-        'Daily lesson',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Daily Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2025-01-01T10:00:00'),
+        endDate: new Date('2025-01-01T11:30:00'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Daily lesson',
+        recurringPattern,
+      });
 
       const periodStart = new Date('2025-01-01');
       const periodEnd = new Date('2025-01-03');
@@ -140,18 +140,18 @@ describe('OccurrenceGeneratorService', () => {
         DayOfWeek.MONDAY,
         DayOfWeek.WEDNESDAY,
       ]);
-      const lesson = new Lesson(
-        'lesson1',
-        'Weekly Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2025-01-06T10:00:00'),
-        new Date('2025-01-06T11:00:00'),
-        'Weekly lesson',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Weekly Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2025-01-06T10:00:00'),
+        endDate: new Date('2025-01-06T11:00:00'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Weekly lesson',
+        recurringPattern,
+      });
 
       const periodStart = new Date('2025-01-06');
       const periodEnd = new Date('2025-01-19');
@@ -174,18 +174,18 @@ describe('OccurrenceGeneratorService', () => {
   describe('Exceptions - SKIP', () => {
     it('should skip occurrences with SKIP exception', () => {
       const recurringPattern = RecurringPattern.daily(1);
-      const lesson = new Lesson(
-        'lesson1',
-        'Daily Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2025-01-01T10:00:00'),
-        new Date('2025-01-01T11:00:00'),
-        'Daily lesson',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Daily Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2025-01-01T10:00:00'),
+        endDate: new Date('2025-01-01T11:00:00'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Daily lesson',
+        recurringPattern,
+      });
 
       const skipException = LessonException.skip(
         'lesson1',
@@ -211,18 +211,18 @@ describe('OccurrenceGeneratorService', () => {
 
     it('should handle multiple SKIP exceptions', () => {
       const recurringPattern = RecurringPattern.daily(1);
-      const lesson = new Lesson(
-        'lesson1',
-        'Daily Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2025-01-01T10:00:00'),
-        new Date('2025-01-01T11:00:00'),
-        'Daily lesson',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Daily Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2025-01-01T10:00:00'),
+        endDate: new Date('2025-01-01T11:00:00'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Daily lesson',
+        recurringPattern,
+      });
 
       const exceptions = [
         LessonException.skip('lesson1', new Date('2025-01-02T10:00:00')),
@@ -250,18 +250,18 @@ describe('OccurrenceGeneratorService', () => {
   describe('Exceptions - RESCHEDULE', () => {
     it('should reschedule occurrence to new date', () => {
       const recurringPattern = RecurringPattern.daily(1);
-      const lesson = new Lesson(
-        'lesson1',
-        'Daily Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2025-01-01T10:00:00'),
-        new Date('2025-01-01T11:00:00'),
-        'Daily lesson',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Daily Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2025-01-01T10:00:00'),
+        endDate: new Date('2025-01-01T11:00:00'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Daily lesson',
+        recurringPattern,
+      });
 
       const rescheduleException = LessonException.reschedule(
         'lesson1',
@@ -290,18 +290,18 @@ describe('OccurrenceGeneratorService', () => {
 
     it('should preserve duration when rescheduling', () => {
       const recurringPattern = RecurringPattern.daily(1);
-      const lesson = new Lesson(
-        'lesson1',
-        'Daily Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2025-01-01T10:00:00'),
-        new Date('2025-01-01T11:30:00'),
-        'Daily lesson',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Daily Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2025-01-01T10:00:00'),
+        endDate: new Date('2025-01-01T11:30:00'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Daily lesson',
+        recurringPattern,
+      });
 
       const rescheduleException = LessonException.reschedule(
         'lesson1',
@@ -335,18 +335,18 @@ describe('OccurrenceGeneratorService', () => {
   describe('Exceptions - MODIFY', () => {
     it('should apply modifications to specific occurrence', () => {
       const recurringPattern = RecurringPattern.daily(1);
-      const lesson = new Lesson(
-        'lesson1',
-        'Daily Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2025-01-01T10:00:00'),
-        new Date('2025-01-01T11:00:00'),
-        'Daily lesson',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Daily Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2025-01-01T10:00:00'),
+        endDate: new Date('2025-01-01T11:00:00'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Daily lesson',
+        recurringPattern,
+      });
 
       const modifyException = LessonException.modify(
         'lesson1',
@@ -384,18 +384,18 @@ describe('OccurrenceGeneratorService', () => {
 
     it('should allow modifying time for specific occurrence', () => {
       const recurringPattern = RecurringPattern.daily(1);
-      const lesson = new Lesson(
-        'lesson1',
-        'Daily Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2025-01-01T10:00:00'),
-        new Date('2025-01-01T11:00:00'),
-        'Daily lesson',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Daily Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2025-01-01T10:00:00'),
+        endDate: new Date('2025-01-01T11:00:00'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Daily lesson',
+        recurringPattern,
+      });
 
       const modifyException = LessonException.modify(
         'lesson1',
@@ -428,18 +428,18 @@ describe('OccurrenceGeneratorService', () => {
   describe('Boundary Conditions - Period vs Lesson Start Date', () => {
     it('should only generate occurrences within period when periodStart > lesson.startDate (daily)', () => {
       const recurringPattern = RecurringPattern.daily(1);
-      const lesson = new Lesson(
-        'lesson1',
-        'Daily Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2024-10-01T10:00:00Z'), // Lesson started 3 months ago
-        new Date('2024-10-01T11:00:00Z'),
-        'Daily lesson',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Daily Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2024-10-01T10:00:00Z'), // Lesson started 3 months ago
+        endDate: new Date('2024-10-01T11:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Daily lesson',
+        recurringPattern,
+      });
 
       // Request occurrences for only 3 days in January (not from October!)
       const periodStart = new Date('2025-01-15T00:00:00Z');
@@ -473,18 +473,18 @@ describe('OccurrenceGeneratorService', () => {
         DayOfWeek.MONDAY,
         DayOfWeek.FRIDAY,
       ]);
-      const lesson = new Lesson(
-        'lesson1',
-        'Weekly Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2024-09-02T10:00:00'), // Started 4 months ago (Monday)
-        new Date('2024-09-02T11:00:00'),
-        'Weekly lesson',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Weekly Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2024-09-02T10:00:00'), // Started 4 months ago (Monday)
+        endDate: new Date('2024-09-02T11:00:00'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Weekly lesson',
+        recurringPattern,
+      });
 
       // Request occurrences for only one week in January
       const periodStart = new Date('2025-01-13T00:00:00'); // Monday
@@ -511,18 +511,18 @@ describe('OccurrenceGeneratorService', () => {
 
     it('should return empty array when periodEnd < lesson.startDate', () => {
       const recurringPattern = RecurringPattern.daily(1);
-      const lesson = new Lesson(
-        'lesson1',
-        'Future Lesson',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2025-06-01T10:00:00'), // Starts in June
-        new Date('2025-06-01T11:00:00'),
-        'Future lesson',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Future Lesson',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2025-06-01T10:00:00'), // Starts in June
+        endDate: new Date('2025-06-01T11:00:00'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Future lesson',
+        recurringPattern,
+      });
 
       // Request occurrences for January (before lesson starts)
       const periodStart = new Date('2025-01-01T00:00:00');
@@ -540,18 +540,18 @@ describe('OccurrenceGeneratorService', () => {
 
     it('should handle partial overlap - lesson starts mid-period (daily)', () => {
       const recurringPattern = RecurringPattern.daily(1);
-      const lesson = new Lesson(
-        'lesson1',
-        'Daily Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2025-01-10T10:00:00'), // Starts on Jan 10
-        new Date('2025-01-10T11:00:00'),
-        'Daily lesson',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Daily Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2025-01-10T10:00:00'), // Starts on Jan 10
+        endDate: new Date('2025-01-10T11:00:00'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Daily lesson',
+        recurringPattern,
+      });
 
       // Request occurrences from Jan 5 to Jan 15
       const periodStart = new Date('2025-01-05T00:00:00');
@@ -582,18 +582,18 @@ describe('OccurrenceGeneratorService', () => {
         lessonStartDate // Use lesson start as reference
       );
 
-      const lesson = new Lesson(
-        'lesson1',
-        'Limited Daily Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        lessonStartDate,
-        new Date('2025-01-01T11:00:00Z'),
-        'Daily lesson with end date',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Limited Daily Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: lessonStartDate,
+        endDate: new Date('2025-01-01T11:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Daily lesson with end date',
+        recurringPattern,
+      });
 
       // Request occurrences from Jan 1 to Jan 20
       const periodStart = new Date('2025-01-01T00:00:00Z');
@@ -623,18 +623,18 @@ describe('OccurrenceGeneratorService', () => {
   describe('Occurrence Count Limit', () => {
     it('should respect occurrence count for daily pattern', () => {
       const recurringPattern = RecurringPattern.daily(1, undefined, 5);
-      const lesson = new Lesson(
-        'lesson1',
-        'Limited Daily Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2025-01-01T10:00:00'),
-        new Date('2025-01-01T11:00:00'),
-        'Daily lesson with 5 occurrences max',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Limited Daily Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2025-01-01T10:00:00'),
+        endDate: new Date('2025-01-01T11:00:00'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Daily lesson with 5 occurrences max',
+        recurringPattern,
+      });
 
       // Request period longer than occurrence count allows
       const periodStart = new Date('2025-01-01');
@@ -660,18 +660,18 @@ describe('OccurrenceGeneratorService', () => {
         undefined,
         3 // Only 3 total occurrences
       );
-      const lesson = new Lesson(
-        'lesson1',
-        'Limited Weekly Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2025-01-06T10:00:00'), // Monday
-        new Date('2025-01-06T11:00:00'),
-        'Weekly lesson with 3 occurrences max',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Limited Weekly Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2025-01-06T10:00:00'), // Monday
+        endDate: new Date('2025-01-06T11:00:00'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Weekly lesson with 3 occurrences max',
+        recurringPattern,
+      });
 
       const periodStart = new Date('2025-01-06');
       const periodEnd = new Date('2025-01-31');
@@ -689,18 +689,18 @@ describe('OccurrenceGeneratorService', () => {
 
     it('should stop at occurrence count even when period extends further', () => {
       const recurringPattern = RecurringPattern.daily(2, undefined, 3); // Every 2 days, max 3
-      const lesson = new Lesson(
-        'lesson1',
-        'Limited Daily Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2025-01-01T10:00:00'),
-        new Date('2025-01-01T11:00:00'),
-        'Every 2 days, max 3 occurrences',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Limited Daily Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2025-01-01T10:00:00'),
+        endDate: new Date('2025-01-01T11:00:00'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Every 2 days, max 3 occurrences',
+        recurringPattern,
+      });
 
       const periodStart = new Date('2025-01-01');
       const periodEnd = new Date('2025-12-31'); // Full year
@@ -721,18 +721,18 @@ describe('OccurrenceGeneratorService', () => {
 
     it('should return fewer occurrences if period ends before count reached', () => {
       const recurringPattern = RecurringPattern.daily(1, undefined, 10);
-      const lesson = new Lesson(
-        'lesson1',
-        'Limited Daily Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2025-01-01T10:00:00'),
-        new Date('2025-01-01T11:00:00'),
-        'Daily lesson with 10 occurrences max',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Limited Daily Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2025-01-01T10:00:00'),
+        endDate: new Date('2025-01-01T11:00:00'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Daily lesson with 10 occurrences max',
+        recurringPattern,
+      });
 
       // Period only covers 3 days
       const periodStart = new Date('2025-01-01');
@@ -751,18 +751,18 @@ describe('OccurrenceGeneratorService', () => {
 
     it('should handle occurrence count with exceptions (skipped still counts)', () => {
       const recurringPattern = RecurringPattern.daily(1, undefined, 5);
-      const lesson = new Lesson(
-        'lesson1',
-        'Limited Daily Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2025-01-01T10:00:00'),
-        new Date('2025-01-01T11:00:00'),
-        'Daily lesson with 5 occurrences',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Limited Daily Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2025-01-01T10:00:00'),
+        endDate: new Date('2025-01-01T11:00:00'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Daily lesson with 5 occurrences',
+        recurringPattern,
+      });
 
       const skipException = LessonException.skip(
         'lesson1',
@@ -788,18 +788,18 @@ describe('OccurrenceGeneratorService', () => {
   describe('Complex Scenarios', () => {
     it('should handle mixed exception types', () => {
       const recurringPattern = RecurringPattern.daily(1);
-      const lesson = new Lesson(
-        'lesson1',
-        'Daily Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2025-01-01T10:00:00'),
-        new Date('2025-01-01T11:00:00'),
-        'Daily lesson',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Daily Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2025-01-01T10:00:00'),
+        endDate: new Date('2025-01-01T11:00:00'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Daily lesson',
+        recurringPattern,
+      });
 
       const exceptions = [
         LessonException.skip('lesson1', new Date('2025-01-02T10:00:00')),
@@ -839,18 +839,18 @@ describe('OccurrenceGeneratorService', () => {
 
     it('should sort occurrences by date', () => {
       const recurringPattern = RecurringPattern.daily(1);
-      const lesson = new Lesson(
-        'lesson1',
-        'Daily Math',
-        ['teacher1'],
-        new Date(),
-        new Date(),
-        ['pupil1'],
-        new Date('2025-01-01T10:00:00'),
-        new Date('2025-01-01T11:00:00'),
-        'Daily lesson',
-        recurringPattern
-      );
+      const lesson = new Lesson({
+        id: 'lesson1',
+        title: 'Daily Math',
+        teacherIds: ['teacher1'],
+        pupilIds: ['pupil1'],
+        startDate: new Date('2025-01-01T10:00:00'),
+        endDate: new Date('2025-01-01T11:00:00'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Daily lesson',
+        recurringPattern,
+      });
 
       const rescheduleException = LessonException.reschedule(
         'lesson1',

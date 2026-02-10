@@ -13,7 +13,6 @@ export const createTRPCContext = async (
   return {
     session,
     useCases,
-    repositories,
   };
 };
 export type Context = Awaited<ReturnType<typeof createTRPCContext>>;

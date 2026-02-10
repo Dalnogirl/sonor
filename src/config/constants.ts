@@ -14,9 +14,3 @@ export const PAGINATION = {
   DEFAULT_PAGE_SIZE: 10,
   MAX_PAGE_SIZE: 100,
 } as const;
-
-export const POST_CONFIG = {
-  MIN_TITLE_LENGTH: 1,
-  MAX_TITLE_LENGTH: 200,
-  MIN_CONTENT_LENGTH: 100,
-} as const;

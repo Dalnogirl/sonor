@@ -118,20 +118,34 @@ export class PrismaLessonRepository implements LessonRepository {
   }
 
   async save(lesson: Lesson): Promise<void> {
-    await this.prisma.lesson.update({
-      where: { id: lesson.id },
-      data: {
-        title: lesson.title,
-        description: lesson.description,
-        startDate: lesson.startDate,
-        endDate: lesson.endDate,
-        recurringPattern: lesson.recurringPattern
-          ? this.serializeRecurringPattern(lesson.recurringPattern)
-          : Prisma.DbNull,
-        deletedAt: lesson.deletedAt ?? null,
-        updatedAt: lesson.updatedAt,
-      },
-    });
+    await this.prisma.$transaction([
+      this.prisma.lessonTeacher.deleteMany({ where: { lessonId: lesson.id } }),
+      this.prisma.lessonPupil.deleteMany({ where: { lessonId: lesson.id } }),
+      this.prisma.lesson.update({
+        where: { id: lesson.id },
+        data: {
+          title: lesson.title,
+          description: lesson.description,
+          startDate: lesson.startDate,
+          endDate: lesson.endDate,
+          recurringPattern: lesson.recurringPattern
+            ? this.serializeRecurringPattern(lesson.recurringPattern)
+            : Prisma.DbNull,
+          deletedAt: lesson.deletedAt ?? null,
+          updatedAt: lesson.updatedAt,
+          teachers: {
+            create: lesson.teacherIds.map((teacherId) => ({
+              user: { connect: { id: teacherId } },
+            })),
+          },
+          pupils: {
+            create: lesson.pupilIds.map((pupilId) => ({
+              user: { connect: { id: pupilId } },
+            })),
+          },
+        },
+      }),
+    ]);
   }
   private toDomain(prismaLesson: {
     id: string;
@@ -152,19 +166,19 @@ export class PrismaLessonRepository implements LessonRepository {
       prismaLesson.recurringPattern
     );
 
-    return new Lesson(
-      prismaLesson.id,
-      prismaLesson.title,
+    return new Lesson({
+      id: prismaLesson.id,
+      title: prismaLesson.title,
       teacherIds,
-      prismaLesson.createdAt,
-      prismaLesson.updatedAt,
       pupilIds,
-      prismaLesson.startDate,
-      prismaLesson.endDate,
-      prismaLesson.description ?? undefined,
+      startDate: prismaLesson.startDate,
+      endDate: prismaLesson.endDate,
+      createdAt: prismaLesson.createdAt,
+      updatedAt: prismaLesson.updatedAt,
+      description: prismaLesson.description ?? undefined,
       recurringPattern,
-      prismaLesson.deletedAt ?? undefined
-    );
+      deletedAt: prismaLesson.deletedAt ?? undefined,
+    });
   }
 
   private parseRecurringPattern(json: unknown): RecurringPattern | undefined {
