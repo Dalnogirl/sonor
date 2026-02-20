@@ -35,27 +35,28 @@ src/
 
 ### Prerequisites
 
-- Node.js 18+ and npm
-- PostgreSQL database
+- Node.js 18+ and npm (see `.nvmrc` — recommended v22)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (PostgreSQL runs in a container via `docker-compose.yml`)
 
 ### Installation
 
 ```bash
-# Install dependencies
+# Install dependencies (runs prisma generate automatically via postinstall)
 npm install
 
 # Copy environment variables
 cp .env.example .env
-# Edit .env with your database URL and secrets
+# Edit .env — MUST set NEXTAUTH_SECRET:
+#   openssl rand -base64 32
 
-# Generate Prisma Client
-npm run db:generate
+# Start PostgreSQL container + push schema + seed + start dev server
+npm run setup   # or step-by-step below
 
-# Push schema to database
-npm run db:push
-
-# Start development server
-npm run dev
+# Step-by-step alternative:
+docker compose up -d       # Start Postgres
+npm run db:push            # Push schema
+npm run db:seed            # Seed test data
+npm run dev                # Start app (also starts Docker if not running)
 ```
 
 Visit [http://localhost:3000](http://localhost:3000)

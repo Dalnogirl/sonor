@@ -35,5 +35,3 @@ __tests__/setup/.test-env
 *.tsbuildinfo
 next-env.d.ts
 
-# prisma
-/prisma/migrations

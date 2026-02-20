@@ -6,7 +6,10 @@
       "Bash(ls:*)",
       "Bash(npx eslint:*)",
       "Bash(npx vitest:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(test:*)",
+      "Bash(node --version:*)",
+      "Bash(docker:*)"
     ],
     "deny": [],
     "ask": []
