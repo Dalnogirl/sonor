@@ -115,7 +115,7 @@ describe('RecurringPattern', () => {
       });
 
       it('should create daily pattern with end date', () => {
-        const endDate = new Date('2025-12-31');
+        const endDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
         const pattern = RecurringPattern.daily(1, endDate);
 
         expect(pattern.endDate).toEqual(endDate);
@@ -151,7 +151,7 @@ describe('RecurringPattern', () => {
       });
 
       it('should create weekly pattern with end date', () => {
-        const endDate = new Date('2026-01-01');
+        const endDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
         const pattern = RecurringPattern.weekly([DayOfWeek.FRIDAY], 1, endDate);
 
         expect(pattern.endDate).toEqual(endDate);
@@ -242,8 +242,8 @@ describe('RecurringPattern', () => {
     });
 
     it('should return false when end dates differ', () => {
-      const date1 = new Date('2025-12-31');
-      const date2 = new Date('2026-01-01');
+      const date1 = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      const date2 = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
       const pattern1 = RecurringPattern.daily(1, date1);
       const pattern2 = RecurringPattern.daily(1, date2);
 

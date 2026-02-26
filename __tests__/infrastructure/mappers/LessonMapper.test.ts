@@ -83,7 +83,7 @@ describe('LessonMapper', () => {
         RecurringFrequency.WEEKLY,
         1,
         [DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.FRIDAY],
-        new Date('2025-12-31'),
+        new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
         null
       );
 
@@ -258,7 +258,7 @@ describe('LessonMapper', () => {
         RecurringFrequency.DAILY,
         2,
         [],
-        new Date('2025-12-31'),
+        new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
         null
       );
 
