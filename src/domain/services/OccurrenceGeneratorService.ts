@@ -1,5 +1,5 @@
 import { Lesson } from '../models/Lesson';
-import { LessonException, ExceptionType } from '../models/LessonException';
+import { LessonException } from '../models/LessonException';
 import { RecurrenceService } from './RecurrenceService';
 import { DateService } from '../ports/services/DateService';
 import { RecurringFrequency } from '../models/RecurringPattern';
@@ -28,13 +28,7 @@ export class OccurrenceGeneratorService {
       periodEnd
     );
 
-    const processedOccurrences = this.applyExceptions(
-      lesson,
-      occurrenceDates,
-      exceptions
-    );
-
-    return processedOccurrences;
+    return this.applyExceptions(lesson, occurrenceDates, exceptions);
   }
 
   private isSingleLessonInPeriod(
@@ -59,8 +53,6 @@ export class OccurrenceGeneratorService {
 
     const pattern = lesson.recurringPattern;
 
-    // Use the later of lesson.startDate and periodStart to avoid generating
-    // occurrences before the requested period
     const effectiveStart =
       lesson.startDate > periodStart ? lesson.startDate : periodStart;
 
@@ -96,55 +88,21 @@ export class OccurrenceGeneratorService {
     occurrenceDates: Date[],
     exceptions: LessonException[]
   ): Lesson[] {
+    const skippedDates = new Set(
+      exceptions.map((e) => this.dateService.formatDateOnly(e.originalDate))
+    );
+
     const result: Lesson[] = [];
-    const exceptionMap = this.buildExceptionMap(exceptions);
-    const rescheduledOccurrences = new Map<string, Lesson>();
 
     for (const occurrenceDate of occurrenceDates) {
       const dateKey = this.dateService.formatDateOnly(occurrenceDate);
-      const exception = exceptionMap.get(dateKey);
-
-      if (exception?.type === ExceptionType.SKIP) {
+      if (skippedDates.has(dateKey)) {
         continue;
       }
-
-      if (exception?.type === ExceptionType.RESCHEDULE && exception.newDate) {
-        const rescheduledLesson = this.createOccurrenceLesson(
-          baseLesson,
-          exception.newDate
-        );
-        const rescheduleKey = this.dateService.formatISO(exception.newDate);
-        rescheduledOccurrences.set(rescheduleKey, rescheduledLesson);
-        continue;
-      }
-
-      if (exception?.type === ExceptionType.MODIFY && exception.modifications) {
-        const modifiedLesson = this.createModifiedLesson(
-          baseLesson,
-          occurrenceDate,
-          exception
-        );
-        result.push(modifiedLesson);
-        continue;
-      }
-
       result.push(this.createOccurrenceLesson(baseLesson, occurrenceDate));
     }
 
-    rescheduledOccurrences.forEach((lesson) => result.push(lesson));
-
-    return result.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
-  }
-
-  private buildExceptionMap(
-    exceptions: LessonException[]
-  ): Map<string, LessonException> {
-    const map = new Map<string, LessonException>();
-    for (const exception of exceptions) {
-      const key = this.dateService.formatDateOnly(exception.originalDate);
-      map.set(key, exception);
-    }
-    return map;
+    return result;
   }
 
   private createOccurrenceLesson(baseLesson: Lesson, occurrenceDate: Date): Lesson {
@@ -168,35 +126,6 @@ export class OccurrenceGeneratorService {
       updatedAt: baseLesson.updatedAt,
       description: baseLesson.description,
       recurringPattern: baseLesson.recurringPattern,
-    });
-  }
-
-  private createModifiedLesson(
-    baseLesson: Lesson,
-    occurrenceDate: Date,
-    exception: LessonException
-  ): Lesson {
-    if (!exception.modifications) {
-      return this.createOccurrenceLesson(baseLesson, occurrenceDate);
-    }
-
-    const modifications = exception.modifications;
-    const baseOccurrence = this.createOccurrenceLesson(
-      baseLesson,
-      occurrenceDate
-    );
-
-    return new Lesson({
-      id: baseOccurrence.id,
-      title: modifications.title ?? baseOccurrence.title,
-      teacherIds: [...(modifications.teacherIds ?? baseOccurrence.teacherIds)],
-      pupilIds: [...(modifications.pupilIds ?? baseOccurrence.pupilIds)],
-      startDate: modifications.startDate ?? baseOccurrence.startDate,
-      endDate: modifications.endDate ?? baseOccurrence.endDate,
-      createdAt: baseOccurrence.createdAt,
-      updatedAt: baseOccurrence.updatedAt,
-      description: modifications.description ?? baseOccurrence.description,
-      recurringPattern: baseOccurrence.recurringPattern,
     });
   }
 }

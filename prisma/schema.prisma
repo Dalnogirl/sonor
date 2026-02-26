@@ -87,9 +87,7 @@ model LessonException {
   id            String   @id @default(cuid())
   lessonId      String
   originalDate  DateTime
-  type          String // 'SKIP' | 'RESCHEDULE' | 'MODIFY'
-  newDate       DateTime?
-  modifications Json? // Partial lesson modifications
+  type          String // Always 'SKIP'
 
   createdAt DateTime @default(now())
 

@@ -20,14 +20,9 @@ export class LessonExceptionAlreadyExistsError extends DomainError {
   }
 }
 
-export class SameDateRescheduleError extends DomainError {
-  constructor() {
-    super('Cannot reschedule to the same date.');
-  }
-}
-
 export class InvalidLessonExceptionError extends DomainError {
   constructor(message: string) {
     super(message);
   }
 }
+

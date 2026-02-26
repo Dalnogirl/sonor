@@ -5,7 +5,6 @@ import { createLessonRequestSchema } from '@/application/dto/lesson/CreateLesson
 import { getLessonRequestSchema } from '@/application/dto/lesson/GetLessonRequestDTO.schema';
 import { getMyTeachingLessonsForPeriodRequestSchema } from '@/application/dto/lesson/GetMyTeachingLessonsForPeriodRequestDTO.schema';
 import { skipLessonOccurrenceRequestSchema } from '@/application/dto/lesson/SkipLessonOccurrenceRequestDTO.schema';
-import { rescheduleLessonOccurrenceRequestSchema } from '@/application/dto/lesson/RescheduleLessonOccurrenceRequestDTO.schema';
 
 export const lessonRouter = router({
   create: protectedProcedure
@@ -70,18 +69,4 @@ export const lessonRouter = router({
       }
     }),
 
-  rescheduleOccurrence: protectedProcedure
-    .input(rescheduleLessonOccurrenceRequestSchema)
-    .mutation(async ({ ctx, input }) => {
-      try {
-        await ctx.useCases.lesson.rescheduleOccurrence.execute(
-          input.lessonId,
-          input.originalDate,
-          input.newDate
-        );
-        return { success: true };
-      } catch (error) {
-        throw mapDomainError(error);
-      }
-    }),
 });

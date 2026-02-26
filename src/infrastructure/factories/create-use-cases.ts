@@ -12,7 +12,6 @@ import { GetMyTeachingLessonsForPeriodUseCase } from '@/application/use-cases/le
 import { CreateLessonUseCase } from '@/application/use-cases/lesson/CreateLessonUseCase';
 import { GetLessonUseCase } from '@/application/use-cases/lesson/GetLessonUseCase';
 import { SkipLessonOccurrenceUseCase } from '@/application/use-cases/lesson/SkipLessonOccurrenceUseCase';
-import { RescheduleLessonOccurrenceUseCase } from '@/application/use-cases/lesson/RescheduleLessonOccurrenceUseCase';
 import { LessonMapper } from '../mappers/LessonMapper';
 import { DeleteLessonUseCase } from '@/application/use-cases/lesson/DeleteLessonUseCase';
 import { ConsoleLogger } from '../services/Logger';
@@ -87,10 +86,6 @@ export const createUseCases = (repositories: Repositories) => {
         logger
       ),
       skipOccurrence: new SkipLessonOccurrenceUseCase(
-        repositories.lessonRepository,
-        repositories.lessonExceptionRepository
-      ),
-      rescheduleOccurrence: new RescheduleLessonOccurrenceUseCase(
         repositories.lessonRepository,
         repositories.lessonExceptionRepository
       ),

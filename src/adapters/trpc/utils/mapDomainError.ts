@@ -4,7 +4,6 @@ import {
   LessonNotFoundError,
   LessonNotRecurringError,
   LessonExceptionAlreadyExistsError,
-  SameDateRescheduleError,
   InvalidLessonExceptionError,
 } from '@/domain/errors/LessonErrors';
 import {
@@ -28,7 +27,6 @@ const ERROR_MAP = new Map<DomainErrorConstructor, TRPC_ERROR_CODE_KEY>([
   [EmailAlreadyExistsError, 'CONFLICT'],
   [LessonExceptionAlreadyExistsError, 'CONFLICT'],
   [LessonNotRecurringError, 'BAD_REQUEST'],
-  [SameDateRescheduleError, 'BAD_REQUEST'],
   [InvalidLessonExceptionError, 'BAD_REQUEST'],
 ]);
 
