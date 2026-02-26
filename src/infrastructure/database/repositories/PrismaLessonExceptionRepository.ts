@@ -102,6 +102,10 @@ export class PrismaLessonExceptionRepository
     }
   }
 
+  async deleteByLessonId(lessonId: string): Promise<void> {
+    await this.prisma.lessonException.deleteMany({ where: { lessonId } });
+  }
+
   async exists(lessonId: string, originalDate: Date): Promise<boolean> {
     const count = await this.prisma.lessonException.count({
       where: {

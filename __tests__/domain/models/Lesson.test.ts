@@ -194,4 +194,226 @@ describe('Lesson', () => {
       expect(lesson.hasPupil(pupil2Id)).toBe(false);
     });
   });
+
+  describe('edit', () => {
+    const baseLessonProps = {
+      id: 'lesson-1',
+      title: 'Original Title',
+      teacherIds: [teacher1Id],
+      pupilIds: [pupil1Id],
+      startDate: new Date('2025-11-10T10:00:00Z'),
+      endDate: new Date('2025-11-10T12:00:00Z'),
+      createdAt: new Date('2025-11-01T10:00:00Z'),
+      updatedAt: new Date('2025-11-01T10:00:00Z'),
+    };
+
+    it('should update all mutable fields', () => {
+      const lesson = new Lesson(baseLessonProps);
+      const newStart = new Date('2025-12-01T09:00:00Z');
+      const newEnd = new Date('2025-12-01T11:00:00Z');
+
+      lesson.edit({
+        title: 'Updated Title',
+        teacherIds: [teacher2Id],
+        pupilIds: [pupil2Id],
+        startDate: newStart,
+        endDate: newEnd,
+        description: 'New description',
+      });
+
+      expect(lesson.title).toBe('Updated Title');
+      expect(lesson.teacherIds).toEqual([teacher2Id]);
+      expect(lesson.pupilIds).toEqual([pupil2Id]);
+      expect(lesson.startDate).toEqual(newStart);
+      expect(lesson.endDate).toEqual(newEnd);
+      expect(lesson.description).toBe('New description');
+    });
+
+    it('should preserve id and createdAt', () => {
+      const lesson = new Lesson(baseLessonProps);
+
+      lesson.edit({
+        title: 'Updated',
+        teacherIds: [teacher1Id],
+        pupilIds: [pupil1Id],
+        startDate: baseLessonProps.startDate,
+        endDate: baseLessonProps.endDate,
+      });
+
+      expect(lesson.id).toBe('lesson-1');
+      expect(lesson.createdAt).toEqual(baseLessonProps.createdAt);
+    });
+
+    it('should update updatedAt', () => {
+      const lesson = new Lesson(baseLessonProps);
+      const originalUpdatedAt = lesson.updatedAt;
+
+      lesson.edit({
+        title: 'Updated',
+        teacherIds: [teacher1Id],
+        pupilIds: [pupil1Id],
+        startDate: baseLessonProps.startDate,
+        endDate: baseLessonProps.endDate,
+      });
+
+      expect(lesson.updatedAt.getTime()).toBeGreaterThanOrEqual(
+        originalUpdatedAt.getTime()
+      );
+    });
+
+    it('should throw when teacherIds is empty', () => {
+      const lesson = new Lesson(baseLessonProps);
+
+      expect(() =>
+        lesson.edit({
+          title: 'Updated',
+          teacherIds: [],
+          pupilIds: [pupil1Id],
+          startDate: baseLessonProps.startDate,
+          endDate: baseLessonProps.endDate,
+        })
+      ).toThrow('Lesson must have at least one teacher');
+    });
+
+    it('should throw when endDate <= startDate', () => {
+      const lesson = new Lesson(baseLessonProps);
+
+      expect(() =>
+        lesson.edit({
+          title: 'Updated',
+          teacherIds: [teacher1Id],
+          pupilIds: [pupil1Id],
+          startDate: new Date('2025-12-01T12:00:00Z'),
+          endDate: new Date('2025-12-01T10:00:00Z'),
+        })
+      ).toThrow('Lesson endDate must be after startDate');
+    });
+
+    it('should throw when lesson is deleted', () => {
+      const lesson = new Lesson({
+        ...baseLessonProps,
+        deletedAt: new Date(),
+      });
+
+      expect(() =>
+        lesson.edit({
+          title: 'Updated',
+          teacherIds: [teacher1Id],
+          pupilIds: [pupil1Id],
+          startDate: baseLessonProps.startDate,
+          endDate: baseLessonProps.endDate,
+        })
+      ).toThrow('Cannot edit a deleted lesson');
+    });
+
+    it('should return recurringPatternChanged: true when pattern added', () => {
+      const lesson = new Lesson(baseLessonProps);
+      const pattern = RecurringPattern.daily(1, undefined, undefined, baseLessonProps.startDate);
+
+      const result = lesson.edit({
+        title: 'Updated',
+        teacherIds: [teacher1Id],
+        pupilIds: [pupil1Id],
+        startDate: baseLessonProps.startDate,
+        endDate: baseLessonProps.endDate,
+        recurringPattern: pattern,
+      });
+
+      expect(result.recurringPatternChanged).toBe(true);
+    });
+
+    it('should return recurringPatternChanged: true when pattern removed', () => {
+      const pattern = RecurringPattern.daily(1, undefined, undefined, baseLessonProps.startDate);
+      const lesson = new Lesson({
+        ...baseLessonProps,
+        recurringPattern: pattern,
+      });
+
+      const result = lesson.edit({
+        title: 'Updated',
+        teacherIds: [teacher1Id],
+        pupilIds: [pupil1Id],
+        startDate: baseLessonProps.startDate,
+        endDate: baseLessonProps.endDate,
+      });
+
+      expect(result.recurringPatternChanged).toBe(true);
+    });
+
+    it('should return recurringPatternChanged: true when pattern differs', () => {
+      const oldPattern = RecurringPattern.daily(1, undefined, undefined, baseLessonProps.startDate);
+      const newPattern = RecurringPattern.weekly(
+        [DayOfWeek.MONDAY],
+        1,
+        undefined,
+        undefined,
+        baseLessonProps.startDate
+      );
+      const lesson = new Lesson({
+        ...baseLessonProps,
+        recurringPattern: oldPattern,
+      });
+
+      const result = lesson.edit({
+        title: 'Updated',
+        teacherIds: [teacher1Id],
+        pupilIds: [pupil1Id],
+        startDate: baseLessonProps.startDate,
+        endDate: baseLessonProps.endDate,
+        recurringPattern: newPattern,
+      });
+
+      expect(result.recurringPatternChanged).toBe(true);
+    });
+
+    it('should return recurringPatternChanged: false when pattern unchanged', () => {
+      const pattern = RecurringPattern.daily(1, undefined, undefined, baseLessonProps.startDate);
+      const lesson = new Lesson({
+        ...baseLessonProps,
+        recurringPattern: pattern,
+      });
+
+      const result = lesson.edit({
+        title: 'Updated',
+        teacherIds: [teacher1Id],
+        pupilIds: [pupil1Id],
+        startDate: baseLessonProps.startDate,
+        endDate: baseLessonProps.endDate,
+        recurringPattern: pattern,
+      });
+
+      expect(result.recurringPatternChanged).toBe(false);
+    });
+
+    it('should return recurringPatternChanged: false when both undefined', () => {
+      const lesson = new Lesson(baseLessonProps);
+
+      const result = lesson.edit({
+        title: 'Updated',
+        teacherIds: [teacher1Id],
+        pupilIds: [pupil1Id],
+        startDate: baseLessonProps.startDate,
+        endDate: baseLessonProps.endDate,
+      });
+
+      expect(result.recurringPatternChanged).toBe(false);
+    });
+
+    it('should not mutate state when validation fails', () => {
+      const lesson = new Lesson(baseLessonProps);
+
+      expect(() =>
+        lesson.edit({
+          title: 'Updated',
+          teacherIds: [],
+          pupilIds: [pupil1Id],
+          startDate: baseLessonProps.startDate,
+          endDate: baseLessonProps.endDate,
+        })
+      ).toThrow();
+
+      expect(lesson.title).toBe('Original Title');
+      expect(lesson.teacherIds).toEqual([teacher1Id]);
+    });
+  });
 });

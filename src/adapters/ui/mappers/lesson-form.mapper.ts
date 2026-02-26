@@ -1,7 +1,5 @@
-import {
-  CreateLessonRequestDTO,
-  RecurringPatternInput,
-} from '@/application/dto/lesson/CreateLessonRequestDTO';
+import { CreateLessonRequestDTO } from '@/application/dto/lesson/CreateLessonRequestDTO';
+import { RecurringPatternInput } from '@/application/dto/lesson/ReccurringPatternInput.schema';
 import { CreateLessonFormValues } from '@/adapters/ui/validation/lesson-form.schema';
 import { RecurringFrequency } from '@/domain/models/RecurringPattern';
 

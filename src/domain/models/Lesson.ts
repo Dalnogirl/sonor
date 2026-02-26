@@ -1,7 +1,5 @@
 import { RecurringPattern } from './RecurringPattern';
-import {
-  InvalidLessonExceptionError,
-} from '@/domain/errors/LessonErrors';
+import { InvalidLessonExceptionError } from '@/domain/errors/LessonErrors';
 
 export interface LessonProps {
   id: string;
@@ -38,13 +36,23 @@ export class Lesson {
   private _teacherIds: string[];
   private _pupilIds: string[];
 
-  constructor(props: LessonProps) {
+  private static validateInvariants(
+    props: Pick<LessonProps, 'teacherIds' | 'startDate' | 'endDate'>
+  ): void {
     if (props.teacherIds.length === 0) {
-      throw new InvalidLessonExceptionError('Lesson must have at least one teacher');
+      throw new InvalidLessonExceptionError(
+        'Lesson must have at least one teacher'
+      );
     }
     if (props.startDate >= props.endDate) {
-      throw new InvalidLessonExceptionError('Lesson endDate must be after startDate');
+      throw new InvalidLessonExceptionError(
+        'Lesson endDate must be after startDate'
+      );
     }
+  }
+
+  constructor(props: LessonProps) {
+    Lesson.validateInvariants(props);
 
     this.id = props.id;
     this.title = props.title;
@@ -122,6 +130,48 @@ export class Lesson {
     }
     this.deletedAt = new Date();
     this.updatedAt = new Date();
+  }
+
+  edit(
+    data: Pick<
+      LessonProps,
+      | 'title'
+      | 'teacherIds'
+      | 'pupilIds'
+      | 'startDate'
+      | 'endDate'
+      | 'description'
+      | 'recurringPattern'
+    >
+  ): { recurringPatternChanged: boolean } {
+    if (this.isDeleted) {
+      throw new InvalidLessonExceptionError('Cannot edit a deleted lesson');
+    }
+
+    Lesson.validateInvariants(data);
+
+    const recurringPatternChanged = this.hasRecurringPatternChanged(
+      data.recurringPattern
+    );
+
+    this.title = data.title;
+    this._teacherIds = [...data.teacherIds];
+    this._pupilIds = [...data.pupilIds];
+    this.startDate = data.startDate;
+    this.endDate = data.endDate;
+    this.description = data.description;
+    this.recurringPattern = data.recurringPattern;
+    this.updatedAt = new Date();
+
+    return { recurringPatternChanged };
+  }
+
+  private hasRecurringPatternChanged(
+    newPattern?: RecurringPattern
+  ): boolean {
+    if (!this.recurringPattern && !newPattern) return false;
+    if (!this.recurringPattern || !newPattern) return true;
+    return !this.recurringPattern.equals(newPattern);
   }
 
   restore(): void {

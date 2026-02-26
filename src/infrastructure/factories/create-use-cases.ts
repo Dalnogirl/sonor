@@ -15,6 +15,7 @@ import { SkipLessonOccurrenceUseCase } from '@/application/use-cases/lesson/Skip
 import { LessonMapper } from '../mappers/LessonMapper';
 import { DeleteLessonUseCase } from '@/application/use-cases/lesson/DeleteLessonUseCase';
 import { ConsoleLogger } from '../services/Logger';
+import { EditLessonUseCase } from '@/application/use-cases/lesson/EditLessonUseCase';
 
 /**
  * Dependency Injection Factory
@@ -84,6 +85,11 @@ export const createUseCases = (repositories: Repositories) => {
       deleteLesson: new DeleteLessonUseCase(
         repositories.lessonRepository,
         logger
+      ),
+      editLesson: new EditLessonUseCase(
+        repositories.lessonRepository,
+        repositories.lessonExceptionRepository,
+        lessonMapper
       ),
       skipOccurrence: new SkipLessonOccurrenceUseCase(
         repositories.lessonRepository,

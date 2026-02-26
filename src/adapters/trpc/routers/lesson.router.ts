@@ -2,6 +2,7 @@ import { router } from '../init';
 import { protectedProcedure } from '../procedures/protected';
 import { mapDomainError } from '../utils/mapDomainError';
 import { createLessonRequestSchema } from '@/application/dto/lesson/CreateLessonRequestDTO.schema';
+import { editLessonRequestSchema } from '@/application/dto/lesson/EditLessonRequestDTO.schema';
 import { getLessonRequestSchema } from '@/application/dto/lesson/GetLessonRequestDTO.schema';
 import { getMyTeachingLessonsForPeriodRequestSchema } from '@/application/dto/lesson/GetMyTeachingLessonsForPeriodRequestDTO.schema';
 import { skipLessonOccurrenceRequestSchema } from '@/application/dto/lesson/SkipLessonOccurrenceRequestDTO.schema';
@@ -12,6 +13,16 @@ export const lessonRouter = router({
     .mutation(async ({ ctx, input }) => {
       try {
         return await ctx.useCases.lesson.createLesson.execute(input);
+      } catch (error) {
+        throw mapDomainError(error);
+      }
+    }),
+
+  edit: protectedProcedure
+    .input(editLessonRequestSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await ctx.useCases.lesson.editLesson.execute(input);
       } catch (error) {
         throw mapDomainError(error);
       }
@@ -68,5 +79,4 @@ export const lessonRouter = router({
         throw mapDomainError(error);
       }
     }),
-
 });

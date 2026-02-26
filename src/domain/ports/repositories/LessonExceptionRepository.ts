@@ -52,6 +52,11 @@ export interface LessonExceptionRepository {
   delete(id: string): Promise<void>;
 
   /**
+   * Delete all exceptions for a lesson (used when recurring pattern changes)
+   */
+  deleteByLessonId(lessonId: string): Promise<void>;
+
+  /**
    * Check if exception exists for specific occurrence
    */
   exists(lessonId: string, originalDate: Date): Promise<boolean>;
