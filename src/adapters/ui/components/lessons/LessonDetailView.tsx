@@ -33,6 +33,7 @@ type LessonDetailViewProps = {
   occurrenceDate: Date | null;
   isRecurring: boolean;
   hasOccurrenceContext: boolean;
+  onEditClick: () => void;
   onDeleteClick: () => void;
   onSkipClick: () => void;
 };
@@ -44,6 +45,7 @@ export function LessonDetailView({
   occurrenceDate,
   isRecurring,
   hasOccurrenceContext,
+  onEditClick,
   onDeleteClick,
   onSkipClick,
 }: LessonDetailViewProps) {
@@ -69,6 +71,9 @@ export function LessonDetailView({
           </Group>
         </div>
         <Group>
+          <Button variant="outline" onClick={onEditClick}>
+            Edit
+          </Button>
           {isRecurring && (
             <Button color="orange" variant="outline" onClick={onSkipClick}>
               Skip Occurrence

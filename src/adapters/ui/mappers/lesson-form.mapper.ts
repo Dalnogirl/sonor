@@ -1,5 +1,7 @@
 import { CreateLessonRequestDTO } from '@/application/dto/lesson/CreateLessonRequestDTO';
+import { EditLessonRequestDTO } from '@/application/dto/lesson/EditLessonRequestDTO.schema';
 import { RecurringPatternInput } from '@/application/dto/lesson/ReccurringPatternInput.schema';
+import { LessonWithUsersResponseDTO } from '@/application/dto/lesson/LessonWithUsersResponseDTO';
 import { CreateLessonFormValues } from '@/adapters/ui/validation/lesson-form.schema';
 import { RecurringFrequency } from '@/domain/models/RecurringPattern';
 
@@ -47,6 +49,45 @@ export class LessonFormMapper {
       endDate: lessonEndDate,
       recurringPattern,
     };
+  }
+
+  static toEditDTO(
+    lessonId: string,
+    formValues: CreateLessonFormValues
+  ): EditLessonRequestDTO {
+    return {
+      id: lessonId,
+      ...this.toCreateDTO(formValues),
+    };
+  }
+
+  static fromLessonToFormValues(
+    lesson: LessonWithUsersResponseDTO
+  ): CreateLessonFormValues {
+    const startDate = new Date(lesson.startDate);
+    const endDate = new Date(lesson.endDate);
+    const rp = lesson.recurringPattern;
+
+    return {
+      title: lesson.title,
+      description: lesson.description ?? '',
+      teacherIds: lesson.teachers.map((t) => t.id),
+      pupilIds: lesson.pupils.map((p) => p.id),
+      day: startDate,
+      startTime: this.formatTime(startDate),
+      endTime: this.formatTime(endDate),
+      isRecurring: !!rp,
+      frequency: rp?.frequency,
+      interval: rp?.interval ?? 1,
+      daysOfWeek: rp?.daysOfWeek ?? [],
+      endType: rp?.endDate ? 'date' : rp?.occurrences ? 'occurrences' : 'never',
+      endDate: rp?.endDate ? new Date(rp.endDate) : null,
+      occurrences: rp?.occurrences ?? null,
+    };
+  }
+
+  private static formatTime(date: Date): string {
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
   }
 
   private static buildRecurringPatternInput(

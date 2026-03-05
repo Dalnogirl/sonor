@@ -2,8 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from './providers';
 import { ColorSchemeScript } from '@mantine/core';
-import { Navbar } from '@/adapters/ui/components/shared/Navbar';
-import { Footer } from '@/adapters/ui/components/shared/Footer';
+import { AppLayout } from '@/adapters/ui/components/shared/AppLayout';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
@@ -23,13 +22,9 @@ export default async function RootLayout({
       <head>
         <ColorSchemeScript defaultColorScheme="auto" />
       </head>
-      <body
-        style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}
-      >
+      <body>
         <Providers session={session}>
-          <Navbar />
-          <main style={{ flex: 1 }}>{children}</main>
-          <Footer />
+          <AppLayout>{children}</AppLayout>
         </Providers>
       </body>
     </html>

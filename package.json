@@ -4,7 +4,7 @@
   "description": "Fullstack music school management application",
   "scripts": {
     "setup": "npm install && npm run db:generate && npm run db:push && npm run db:seed",
-    "dev": "docker compose up -d && next dev",
+    "dev": "docker compose up -d && next dev --turbopack",
     "dev:db": "docker compose up -d",
     "dev:down": "docker compose down",
     "build": "next build",

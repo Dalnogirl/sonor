@@ -3,6 +3,7 @@
 import { Loader, Center, Card, Text } from '@mantine/core';
 import { useLessonDetail } from '@/adapters/ui/features/lessons';
 import { LessonDetailView } from './LessonDetailView';
+import { EditLessonModal } from './EditLessonModal';
 import { DeleteLessonModal } from './DeleteLessonModal';
 import { SkipOccurrenceModal } from './SkipOccurrenceModal';
 
@@ -16,6 +17,7 @@ export function LessonDetailClient() {
     occurrenceDate,
     isRecurring,
     hasOccurrenceContext,
+    editModal,
     deleteModal,
     skipModal,
   } = useLessonDetail();
@@ -40,6 +42,12 @@ export function LessonDetailClient() {
 
   return (
     <>
+      <EditLessonModal
+        opened={editModal.opened}
+        onClose={editModal.close}
+        lesson={lesson}
+      />
+
       <DeleteLessonModal
         opened={deleteModal.opened}
         onClose={deleteModal.close}
@@ -66,6 +74,7 @@ export function LessonDetailClient() {
         occurrenceDate={occurrenceDate}
         isRecurring={isRecurring}
         hasOccurrenceContext={hasOccurrenceContext}
+        onEditClick={editModal.open}
         onDeleteClick={deleteModal.open}
         onSkipClick={skipModal.open}
       />

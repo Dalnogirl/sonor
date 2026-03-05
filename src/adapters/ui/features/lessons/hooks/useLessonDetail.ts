@@ -21,6 +21,7 @@ export const useLessonDetail = () => {
   const occurrenceDate = parseOccurrenceDate(searchParams.get('date'));
 
   // Modal states
+  const [editModalOpened, editModalHandlers] = useDisclosure(false);
   const [deleteModalOpened, deleteModalHandlers] = useDisclosure(false);
   const [skipModalOpened, skipModalHandlers] = useDisclosure(false);
   const [skipDate, setSkipDate] = useState<Date | null>(occurrenceDate);
@@ -74,6 +75,13 @@ export const useLessonDetail = () => {
     occurrenceDate,
     isRecurring,
     hasOccurrenceContext,
+
+    // Edit modal
+    editModal: {
+      opened: editModalOpened,
+      open: editModalHandlers.open,
+      close: editModalHandlers.close,
+    },
 
     // Delete modal
     deleteModal: {

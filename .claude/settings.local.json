@@ -9,7 +9,8 @@
       "Bash(npm run build:*)",
       "Bash(test:*)",
       "Bash(node --version:*)",
-      "Bash(docker:*)"
+      "Bash(docker:*)",
+      "Bash(xargs cat:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,7 +1,7 @@
 'use client';
 
 import { Group, Avatar, Text, Menu, UnstyledButton, rem } from '@mantine/core';
-import { IconLogout, IconUser, IconChevronDown } from '@tabler/icons-react';
+import { IconLogout, IconChevronDown } from '@tabler/icons-react';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { getInitials } from '@/adapters/ui/utils/string-utils';
@@ -10,11 +10,7 @@ export function UserInfo() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  if (status === 'loading') {
-    return null;
-  }
-
-  if (!session?.user) {
+  if (status === 'loading' || !session?.user) {
     return null;
   }
 
@@ -23,11 +19,6 @@ export function UserInfo() {
   const handleLogout = async () => {
     await signOut({ redirect: false });
     router.push('/login');
-  };
-
-  const handleProfile = () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    router.push('/profile' as any);
   };
 
   const displayName = user.name || user.email || 'User';
@@ -39,17 +30,6 @@ export function UserInfo() {
           style={{
             padding: '8px 12px',
             borderRadius: '8px',
-            transition: 'background-color 0.2s, transform 0.1s',
-          }}
-          styles={{
-            root: {
-              '&:hover': {
-                backgroundColor: 'rgba(0, 0, 0, 0.05)',
-              },
-              '&:active': {
-                transform: 'scale(0.98)',
-              },
-            },
           }}
         >
           <Group gap="sm">
@@ -74,13 +54,6 @@ export function UserInfo() {
       </Menu.Target>
 
       <Menu.Dropdown>
-        <Menu.Item
-          leftSection={<IconUser style={{ width: rem(16), height: rem(16) }} />}
-          onClick={handleProfile}
-        >
-          Profile
-        </Menu.Item>
-        <Menu.Divider />
         <Menu.Item
           color="red"
           leftSection={

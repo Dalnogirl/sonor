@@ -9,12 +9,8 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
     globalSetup: ['./__tests__/setup/globalSetup.ts'],
-    // Run integration tests sequentially to avoid database conflicts
-    poolOptions: {
-      threads: {
-        singleThread: true,
-      },
-    },
+    // Run test files sequentially to avoid database deadlocks between integration tests
+    fileParallelism: false,
   },
   resolve: {
     alias: {
