@@ -11,10 +11,9 @@ import {
   Paper,
   Stack,
   Alert,
-  List,
   Group,
 } from '@mantine/core';
-import { IconCheck, IconX, IconClock, IconFlask } from '@tabler/icons-react';
+import { IconCheck, IconX, IconClock } from '@tabler/icons-react';
 
 type MessageType = 'success' | 'error' | 'loading' | null;
 
@@ -50,7 +49,7 @@ export default function RegisterPage() {
     <Container size="sm" py="xl">
       <Stack gap="lg">
         <Group>
-          <Title order={1}>📝 Register New User</Title>
+          <Title order={1}>Register New User</Title>
         </Group>
 
         <Paper shadow="md" p="xl" radius="md" withBorder>
@@ -128,22 +127,6 @@ export default function RegisterPage() {
           </Alert>
         )}
 
-        <Paper shadow="sm" p="lg" radius="md" withBorder bg="gray.0">
-          <Stack gap="sm">
-            <Group gap="xs">
-              <IconFlask size={20} />
-              <Title order={3} size="h4">
-                Test Cases
-              </Title>
-            </Group>
-            <List size="sm">
-              <List.Item>Try registering with valid data</List.Item>
-              <List.Item>Try the same email twice (should fail)</List.Item>
-              <List.Item>Try password &lt; 8 chars (should fail)</List.Item>
-              <List.Item>Try invalid email format (should fail)</List.Item>
-            </List>
-          </Stack>
-        </Paper>
       </Stack>
     </Container>
   );

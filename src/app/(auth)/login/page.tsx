@@ -81,7 +81,7 @@ export default function LoginPage() {
     <Container size="sm" py="xl">
       <Stack gap="lg">
         <Group>
-          <Title order={1}>🔐 Login</Title>
+          <Title order={1}>Login</Title>
         </Group>
 
         <Paper shadow="md" p="xl" radius="md" withBorder>
