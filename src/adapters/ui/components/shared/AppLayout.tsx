@@ -17,23 +17,25 @@ import {
   IconLogin,
   IconUserPlus,
 } from '@tabler/icons-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
 import { useSession } from 'next-auth/react';
 import { UserInfo } from './UserInfo';
 import { ThemeToggle } from './ThemeToggle';
-
-const NAV_ITEMS = [
-  { href: '/lessons' as const, label: 'My Lessons', icon: IconSchool },
-  { href: '/users' as const, label: 'Users', icon: IconUsers },
-  { href: '/profile' as const, label: 'Profile', icon: IconUser },
-];
+import { LocaleSwitcher } from './LocaleSwitcher';
+import { useTranslations } from 'next-intl';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [opened, { toggle, close }] = useDisclosure();
   const pathname = usePathname();
   const { data: session } = useSession();
   const isAuthenticated = !!session?.user;
+  const t = useTranslations('common');
+
+  const NAV_ITEMS = [
+    { href: '/lessons' as const, label: t('nav.lessons'), icon: IconSchool },
+    { href: '/users' as const, label: t('nav.users'), icon: IconUsers },
+    { href: '/profile' as const, label: t('nav.profile'), icon: IconUser },
+  ];
 
   return (
     <AppShell
@@ -65,6 +67,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </Group>
 
           <Group gap="sm">
+            <LocaleSwitcher />
             <ThemeToggle />
             {isAuthenticated ? (
               <UserInfo />
@@ -77,7 +80,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   leftSection={<IconLogin size={18} />}
                   size="sm"
                 >
-                  Login
+                  {t('nav.login')}
                 </Button>
                 <Button
                   component={Link}
@@ -86,7 +89,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   leftSection={<IconUserPlus size={18} />}
                   size="sm"
                 >
-                  Register
+                  {t('nav.register')}
                 </Button>
               </>
             )}

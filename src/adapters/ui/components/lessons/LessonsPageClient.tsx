@@ -14,6 +14,7 @@ import { DailyLessonsView } from '@/adapters/ui/components/lessons/DailyLessonsV
 import { WeeklyLessonsView } from '@/adapters/ui/components/lessons/WeeklyLessonsView';
 import { MonthlyLessonsView } from '@/adapters/ui/components/lessons/MonthlyLessonsView';
 import { useLessonsViewState } from '@/adapters/ui/features/lessons';
+import { useTranslations } from 'next-intl';
 
 export const LessonsPageClient = () => {
   const [opened, { open, close }] = useDisclosure(false);
@@ -21,6 +22,7 @@ export const LessonsPageClient = () => {
   const handleCanCreateChange = useCallback((value: boolean) => setCanCreate(value), []);
   const { viewMode, currentDate, setViewMode, setCurrentDate } =
     useLessonsViewState();
+  const t = useTranslations('lessons');
 
   return (
     <Container size="xl" py="xl">
@@ -32,8 +34,8 @@ export const LessonsPageClient = () => {
             alignItems: 'center',
           }}
         >
-          <Title order={1}>Lessons</Title>
-          {canCreate && <Button onClick={open}>Create Lesson</Button>}
+          <Title order={1}>{t('page.title')}</Title>
+          {canCreate && <Button onClick={open}>{t('page.createLesson')}</Button>}
         </div>
 
         <SegmentedControl
@@ -42,9 +44,9 @@ export const LessonsPageClient = () => {
             setViewMode(value as 'daily' | 'weekly' | 'monthly')
           }
           data={[
-            { label: 'Daily', value: 'daily' },
-            { label: 'Weekly', value: 'weekly' },
-            { label: 'Monthly', value: 'monthly' },
+            { label: t('views.daily'), value: 'daily' },
+            { label: t('views.weekly'), value: 'weekly' },
+            { label: t('views.monthly'), value: 'monthly' },
           ]}
         />
 

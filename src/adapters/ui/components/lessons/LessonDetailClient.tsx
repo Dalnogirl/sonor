@@ -6,6 +6,7 @@ import { LessonDetailView } from './LessonDetailView';
 import { EditLessonModal } from './EditLessonModal';
 import { DeleteLessonModal } from './DeleteLessonModal';
 import { SkipOccurrenceModal } from './SkipOccurrenceModal';
+import { useTranslations } from 'next-intl';
 
 export function LessonDetailClient() {
   const {
@@ -22,6 +23,7 @@ export function LessonDetailClient() {
     deleteModal,
     skipModal,
   } = useLessonDetail();
+  const t = useTranslations('lessons.detail');
 
   if (isLoading) {
     return (
@@ -35,7 +37,7 @@ export function LessonDetailClient() {
     return (
       <Card withBorder>
         <Text c="red" ta="center">
-          {error?.message || 'Lesson not found'}
+          {error?.message || t('notFound')}
         </Text>
       </Card>
     );

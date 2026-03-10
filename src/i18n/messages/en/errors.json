@@ -1,0 +1,11 @@
+{
+  "LessonNotFoundError": "Lesson not found",
+  "UserNotFoundError": "User not found",
+  "UnauthorizedError": "You don't have permission to perform this action",
+  "InvalidCredentialsError": "Invalid email or password",
+  "EmailAlreadyExistsError": "This email is already registered",
+  "LessonNotRecurringError": "This lesson is not recurring",
+  "LessonExceptionAlreadyExistsError": "An exception already exists for this date",
+  "InvalidLessonExceptionError": "Invalid lesson exception",
+  "unexpected": "An unexpected error occurred. Please try again."
+}

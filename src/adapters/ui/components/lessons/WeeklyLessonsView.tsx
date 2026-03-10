@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { Button, Group, Text, Box, Stack, Card, Loader, Center } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import {
   useWeeklyLessons,
   type SerializedLesson,
@@ -17,32 +17,7 @@ import {
   formatTimeRange,
   formatFullDate,
 } from '@/adapters/ui/utils/date-utils';
-
-/**
- * WeeklyLessonsView Component
- *
- * Displays lessons in a weekly calendar grid view
- *
- * **Architectural Role:** Presentation component (adapter layer)
- * - Pure UI rendering - no business logic
- * - Delegates state management to useWeeklyLessons hook
- * - Transforms serialized data into UI elements
- * - Controlled component (accepts external state)
- * - CSS-based responsive design (no hydration issues)
- *
- * **Applies:**
- * - Single Responsibility (SOLID): Only renders UI
- * - Information Expert (GRASP): Knows how to render week grid layout
- * - Low Coupling: Depends on hook interface, not implementation
- * - Separation of Concerns: UI separated from state logic
- * - Protected Variations (GRASP): CSS handles breakpoints, not JS
- *
- * **Pattern:** Container/Presenter + Controlled Component
- * - Hook = container (state logic)
- * - Component = presenter (UI rendering)
- * - Parent controls date via props
- * - Mantine's hiddenFrom/visibleFrom for responsive layouts
- */
+import { useTranslations } from 'next-intl';
 
 interface WeeklyLessonsViewProps {
   initialDate?: Date | null;
@@ -62,6 +37,7 @@ export const WeeklyLessonsView = ({ initialDate, onDateChange, onCanCreateChange
     goToNextWeek,
     goToToday,
   } = useWeeklyLessons({ initialDate, onDateChange });
+  const t = useTranslations('common');
 
   useEffect(() => {
     onCanCreateChange?.(canCreate);
@@ -71,7 +47,6 @@ export const WeeklyLessonsView = ({ initialDate, onDateChange, onCanCreateChange
 
   return (
     <Stack gap="md">
-      {/* Week Navigation */}
       <Group justify="space-between">
         <Group>
           <Button
@@ -81,14 +56,14 @@ export const WeeklyLessonsView = ({ initialDate, onDateChange, onCanCreateChange
             size={isMobile ? 'xs' : 'sm'}
           >
             <Box component="span" hiddenFrom="sm">
-              Prev
+              {t('actions.prev')}
             </Box>
             <Box component="span" visibleFrom="sm">
-              Previous
+              {t('actions.previous')}
             </Box>
           </Button>
           <Button variant="outline" onClick={goToToday} size={isMobile ? 'xs' : 'sm'}>
-            Today
+            {t('actions.today')}
           </Button>
           <Button
             variant="subtle"
@@ -96,7 +71,7 @@ export const WeeklyLessonsView = ({ initialDate, onDateChange, onCanCreateChange
             onClick={goToNextWeek}
             size={isMobile ? 'xs' : 'sm'}
           >
-            Next
+            {t('actions.next')}
           </Button>
         </Group>
         <Text fw={600} size={isMobile ? 'sm' : 'lg'}>
@@ -104,7 +79,6 @@ export const WeeklyLessonsView = ({ initialDate, onDateChange, onCanCreateChange
         </Text>
       </Group>
 
-      {/* Week Grid - Desktop vs Mobile Layout */}
       <Box style={{ minHeight: '400px' }}>
         {isLoading ? (
           <Center h="100%">
@@ -125,9 +99,6 @@ export const WeeklyLessonsView = ({ initialDate, onDateChange, onCanCreateChange
   );
 };
 
-/**
- * WeeklyDesktopLayout - 7-column grid layout for desktop
- */
 interface WeeklyDesktopLayoutProps {
   weekDays: Date[];
   getLessonsForDay: (day: Date) => SerializedLesson[];
@@ -143,16 +114,14 @@ const WeeklyDesktopLayout = ({ weekDays, getLessonsForDay }: WeeklyDesktopLayout
   );
 };
 
-/**
- * WeeklyMobileLayout - Vertical stack layout for mobile
- * Each day displayed as full-width card
- */
 interface WeeklyMobileLayoutProps {
   weekDays: Date[];
   getLessonsForDay: (day: Date) => SerializedLesson[];
 }
 
 const WeeklyMobileLayout = ({ weekDays, getLessonsForDay }: WeeklyMobileLayoutProps) => {
+  const t = useTranslations();
+
   return (
     <Stack gap="md">
       {weekDays.map((day) => {
@@ -169,7 +138,6 @@ const WeeklyMobileLayout = ({ weekDays, getLessonsForDay }: WeeklyMobileLayoutPr
             }}
           >
             <Stack gap="sm">
-              {/* Day Header */}
               <Group justify="space-between">
                 <div>
                   <Text size="lg" fw={600}>
@@ -181,15 +149,14 @@ const WeeklyMobileLayout = ({ weekDays, getLessonsForDay }: WeeklyMobileLayoutPr
                 </div>
                 {isToday && (
                   <Text size="xs" c="blue" fw={600}>
-                    TODAY
+                    {t('common.status.today')}
                   </Text>
                 )}
               </Group>
 
-              {/* Lessons */}
               {dayLessons.length === 0 ? (
                 <Text size="sm" c="dimmed" ta="center" py="xs">
-                  No lessons
+                  {t('lessons.weekly.noLessons')}
                 </Text>
               ) : (
                 <Stack gap="xs">
@@ -206,9 +173,6 @@ const WeeklyMobileLayout = ({ weekDays, getLessonsForDay }: WeeklyMobileLayoutPr
   );
 };
 
-/**
- * MobileLessonCard - Optimized lesson card for mobile
- */
 interface MobileLessonCardProps {
   lesson: SerializedLesson;
 }
@@ -237,9 +201,6 @@ const MobileLessonCard = ({ lesson }: MobileLessonCardProps) => {
   );
 };
 
-/**
- * DayColumn - Displays lessons for a single day (Desktop)
- */
 interface DayColumnProps {
   day: Date;
   lessons: SerializedLesson[];
@@ -247,6 +208,7 @@ interface DayColumnProps {
 
 const DayColumn = ({ day, lessons }: DayColumnProps) => {
   const isToday = isSameDay(day, new Date());
+  const t = useTranslations('lessons.weekly');
 
   return (
     <Stack gap="xs">
@@ -267,7 +229,7 @@ const DayColumn = ({ day, lessons }: DayColumnProps) => {
       <Stack gap="xs">
         {lessons.length === 0 ? (
           <Text size="xs" c="dimmed" ta="center" py="md">
-            No lessons
+            {t('noLessons')}
           </Text>
         ) : (
           lessons.map((lesson) => <LessonCard key={lesson.id} lesson={lesson} />)
@@ -277,9 +239,6 @@ const DayColumn = ({ day, lessons }: DayColumnProps) => {
   );
 };
 
-/**
- * LessonCard - Displays single lesson
- */
 interface LessonCardProps {
   lesson: SerializedLesson;
 }

@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { Button, Group, Text, Box, Stack, Card, Loader, Center } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import {
   useDailyLessons,
   type SerializedLesson,
@@ -11,30 +11,7 @@ import {
   buildLessonDetailUrl,
 } from '@/adapters/ui/features/lessons';
 import { formatFullDate, formatTimeRange } from '@/adapters/ui/utils/date-utils';
-
-/**
- * DailyLessonsView Component
- *
- * Displays lessons for a single day in detailed list view
- *
- * **Architectural Role:** Presentation component (adapter layer)
- * - Pure UI rendering - no business logic
- * - Delegates state management to useDailyLessons hook
- * - Transforms serialized data into detailed list UI
- * - Controlled component (accepts external state)
- *
- * **Applies:**
- * - Single Responsibility (SOLID): Only renders UI
- * - Information Expert (GRASP): Knows how to render daily lesson list
- * - Low Coupling: Depends on hook interface, not implementation
- * - Separation of Concerns: UI separated from state logic
- *
- * **Pattern:** Container/Presenter + Controlled Component
- * - Hook = container (state logic)
- * - Component = presenter (UI rendering)
- * - Parent controls date via props
- * - Consistent with Weekly/Monthly views
- */
+import { useTranslations } from 'next-intl';
 
 interface DailyLessonsViewProps {
   initialDate?: Date | null;
@@ -53,6 +30,7 @@ export const DailyLessonsView = ({ initialDate, onDateChange, onCanCreateChange 
     goToNextDay,
     goToToday,
   } = useDailyLessons({ initialDate, onDateChange });
+  const t = useTranslations();
 
   useEffect(() => {
     onCanCreateChange?.(canCreate);
@@ -60,7 +38,6 @@ export const DailyLessonsView = ({ initialDate, onDateChange, onCanCreateChange 
 
   return (
     <Stack gap="md">
-      {/* Day Navigation */}
       <Group justify="space-between">
         <Group>
           <Button
@@ -68,17 +45,17 @@ export const DailyLessonsView = ({ initialDate, onDateChange, onCanCreateChange 
             leftSection={<IconChevronLeft size={18} />}
             onClick={goToPreviousDay}
           >
-            Previous
+            {t('common.actions.previous')}
           </Button>
           <Button variant="outline" onClick={goToToday}>
-            Today
+            {t('common.actions.today')}
           </Button>
           <Button
             variant="subtle"
             rightSection={<IconChevronRight size={18} />}
             onClick={goToNextDay}
           >
-            Next
+            {t('common.actions.next')}
           </Button>
         </Group>
         <Box>
@@ -87,13 +64,12 @@ export const DailyLessonsView = ({ initialDate, onDateChange, onCanCreateChange 
           </Text>
           {isToday && (
             <Text size="xs" c="blue" ta="right">
-              Today
+              {t('common.actions.today')}
             </Text>
           )}
         </Box>
       </Group>
 
-      {/* Lessons List */}
       <Box style={{ minHeight: '400px' }}>
         {isLoading ? (
           <Center h="100%">
@@ -104,10 +80,10 @@ export const DailyLessonsView = ({ initialDate, onDateChange, onCanCreateChange 
             <Center h={200}>
               <Stack gap="xs" align="center">
                 <Text size="lg" c="dimmed">
-                  No lessons scheduled
+                  {t('lessons.daily.noLessons')}
                 </Text>
                 <Text size="sm" c="dimmed">
-                  {isToday ? 'for today' : 'for this day'}
+                  {isToday ? t('lessons.daily.forToday') : t('lessons.daily.forThisDay')}
                 </Text>
               </Stack>
             </Center>
@@ -124,15 +100,13 @@ export const DailyLessonsView = ({ initialDate, onDateChange, onCanCreateChange 
   );
 };
 
-/**
- * DetailedLessonCard - Detailed lesson card for daily view
- * Shows more information than weekly/monthly compact views
- */
 interface DetailedLessonCardProps {
   lesson: SerializedLesson;
 }
 
 const DetailedLessonCard = ({ lesson }: DetailedLessonCardProps) => {
+  const t = useTranslations('lessons.daily');
+
   return (
     <Link href={buildLessonDetailUrl(lesson.id, lesson.startDate)} style={{ textDecoration: 'none' }}>
       <Card padding="md" withBorder style={{ cursor: 'pointer' }}>
@@ -150,13 +124,13 @@ const DetailedLessonCard = ({ lesson }: DetailedLessonCardProps) => {
 
             <Group gap="xs">
               <Text size="sm" c="dimmed">
-                📚 {lesson.teacherIds.length} teacher(s)
+                {t('teachers', { count: lesson.teacherIds.length })}
               </Text>
               <Text size="sm" c="dimmed">
                 •
               </Text>
               <Text size="sm" c="dimmed">
-                👥 {lesson.pupilIds.length} pupil(s)
+                {t('pupils', { count: lesson.pupilIds.length })}
               </Text>
             </Group>
           </Stack>

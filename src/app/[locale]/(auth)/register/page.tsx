@@ -14,10 +14,12 @@ import {
   Group,
 } from '@mantine/core';
 import { IconCheck, IconX, IconClock } from '@tabler/icons-react';
+import { useTranslations } from 'next-intl';
 
 type MessageType = 'success' | 'error' | 'loading' | null;
 
 export default function RegisterPage() {
+  const t = useTranslations('auth.register');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,7 +28,7 @@ export default function RegisterPage() {
 
   const registerMutation = trpc.auth.register.useMutation({
     onSuccess: (data) => {
-      setMessage(`Success! User created: ${data.email} (ID: ${data.id})`);
+      setMessage(t('success', { email: data.email, id: data.id }));
       setMessageType('success');
       setName('');
       setEmail('');
@@ -40,7 +42,7 @@ export default function RegisterPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage('Creating user...');
+    setMessage(t('creating'));
     setMessageType('loading');
     registerMutation.mutate({ name, email, password });
   };
@@ -49,15 +51,15 @@ export default function RegisterPage() {
     <Container size="sm" py="xl">
       <Stack gap="lg">
         <Group>
-          <Title order={1}>Register New User</Title>
+          <Title order={1}>{t('title')}</Title>
         </Group>
 
         <Paper shadow="md" p="xl" radius="md" withBorder>
           <form onSubmit={handleSubmit}>
             <Stack gap="md">
               <TextInput
-                label="Name"
-                placeholder="John Doe"
+                label={t('name')}
+                placeholder={t('namePlaceholder')}
                 value={name}
                 onChange={(e) => setName(e.currentTarget.value)}
                 required
@@ -65,8 +67,8 @@ export default function RegisterPage() {
               />
 
               <TextInput
-                label="Email"
-                placeholder="john@example.com"
+                label={t('email')}
+                placeholder={t('emailPlaceholder')}
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.currentTarget.value)}
@@ -75,8 +77,8 @@ export default function RegisterPage() {
               />
 
               <PasswordInput
-                label="Password"
-                placeholder="Minimum 8 characters"
+                label={t('password')}
+                placeholder={t('passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.currentTarget.value)}
                 required
@@ -91,7 +93,7 @@ export default function RegisterPage() {
                 loading={registerMutation.isPending}
                 mt="sm"
               >
-                {registerMutation.isPending ? 'Creating...' : 'Register'}
+                {registerMutation.isPending ? t('submitting') : t('submit')}
               </Button>
             </Stack>
           </form>
@@ -110,10 +112,10 @@ export default function RegisterPage() {
             }
             title={
               messageType === 'success'
-                ? 'Success'
+                ? t('alertSuccess')
                 : messageType === 'error'
-                ? 'Error'
-                : 'Processing'
+                ? t('alertError')
+                : t('alertProcessing')
             }
             color={
               messageType === 'success'
@@ -126,7 +128,6 @@ export default function RegisterPage() {
             {message}
           </Alert>
         )}
-
       </Stack>
     </Container>
   );

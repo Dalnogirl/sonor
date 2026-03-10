@@ -1,6 +1,7 @@
 'use client';
 
 import { Modal, Stack, Text, Group, Button } from '@mantine/core';
+import { useTranslations } from 'next-intl';
 
 type DeleteLessonModalProps = {
   opened: boolean;
@@ -19,12 +20,15 @@ export function DeleteLessonModal({
   error,
   lessonTitle,
 }: DeleteLessonModalProps) {
+  const t = useTranslations('lessons.delete');
+  const tc = useTranslations('common');
+
   return (
-    <Modal opened={opened} onClose={onClose} title="Delete Lesson" centered>
+    <Modal opened={opened} onClose={onClose} title={t('title')} centered>
       <Stack>
-        <Text>Are you sure you want to delete &quot;{lessonTitle}&quot;?</Text>
+        <Text>{t('confirm', { title: lessonTitle })}</Text>
         <Text size="sm" c="dimmed">
-          This action cannot be undone.
+          {t('warning')}
         </Text>
         {error && (
           <Text c="red" size="sm">
@@ -33,10 +37,10 @@ export function DeleteLessonModal({
         )}
         <Group justify="flex-end" mt="md">
           <Button variant="default" onClick={onClose}>
-            Cancel
+            {tc('actions.cancel')}
           </Button>
           <Button color="red" onClick={onConfirm} loading={isPending}>
-            Delete
+            {tc('actions.delete')}
           </Button>
         </Group>
       </Stack>

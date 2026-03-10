@@ -14,6 +14,7 @@ import {
   formatTimeRange,
   formatDateTime,
 } from '@/adapters/ui/utils/date-utils';
+import { useTranslations } from 'next-intl';
 
 type Participant = {
   id: string;
@@ -57,6 +58,9 @@ export function LessonDetailView({
   onDeleteClick,
   onSkipClick,
 }: LessonDetailViewProps) {
+  const t = useTranslations('lessons.detail');
+  const tc = useTranslations('common');
+
   return (
     <Stack gap="lg">
       <Group justify="space-between" align="flex-start">
@@ -73,7 +77,7 @@ export function LessonDetailView({
             </Badge>
             {isRecurring && (
               <Badge variant="light" color="blue" size="lg">
-                Recurring
+                {t('recurring')}
               </Badge>
             )}
           </Group>
@@ -81,17 +85,17 @@ export function LessonDetailView({
         <Group>
           {permissions.canEdit && (
             <Button variant="outline" onClick={onEditClick}>
-              Edit
+              {tc('actions.edit')}
             </Button>
           )}
           {isRecurring && permissions.canSkip && (
             <Button color="orange" variant="outline" onClick={onSkipClick}>
-              Skip Occurrence
+              {t('skipOccurrence')}
             </Button>
           )}
           {permissions.canDelete && (
             <Button color="red" variant="outline" onClick={onDeleteClick}>
-              Delete
+              {tc('actions.delete')}
             </Button>
           )}
         </Group>
@@ -101,7 +105,7 @@ export function LessonDetailView({
         <Card withBorder>
           <Stack gap="xs">
             <Text fw={600} size="sm">
-              Description
+              {t('description')}
             </Text>
             <Text>{lesson.description}</Text>
           </Stack>
@@ -111,19 +115,19 @@ export function LessonDetailView({
       <Card withBorder>
         <Stack gap="xs">
           <Text fw={600} size="sm">
-            {hasOccurrenceContext ? 'Occurrence Schedule' : 'Schedule'}
+            {hasOccurrenceContext ? t('occurrenceSchedule') : t('schedule')}
           </Text>
           {hasOccurrenceContext ? (
             <Group>
               <div>
                 <Text size="xs" c="dimmed">
-                  Date
+                  {t('date')}
                 </Text>
                 <Text>{formatFullDate(occurrenceDate!)}</Text>
               </div>
               <div>
                 <Text size="xs" c="dimmed">
-                  Time
+                  {t('time')}
                 </Text>
                 <Text>{formatTimeRange(startDate, endDate)}</Text>
               </div>
@@ -132,13 +136,13 @@ export function LessonDetailView({
             <Group>
               <div>
                 <Text size="xs" c="dimmed">
-                  Start
+                  {t('start')}
                 </Text>
                 <Text>{formatDateTime(startDate)}</Text>
               </div>
               <div>
                 <Text size="xs" c="dimmed">
-                  End
+                  {t('end')}
                 </Text>
                 <Text>{formatDateTime(endDate)}</Text>
               </div>
@@ -150,11 +154,11 @@ export function LessonDetailView({
       <Card withBorder>
         <Stack gap="xs">
           <Text fw={600} size="sm">
-            Participants
+            {t('participants')}
           </Text>
           <div>
             <Text size="xs" c="dimmed">
-              Teachers
+              {t('teachers')}
             </Text>
             {lesson.teachers.length > 0 ? (
               <Stack gap="xs">
@@ -165,12 +169,12 @@ export function LessonDetailView({
                 ))}
               </Stack>
             ) : (
-              <Text c="dimmed">No teachers assigned</Text>
+              <Text c="dimmed">{t('noTeachers')}</Text>
             )}
           </div>
           <div>
             <Text size="xs" c="dimmed">
-              Pupils
+              {t('pupils')}
             </Text>
             {lesson.pupils.length > 0 ? (
               <Stack gap="xs">
@@ -181,7 +185,7 @@ export function LessonDetailView({
                 ))}
               </Stack>
             ) : (
-              <Text c="dimmed">No pupils assigned</Text>
+              <Text c="dimmed">{t('noPupils')}</Text>
             )}
           </div>
         </Stack>

@@ -13,18 +13,8 @@ import { DatePickerInput } from '@mantine/dates';
 import { UseFormReturnType } from '@mantine/form';
 import { CreateLessonFormValues } from '@/adapters/ui/validation/lesson-form.schema';
 import { RecurringFrequency, DayOfWeek } from '@/domain/models/RecurringPattern';
+import { useTranslations } from 'next-intl';
 
-/**
- * RecurringPatternFields
- *
- * Renders recurring pattern configuration fields
- *
- * **Applies:**
- * - Single Responsibility: Only renders recurring pattern fields
- * - Information Expert: Knows how to display recurring pattern options
- * - Protected Variations: Shields parent from recurring pattern complexity
- * - High Cohesion: Groups all recurring-related inputs
- */
 interface RecurringPatternFieldsProps {
   form: UseFormReturnType<CreateLessonFormValues>;
 }
@@ -32,12 +22,15 @@ interface RecurringPatternFieldsProps {
 export const RecurringPatternFields = ({
   form,
 }: RecurringPatternFieldsProps) => {
+  const t = useTranslations('lessons.fields');
+  const td = useTranslations('lessons.dayNames');
+
   return (
     <>
       <Divider my="md" />
 
       <Checkbox
-        label="Recurring Lesson"
+        label={t('recurring')}
         {...form.getInputProps('isRecurring', { type: 'checkbox' })}
       />
 
@@ -45,20 +38,20 @@ export const RecurringPatternFields = ({
         <Box>
           <Stack gap="md">
             <Select
-              label="Frequency"
-              placeholder="Select frequency"
+              label={t('frequency')}
+              placeholder={t('frequencyPlaceholder')}
               data={[
-                { value: RecurringFrequency.DAILY, label: 'Daily' },
-                { value: RecurringFrequency.WEEKLY, label: 'Weekly' },
-                { value: RecurringFrequency.MONTHLY, label: 'Monthly' },
+                { value: RecurringFrequency.DAILY, label: t('frequencyDaily') },
+                { value: RecurringFrequency.WEEKLY, label: t('frequencyWeekly') },
+                { value: RecurringFrequency.MONTHLY, label: t('frequencyMonthly') },
               ]}
               withAsterisk
               {...form.getInputProps('frequency')}
             />
 
             <NumberInput
-              label="Repeat every"
-              placeholder="Enter interval"
+              label={t('repeatEvery')}
+              placeholder={t('repeatPlaceholder')}
               min={1}
               withAsterisk
               {...form.getInputProps('interval')}
@@ -66,16 +59,16 @@ export const RecurringPatternFields = ({
 
             {form.values.frequency === RecurringFrequency.WEEKLY && (
               <MultiSelect
-                label="Days of Week"
-                placeholder="Select days"
+                label={t('daysOfWeek')}
+                placeholder={t('daysOfWeekPlaceholder')}
                 data={[
-                  { value: String(DayOfWeek.SUNDAY), label: 'Sunday' },
-                  { value: String(DayOfWeek.MONDAY), label: 'Monday' },
-                  { value: String(DayOfWeek.TUESDAY), label: 'Tuesday' },
-                  { value: String(DayOfWeek.WEDNESDAY), label: 'Wednesday' },
-                  { value: String(DayOfWeek.THURSDAY), label: 'Thursday' },
-                  { value: String(DayOfWeek.FRIDAY), label: 'Friday' },
-                  { value: String(DayOfWeek.SATURDAY), label: 'Saturday' },
+                  { value: String(DayOfWeek.SUNDAY), label: td('sunday') },
+                  { value: String(DayOfWeek.MONDAY), label: td('monday') },
+                  { value: String(DayOfWeek.TUESDAY), label: td('tuesday') },
+                  { value: String(DayOfWeek.WEDNESDAY), label: td('wednesday') },
+                  { value: String(DayOfWeek.THURSDAY), label: td('thursday') },
+                  { value: String(DayOfWeek.FRIDAY), label: td('friday') },
+                  { value: String(DayOfWeek.SATURDAY), label: td('saturday') },
                 ]}
                 withAsterisk
                 {...form.getInputProps('daysOfWeek')}
@@ -91,21 +84,21 @@ export const RecurringPatternFields = ({
 
             <Box>
               <Text size="sm" fw={500} mb="xs">
-                Ends
+                {t('ends')}
               </Text>
               <Radio.Group {...form.getInputProps('endType')}>
                 <Stack gap="xs">
-                  <Radio value="never" label="Never" />
-                  <Radio value="date" label="On date" />
-                  <Radio value="occurrences" label="After occurrences" />
+                  <Radio value="never" label={t('endsNever')} />
+                  <Radio value="date" label={t('endsOnDate')} />
+                  <Radio value="occurrences" label={t('endsAfterOccurrences')} />
                 </Stack>
               </Radio.Group>
             </Box>
 
             {form.values.endType === 'date' && (
               <DatePickerInput
-                label="End Date"
-                placeholder="Pick end date"
+                label={t('endDate')}
+                placeholder={t('endDatePlaceholder')}
                 minDate={form.values.day || new Date()}
                 withAsterisk
                 {...form.getInputProps('endDate')}
@@ -114,8 +107,8 @@ export const RecurringPatternFields = ({
 
             {form.values.endType === 'occurrences' && (
               <NumberInput
-                label="Number of Occurrences"
-                placeholder="Enter number"
+                label={t('occurrences')}
+                placeholder={t('occurrencesPlaceholder')}
                 min={1}
                 withAsterisk
                 {...form.getInputProps('occurrences')}

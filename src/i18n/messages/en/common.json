@@ -1,0 +1,33 @@
+{
+  "nav": {
+    "lessons": "My Lessons",
+    "users": "Users",
+    "profile": "Profile",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  },
+  "actions": {
+    "save": "Save Changes",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "previous": "Previous",
+    "prev": "Prev",
+    "next": "Next",
+    "today": "Today"
+  },
+  "status": {
+    "loading": "Loading...",
+    "today": "TODAY"
+  },
+  "app": {
+    "title": "Sonor",
+    "subtitle": "Welcome to your music school management application!"
+  },
+  "metadata": {
+    "title": "Sonor - Music School Management",
+    "description": "Fullstack music school management application"
+  }
+}

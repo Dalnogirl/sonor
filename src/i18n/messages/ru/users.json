@@ -1,0 +1,15 @@
+{
+  "page": {
+    "title": "Управление пользователями"
+  },
+  "list": {
+    "loading": "Загрузка пользователей...",
+    "errorTitle": "Ошибка",
+    "errorMessage": "Ошибка загрузки пользователей: {message}",
+    "noUsersTitle": "Нет пользователей",
+    "noUsersMessage": "Пользователи не найдены",
+    "nameColumn": "Имя",
+    "emailColumn": "Email",
+    "pageInfo": "Страница {page} • Показано {count} пользователей"
+  }
+}

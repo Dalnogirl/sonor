@@ -2,6 +2,7 @@
 
 import { Modal, Stack, Text, Group, Button } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
+import { useTranslations } from 'next-intl';
 
 type SkipOccurrenceModalProps = {
   opened: boolean;
@@ -22,13 +23,16 @@ export function SkipOccurrenceModal({
   date,
   onDateChange,
 }: SkipOccurrenceModalProps) {
+  const t = useTranslations('lessons.skip');
+  const tc = useTranslations('common');
+
   return (
-    <Modal opened={opened} onClose={onClose} title="Skip Occurrence" centered>
+    <Modal opened={opened} onClose={onClose} title={t('title')} centered>
       <Stack>
-        <Text>Select the date of the occurrence you want to skip.</Text>
+        <Text>{t('description')}</Text>
         <DatePickerInput
-          label="Occurrence Date"
-          placeholder="Select date"
+          label={t('dateLabel')}
+          placeholder={t('datePlaceholder')}
           value={date}
           onChange={(value) => onDateChange(value as Date | null)}
         />
@@ -39,10 +43,10 @@ export function SkipOccurrenceModal({
         )}
         <Group justify="flex-end" mt="md">
           <Button variant="default" onClick={onClose}>
-            Cancel
+            {tc('actions.cancel')}
           </Button>
           <Button onClick={onConfirm} loading={isPending} disabled={!date}>
-            Skip
+            {t('submit')}
           </Button>
         </Group>
       </Stack>

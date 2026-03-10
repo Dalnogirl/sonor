@@ -1,0 +1,114 @@
+{
+  "page": {
+    "title": "Lekcje",
+    "createLesson": "Utwórz lekcję"
+  },
+  "views": {
+    "daily": "Dzień",
+    "weekly": "Tydzień",
+    "monthly": "Miesiąc"
+  },
+  "daily": {
+    "noLessons": "Brak zaplanowanych lekcji",
+    "forToday": "na dziś",
+    "forThisDay": "na ten dzień",
+    "teachers": "{count} nauczyciel(i)",
+    "pupils": "{count} uczeń/uczniów"
+  },
+  "weekly": {
+    "noLessons": "Brak lekcji"
+  },
+  "monthly": {
+    "noLessons": "Brak lekcji",
+    "week": "Tydzień {number}",
+    "lessonCount": "{count} lekcja/lekcji",
+    "moreCount": "+{count} więcej",
+    "weekdays": {
+      "mon": "PN",
+      "tue": "WT",
+      "wed": "ŚR",
+      "thu": "CZW",
+      "fri": "PT",
+      "sat": "SOB",
+      "sun": "ND"
+    }
+  },
+  "detail": {
+    "recurring": "Cykliczna",
+    "description": "Opis",
+    "schedule": "Harmonogram",
+    "occurrenceSchedule": "Harmonogram zajęć",
+    "date": "Data",
+    "time": "Czas",
+    "start": "Początek",
+    "end": "Koniec",
+    "participants": "Uczestnicy",
+    "teachers": "Nauczyciele",
+    "pupils": "Uczniowie",
+    "noTeachers": "Brak przypisanych nauczycieli",
+    "noPupils": "Brak przypisanych uczniów",
+    "skipOccurrence": "Pomiń zajęcia",
+    "notFound": "Lekcja nie znaleziona"
+  },
+  "create": {
+    "title": "Utwórz nową lekcję",
+    "submit": "Utwórz lekcję"
+  },
+  "edit": {
+    "title": "Edytuj lekcję",
+    "submit": "Zapisz zmiany"
+  },
+  "delete": {
+    "title": "Usuń lekcję",
+    "confirm": "Czy na pewno chcesz usunąć \"{title}\"?",
+    "warning": "Tej operacji nie można cofnąć."
+  },
+  "skip": {
+    "title": "Pomiń zajęcia",
+    "description": "Wybierz datę zajęć, które chcesz pominąć.",
+    "dateLabel": "Data zajęć",
+    "datePlaceholder": "Wybierz datę",
+    "submit": "Pomiń"
+  },
+  "fields": {
+    "title": "Tytuł",
+    "titlePlaceholder": "Wprowadź tytuł lekcji",
+    "description": "Opis",
+    "descriptionPlaceholder": "Wprowadź opis lekcji",
+    "pupils": "Uczniowie",
+    "pupilsPlaceholder": "Wybierz uczniów",
+    "teachers": "Nauczyciele",
+    "teachersPlaceholder": "Wybierz nauczycieli",
+    "day": "Dzień",
+    "dayPlaceholder": "Wybierz dzień",
+    "startTime": "Początek",
+    "endTime": "Koniec",
+    "recurring": "Lekcja cykliczna",
+    "frequency": "Częstotliwość",
+    "frequencyPlaceholder": "Wybierz częstotliwość",
+    "frequencyDaily": "Codziennie",
+    "frequencyWeekly": "Co tydzień",
+    "frequencyMonthly": "Co miesiąc",
+    "repeatEvery": "Powtarzaj co",
+    "repeatPlaceholder": "Wprowadź interwał",
+    "daysOfWeek": "Dni tygodnia",
+    "daysOfWeekPlaceholder": "Wybierz dni",
+    "ends": "Kończy się",
+    "endsNever": "Nigdy",
+    "endsOnDate": "W dniu",
+    "endsAfterOccurrences": "Po liczbie zajęć",
+    "endDate": "Data zakończenia",
+    "endDatePlaceholder": "Wybierz datę zakończenia",
+    "occurrences": "Liczba zajęć",
+    "occurrencesPlaceholder": "Wprowadź liczbę"
+  },
+  "dayNames": {
+    "sunday": "Niedziela",
+    "monday": "Poniedziałek",
+    "tuesday": "Wtorek",
+    "wednesday": "Środa",
+    "thursday": "Czwartek",
+    "friday": "Piątek",
+    "saturday": "Sobota"
+  }
+}

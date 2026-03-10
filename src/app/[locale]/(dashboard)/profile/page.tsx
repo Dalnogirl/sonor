@@ -7,16 +7,25 @@ import {
   Avatar,
   Stack,
 } from '@mantine/core';
-import { redirect } from 'next/navigation';
+import { redirect } from '@/i18n/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getInitials } from '@/adapters/ui/utils/string-utils';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations('profile');
+
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
-    redirect('/login');
+    return redirect({ href: '/login', locale });
   }
 
   const { user } = session;
@@ -40,7 +49,7 @@ export default async function ProfilePage() {
 
           <div>
             <Text size="sm" fw={500} mb="xs">
-              User ID
+              {t('userId')}
             </Text>
             <Text size="sm" c="dimmed">
               {user.id}

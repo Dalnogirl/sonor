@@ -1,0 +1,15 @@
+{
+  "page": {
+    "title": "User Management"
+  },
+  "list": {
+    "loading": "Loading users...",
+    "errorTitle": "Error",
+    "errorMessage": "Error loading users: {message}",
+    "noUsersTitle": "No users",
+    "noUsersMessage": "No users found in the system",
+    "nameColumn": "Name",
+    "emailColumn": "Email",
+    "pageInfo": "Page {page} • Showing {count} users"
+  }
+}

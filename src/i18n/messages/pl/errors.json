@@ -1,0 +1,11 @@
+{
+  "LessonNotFoundError": "Lekcja nie znaleziona",
+  "UserNotFoundError": "Użytkownik nie znaleziony",
+  "UnauthorizedError": "Nie masz uprawnień do wykonania tej operacji",
+  "InvalidCredentialsError": "Nieprawidłowy email lub hasło",
+  "EmailAlreadyExistsError": "Ten email jest już zarejestrowany",
+  "LessonNotRecurringError": "Ta lekcja nie jest cykliczna",
+  "LessonExceptionAlreadyExistsError": "Wyjątek dla tej daty już istnieje",
+  "InvalidLessonExceptionError": "Nieprawidłowy wyjątek lekcji",
+  "unexpected": "Wystąpił nieoczekiwany błąd. Spróbuj ponownie."
+}

@@ -1,0 +1,33 @@
+{
+  "nav": {
+    "lessons": "Moje lekcje",
+    "users": "Użytkownicy",
+    "profile": "Profil",
+    "login": "Logowanie",
+    "register": "Rejestracja",
+    "logout": "Wyloguj"
+  },
+  "actions": {
+    "save": "Zapisz zmiany",
+    "cancel": "Anuluj",
+    "delete": "Usuń",
+    "edit": "Edytuj",
+    "create": "Utwórz",
+    "previous": "Poprzedni",
+    "prev": "Poprz",
+    "next": "Następny",
+    "today": "Dziś"
+  },
+  "status": {
+    "loading": "Ładowanie...",
+    "today": "DZIŚ"
+  },
+  "app": {
+    "title": "Sonor",
+    "subtitle": "Witamy w aplikacji do zarządzania szkołą muzyczną!"
+  },
+  "metadata": {
+    "title": "Sonor - Zarządzanie szkołą muzyczną",
+    "description": "Aplikacja do zarządzania szkołą muzyczną"
+  }
+}

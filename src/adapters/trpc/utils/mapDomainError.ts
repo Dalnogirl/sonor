@@ -42,11 +42,16 @@ export function mapDomainError(error: unknown): TRPCError {
   if (error instanceof DomainError) {
     const code =
       ERROR_MAP.get(error.constructor as DomainErrorConstructor) ?? 'BAD_REQUEST';
-    return new TRPCError({ code, message: error.message });
+    return new TRPCError({
+      code,
+      message: error.message,
+      cause: { errorCode: error.constructor.name },
+    });
   }
 
   return new TRPCError({
     code: 'INTERNAL_SERVER_ERROR',
     message: 'An unexpected error occurred.',
+    cause: { errorCode: 'unexpected' },
   });
 }

@@ -3,12 +3,14 @@
 import { Group, Avatar, Text, Menu, UnstyledButton, rem } from '@mantine/core';
 import { IconLogout, IconChevronDown } from '@tabler/icons-react';
 import { signOut, useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { getInitials } from '@/adapters/ui/utils/string-utils';
+import { useTranslations } from 'next-intl';
 
 export function UserInfo() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const t = useTranslations('common');
 
   if (status === 'loading' || !session?.user) {
     return null;
@@ -61,7 +63,7 @@ export function UserInfo() {
           }
           onClick={handleLogout}
         >
-          Logout
+          {t('nav.logout')}
         </Menu.Item>
       </Menu.Dropdown>
     </Menu>

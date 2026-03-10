@@ -1,0 +1,15 @@
+{
+  "page": {
+    "title": "Zarządzanie użytkownikami"
+  },
+  "list": {
+    "loading": "Ładowanie użytkowników...",
+    "errorTitle": "Błąd",
+    "errorMessage": "Błąd ładowania użytkowników: {message}",
+    "noUsersTitle": "Brak użytkowników",
+    "noUsersMessage": "Nie znaleziono użytkowników w systemie",
+    "nameColumn": "Imię",
+    "emailColumn": "Email",
+    "pageInfo": "Strona {page} • Pokazano {count} użytkowników"
+  }
+}

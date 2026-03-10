@@ -1,0 +1,114 @@
+{
+  "page": {
+    "title": "Уроки",
+    "createLesson": "Создать урок"
+  },
+  "views": {
+    "daily": "День",
+    "weekly": "Неделя",
+    "monthly": "Месяц"
+  },
+  "daily": {
+    "noLessons": "Нет запланированных уроков",
+    "forToday": "на сегодня",
+    "forThisDay": "на этот день",
+    "teachers": "{count} учитель(ей)",
+    "pupils": "{count} ученик(ов)"
+  },
+  "weekly": {
+    "noLessons": "Нет уроков"
+  },
+  "monthly": {
+    "noLessons": "Нет уроков",
+    "week": "Неделя {number}",
+    "lessonCount": "{count} урок(ов)",
+    "moreCount": "+{count} ещё",
+    "weekdays": {
+      "mon": "ПН",
+      "tue": "ВТ",
+      "wed": "СР",
+      "thu": "ЧТ",
+      "fri": "ПТ",
+      "sat": "СБ",
+      "sun": "ВС"
+    }
+  },
+  "detail": {
+    "recurring": "Повторяющийся",
+    "description": "Описание",
+    "schedule": "Расписание",
+    "occurrenceSchedule": "Расписание занятия",
+    "date": "Дата",
+    "time": "Время",
+    "start": "Начало",
+    "end": "Конец",
+    "participants": "Участники",
+    "teachers": "Учителя",
+    "pupils": "Ученики",
+    "noTeachers": "Учителя не назначены",
+    "noPupils": "Ученики не назначены",
+    "skipOccurrence": "Пропустить занятие",
+    "notFound": "Урок не найден"
+  },
+  "create": {
+    "title": "Создать новый урок",
+    "submit": "Создать урок"
+  },
+  "edit": {
+    "title": "Редактировать урок",
+    "submit": "Сохранить"
+  },
+  "delete": {
+    "title": "Удалить урок",
+    "confirm": "Вы уверены, что хотите удалить \"{title}\"?",
+    "warning": "Это действие нельзя отменить."
+  },
+  "skip": {
+    "title": "Пропустить занятие",
+    "description": "Выберите дату занятия, которое хотите пропустить.",
+    "dateLabel": "Дата занятия",
+    "datePlaceholder": "Выберите дату",
+    "submit": "Пропустить"
+  },
+  "fields": {
+    "title": "Название",
+    "titlePlaceholder": "Введите название урока",
+    "description": "Описание",
+    "descriptionPlaceholder": "Введите описание урока",
+    "pupils": "Ученики",
+    "pupilsPlaceholder": "Выберите учеников",
+    "teachers": "Учителя",
+    "teachersPlaceholder": "Выберите учителей",
+    "day": "День",
+    "dayPlaceholder": "Выберите день",
+    "startTime": "Начало",
+    "endTime": "Конец",
+    "recurring": "Повторяющийся урок",
+    "frequency": "Частота",
+    "frequencyPlaceholder": "Выберите частоту",
+    "frequencyDaily": "Ежедневно",
+    "frequencyWeekly": "Еженедельно",
+    "frequencyMonthly": "Ежемесячно",
+    "repeatEvery": "Повторять каждые",
+    "repeatPlaceholder": "Введите интервал",
+    "daysOfWeek": "Дни недели",
+    "daysOfWeekPlaceholder": "Выберите дни",
+    "ends": "Окончание",
+    "endsNever": "Никогда",
+    "endsOnDate": "В дату",
+    "endsAfterOccurrences": "После количества занятий",
+    "endDate": "Дата окончания",
+    "endDatePlaceholder": "Выберите дату окончания",
+    "occurrences": "Количество занятий",
+    "occurrencesPlaceholder": "Введите число"
+  },
+  "dayNames": {
+    "sunday": "Воскресенье",
+    "monday": "Понедельник",
+    "tuesday": "Вторник",
+    "wednesday": "Среда",
+    "thursday": "Четверг",
+    "friday": "Пятница",
+    "saturday": "Суббота"
+  }
+}

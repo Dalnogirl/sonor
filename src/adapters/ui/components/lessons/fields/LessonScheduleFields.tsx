@@ -2,40 +2,33 @@ import { Group, Flex } from '@mantine/core';
 import { DatePickerInput, TimePicker } from '@mantine/dates';
 import { UseFormReturnType } from '@mantine/form';
 import { CreateLessonFormValues } from '@/adapters/ui/validation/lesson-form.schema';
+import { useTranslations } from 'next-intl';
 
-/**
- * LessonScheduleFields
- *
- * Renders scheduling fields (day, start time, end time)
- *
- * **Applies:**
- * - Single Responsibility: Only renders schedule fields
- * - Information Expert: Knows how to display date/time inputs
- * - High Cohesion: Groups related scheduling inputs
- */
 interface LessonScheduleFieldsProps {
   form: UseFormReturnType<CreateLessonFormValues>;
 }
 
 export const LessonScheduleFields = ({ form }: LessonScheduleFieldsProps) => {
+  const t = useTranslations('lessons.fields');
+
   return (
     <>
       <Group grow>
         <DatePickerInput
-          label="Day"
-          placeholder="Pick day"
+          label={t('day')}
+          placeholder={t('dayPlaceholder')}
           withAsterisk
           {...form.getInputProps('day')}
         />
       </Group>
       <Flex justify="space-between">
         <TimePicker
-          label="Start"
+          label={t('startTime')}
           withAsterisk
           {...form.getInputProps('startTime')}
         />
         <TimePicker
-          label="End"
+          label={t('endTime')}
           withAsterisk
           {...form.getInputProps('endTime')}
         />

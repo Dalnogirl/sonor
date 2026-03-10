@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useDisclosure } from '@mantine/hooks';
 import { trpc } from '@/lib/trpc';
 import { parseOccurrenceDate } from '../services/lessonViewService';

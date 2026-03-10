@@ -12,7 +12,7 @@ import {
   Center,
 } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import {
   useMonthlyLessons,
   type SerializedLesson,
@@ -25,33 +25,7 @@ import {
   formatTimeRange,
   formatFullDate,
 } from '@/adapters/ui/utils/date-utils';
-
-/**
- * MonthlyLessonsView Component
- *
- * Displays lessons in a monthly calendar grid view
- *
- * **Architectural Role:** Presentation component (adapter layer)
- * - Pure UI rendering - no business logic
- * - Delegates state management to useMonthlyLessons hook
- * - Transforms serialized data into calendar UI
- * - Controlled component (accepts external state)
- * - CSS-based responsive design (no hydration issues)
- *
- * **Applies:**
- * - Single Responsibility (SOLID): Only renders UI
- * - Information Expert (GRASP): Knows how to render calendar grid
- * - Low Coupling: Depends on hook interface, not implementation
- * - Separation of Concerns: UI separated from state logic
- * - Protected Variations (GRASP): CSS handles breakpoints, not JS
- *
- * **Pattern:** Container/Presenter + Controlled Component
- * - Hook = container (state logic)
- * - Component = presenter (UI rendering)
- * - Parent controls date via props
- * - Mirrors WeeklyLessonsView for consistency
- * - Mantine's hiddenFrom/visibleFrom for responsive layouts
- */
+import { useTranslations } from 'next-intl';
 
 interface MonthlyLessonsViewProps {
   initialDate?: Date | null;
@@ -76,6 +50,7 @@ export const MonthlyLessonsView = ({
     goToNextMonth,
     goToToday,
   } = useMonthlyLessons({ initialDate, onDateChange });
+  const t = useTranslations('common');
 
   useEffect(() => {
     onCanCreateChange?.(canCreate);
@@ -85,7 +60,6 @@ export const MonthlyLessonsView = ({
 
   return (
     <Stack gap="md">
-      {/* Month Navigation */}
       <Group justify="space-between">
         <Group>
           <Button
@@ -95,10 +69,10 @@ export const MonthlyLessonsView = ({
             size={isMobile ? 'xs' : 'sm'}
           >
             <Box component="span" hiddenFrom="sm">
-              Prev
+              {t('actions.prev')}
             </Box>
             <Box component="span" visibleFrom="sm">
-              Previous
+              {t('actions.previous')}
             </Box>
           </Button>
           <Button
@@ -106,7 +80,7 @@ export const MonthlyLessonsView = ({
             onClick={goToToday}
             size={isMobile ? 'xs' : 'sm'}
           >
-            Today
+            {t('actions.today')}
           </Button>
           <Button
             variant="subtle"
@@ -114,7 +88,7 @@ export const MonthlyLessonsView = ({
             onClick={goToNextMonth}
             size={isMobile ? 'xs' : 'sm'}
           >
-            Next
+            {t('actions.next')}
           </Button>
         </Group>
         <Text fw={600} size={isMobile ? 'sm' : 'lg'}>
@@ -122,7 +96,6 @@ export const MonthlyLessonsView = ({
         </Text>
       </Group>
 
-      {/* Calendar Grid - Desktop vs Mobile Layout */}
       <Box style={{ minHeight: '300px' }}>
         {isLoading ? (
           <Center h="100%">
@@ -147,9 +120,6 @@ export const MonthlyLessonsView = ({
   );
 };
 
-/**
- * MonthlyDesktopLayout - 7-column calendar grid for desktop
- */
 interface MonthlyDesktopLayoutProps {
   monthDays: Date[];
   getLessonsForDay: (day: Date) => SerializedLesson[];
@@ -161,9 +131,11 @@ const MonthlyDesktopLayout = ({
   getLessonsForDay,
   paddingDays,
 }: MonthlyDesktopLayoutProps) => {
+  const t = useTranslations('lessons.monthly');
+  const weekdayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
+
   return (
     <Box>
-      {/* Weekday Headers */}
       <Box
         style={{
           display: 'grid',
@@ -172,14 +144,13 @@ const MonthlyDesktopLayout = ({
           marginBottom: '8px',
         }}
       >
-        {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map((day) => (
-          <Text key={day} size="xs" c="dimmed" ta="center" fw={600}>
-            {day}
+        {weekdayKeys.map((key) => (
+          <Text key={key} size="xs" c="dimmed" ta="center" fw={600}>
+            {t(`weekdays.${key}`)}
           </Text>
         ))}
       </Box>
 
-      {/* Calendar Days */}
       <Box
         style={{
           display: 'grid',
@@ -187,12 +158,10 @@ const MonthlyDesktopLayout = ({
           gap: '8px',
         }}
       >
-        {/* Padding for first week */}
         {paddingDays.map((_, i) => (
           <Box key={`padding-${i}`} style={{ minHeight: '100px' }} />
         ))}
 
-        {/* Actual days */}
         {monthDays.map((day) => (
           <DayCell
             key={day.toISOString()}
@@ -205,10 +174,6 @@ const MonthlyDesktopLayout = ({
   );
 };
 
-/**
- * MonthlyMobileLayout - List grouped by week for mobile
- * Shows days vertically with lesson counts
- */
 interface MonthlyMobileLayoutProps {
   weeks: Date[][];
   getLessonsForDay: (day: Date) => SerializedLesson[];
@@ -218,12 +183,14 @@ const MonthlyMobileLayout = ({
   weeks,
   getLessonsForDay,
 }: MonthlyMobileLayoutProps) => {
+  const t = useTranslations();
+
   return (
     <Stack gap="lg">
       {weeks.map((week, weekIndex) => (
         <div key={weekIndex}>
           <Text size="sm" fw={600} c="dimmed" mb="xs">
-            Week {weekIndex + 1}
+            {t('lessons.monthly.week', { number: weekIndex + 1 })}
           </Text>
           <Stack gap="xs">
             {week.map((day) => {
@@ -248,7 +215,7 @@ const MonthlyMobileLayout = ({
                       </Text>
                       {isToday && (
                         <Text size="xs" c="blue" fw={600}>
-                          TODAY
+                          {t('common.status.today')}
                         </Text>
                       )}
                     </div>
@@ -271,7 +238,7 @@ const MonthlyMobileLayout = ({
                             ))}
                             {dayLessons.length > 2 && (
                               <Text size="xs" c="dimmed">
-                                +{dayLessons.length - 2} more
+                                {t('lessons.monthly.moreCount', { count: dayLessons.length - 2 })}
                               </Text>
                             )}
                           </Stack>
@@ -279,7 +246,7 @@ const MonthlyMobileLayout = ({
                       </Group>
                     ) : (
                       <Text size="xs" c="dimmed">
-                        No lessons
+                        {t('lessons.monthly.noLessons')}
                       </Text>
                     )}
                   </Group>
@@ -293,9 +260,6 @@ const MonthlyMobileLayout = ({
   );
 };
 
-/**
- * DayCell - Displays single day in calendar with lessons (Desktop)
- */
 interface DayCellProps {
   day: Date;
   lessons: SerializedLesson[];
@@ -303,6 +267,7 @@ interface DayCellProps {
 
 const DayCell = ({ day, lessons }: DayCellProps) => {
   const isToday = isSameDay(day, new Date());
+  const t = useTranslations('lessons.monthly');
 
   return (
     <Card
@@ -323,7 +288,7 @@ const DayCell = ({ day, lessons }: DayCellProps) => {
         <Stack gap={4}>
           {lessons.length === 0 ? (
             <Text size="xs" c="dimmed" ta="center">
-              No lessons
+              {t('noLessons')}
             </Text>
           ) : (
             lessons.map((lesson) => (
@@ -336,9 +301,6 @@ const DayCell = ({ day, lessons }: DayCellProps) => {
   );
 };
 
-/**
- * CompactLessonCard - Compact lesson display for calendar cells
- */
 interface CompactLessonCardProps {
   lesson: SerializedLesson;
 }

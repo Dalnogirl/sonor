@@ -1,0 +1,114 @@
+{
+  "page": {
+    "title": "Lessons",
+    "createLesson": "Create Lesson"
+  },
+  "views": {
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly"
+  },
+  "daily": {
+    "noLessons": "No lessons scheduled",
+    "forToday": "for today",
+    "forThisDay": "for this day",
+    "teachers": "{count} teacher(s)",
+    "pupils": "{count} pupil(s)"
+  },
+  "weekly": {
+    "noLessons": "No lessons"
+  },
+  "monthly": {
+    "noLessons": "No lessons",
+    "week": "Week {number}",
+    "lessonCount": "{count} lesson{count, plural, one {} other {s}}",
+    "moreCount": "+{count} more",
+    "weekdays": {
+      "mon": "MON",
+      "tue": "TUE",
+      "wed": "WED",
+      "thu": "THU",
+      "fri": "FRI",
+      "sat": "SAT",
+      "sun": "SUN"
+    }
+  },
+  "detail": {
+    "recurring": "Recurring",
+    "description": "Description",
+    "schedule": "Schedule",
+    "occurrenceSchedule": "Occurrence Schedule",
+    "date": "Date",
+    "time": "Time",
+    "start": "Start",
+    "end": "End",
+    "participants": "Participants",
+    "teachers": "Teachers",
+    "pupils": "Pupils",
+    "noTeachers": "No teachers assigned",
+    "noPupils": "No pupils assigned",
+    "skipOccurrence": "Skip Occurrence",
+    "notFound": "Lesson not found"
+  },
+  "create": {
+    "title": "Create New Lesson",
+    "submit": "Create Lesson"
+  },
+  "edit": {
+    "title": "Edit Lesson",
+    "submit": "Save Changes"
+  },
+  "delete": {
+    "title": "Delete Lesson",
+    "confirm": "Are you sure you want to delete \"{title}\"?",
+    "warning": "This action cannot be undone."
+  },
+  "skip": {
+    "title": "Skip Occurrence",
+    "description": "Select the date of the occurrence you want to skip.",
+    "dateLabel": "Occurrence Date",
+    "datePlaceholder": "Select date",
+    "submit": "Skip"
+  },
+  "fields": {
+    "title": "Title",
+    "titlePlaceholder": "Enter lesson title",
+    "description": "Description",
+    "descriptionPlaceholder": "Enter lesson description",
+    "pupils": "Pupils",
+    "pupilsPlaceholder": "Select pupils",
+    "teachers": "Teachers",
+    "teachersPlaceholder": "Select teachers",
+    "day": "Day",
+    "dayPlaceholder": "Pick day",
+    "startTime": "Start",
+    "endTime": "End",
+    "recurring": "Recurring Lesson",
+    "frequency": "Frequency",
+    "frequencyPlaceholder": "Select frequency",
+    "frequencyDaily": "Daily",
+    "frequencyWeekly": "Weekly",
+    "frequencyMonthly": "Monthly",
+    "repeatEvery": "Repeat every",
+    "repeatPlaceholder": "Enter interval",
+    "daysOfWeek": "Days of Week",
+    "daysOfWeekPlaceholder": "Select days",
+    "ends": "Ends",
+    "endsNever": "Never",
+    "endsOnDate": "On date",
+    "endsAfterOccurrences": "After occurrences",
+    "endDate": "End Date",
+    "endDatePlaceholder": "Pick end date",
+    "occurrences": "Number of Occurrences",
+    "occurrencesPlaceholder": "Enter number"
+  },
+  "dayNames": {
+    "sunday": "Sunday",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday"
+  }
+}

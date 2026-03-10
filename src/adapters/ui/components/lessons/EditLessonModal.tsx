@@ -8,6 +8,7 @@ import { LessonParticipantsFields } from './fields/LessonParticipantsFields';
 import { LessonScheduleFields } from './fields/LessonScheduleFields';
 import { RecurringPatternFields } from './fields/RecurringPatternFields';
 import { LessonWithUsersResponseDTO } from '@/application/dto/lesson/LessonWithUsersResponseDTO';
+import { useTranslations } from 'next-intl';
 
 interface EditLessonModalProps {
   opened: boolean;
@@ -24,12 +25,13 @@ export const EditLessonModal = ({
     lesson,
     onClose
   );
+  const t = useTranslations('lessons.edit');
 
   return (
     <Modal
       opened={opened}
       onClose={onClose}
-      title="Edit Lesson"
+      title={t('title')}
       centered
       size="lg"
     >
@@ -41,7 +43,7 @@ export const EditLessonModal = ({
           <RecurringPatternFields form={form} />
 
           <Button type="submit" fullWidth mt="md" loading={isSubmitting}>
-            Save Changes
+            {t('submit')}
           </Button>
         </Stack>
       </form>

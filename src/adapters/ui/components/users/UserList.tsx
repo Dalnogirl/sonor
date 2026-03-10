@@ -13,10 +13,12 @@ import {
 } from '@mantine/core';
 import { IconAlertCircle, IconUser } from '@tabler/icons-react';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 export function UserList() {
   const [page, setPage] = useState(1);
   const pageSize = 10;
+  const t = useTranslations('users.list');
 
   const { data: users, isLoading, error } = useUsers({ page, pageSize });
 
@@ -24,29 +26,27 @@ export function UserList() {
     return (
       <Stack align="center" py="xl">
         <Loader size="lg" />
-        <Text c="dimmed">Loading users...</Text>
+        <Text c="dimmed">{t('loading')}</Text>
       </Stack>
     );
   }
 
   if (error) {
     return (
-      <Alert icon={<IconAlertCircle size={16} />} title="Error" color="red">
-        Error loading users: {error.message}
+      <Alert icon={<IconAlertCircle size={16} />} title={t('errorTitle')} color="red">
+        {t('errorMessage', { message: error.message })}
       </Alert>
     );
   }
 
   if (!users || users.length === 0) {
     return (
-      <Alert icon={<IconUser size={16} />} title="No users" color="blue">
-        No users found in the system
+      <Alert icon={<IconUser size={16} />} title={t('noUsersTitle')} color="blue">
+        {t('noUsersMessage')}
       </Alert>
     );
   }
 
-  // Basic pagination - estimate total pages (since backend doesn't return count yet)
-  // If we got fewer users than pageSize, we're on the last page
   const estimatedTotalPages = users.length < pageSize ? page : page + 1;
 
   return (
@@ -55,8 +55,8 @@ export function UserList() {
         <Table striped highlightOnHover>
           <Table.Thead>
             <Table.Tr>
-              <Table.Th>Name</Table.Th>
-              <Table.Th>Email</Table.Th>
+              <Table.Th>{t('nameColumn')}</Table.Th>
+              <Table.Th>{t('emailColumn')}</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -76,7 +76,7 @@ export function UserList() {
 
       <Group justify="space-between">
         <Text size="sm" c="dimmed">
-          Page {page} • Showing {users.length} users
+          {t('pageInfo', { page, count: users.length })}
         </Text>
         <Pagination
           value={page}

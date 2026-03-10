@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import {
   Container,
   Title,
@@ -17,27 +17,14 @@ import {
   Anchor,
 } from '@mantine/core';
 import { IconLogin, IconX, IconCheck } from '@tabler/icons-react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 
 type MessageType = 'success' | 'error' | null;
 
-/**
- * Login Page - UI Adapter (Hexagonal Architecture)
- *
- * This component adapts user input to NextAuth, which internally
- * uses LoginUseCase through CredentialsProvider in auth.ts
- *
- * Responsibilities:
- * - UI presentation and form handling
- * - Input validation (client-side)
- * - Calls NextAuth signIn (adapter to authentication system)
- *
- * Business Logic Location:
- * - LoginUseCase: application/use-cases/auth/LoginUseCase.ts
- * - Wired in: lib/auth.ts via NextAuth CredentialsProvider
- */
 export default function LoginPage() {
   const router = useRouter();
+  const t = useTranslations('auth.login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -51,27 +38,24 @@ export default function LoginPage() {
     setMessageType(null);
 
     try {
-      // NextAuth signIn - calls CredentialsProvider which uses LoginUseCase
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false, // Handle redirect manually for better UX
+        redirect: false,
       });
 
       if (result?.error) {
-        setMessage('Invalid email or password');
-
+        setMessage(t('invalidCredentials'));
         setMessageType('error');
         setIsLoading(false);
       } else if (result?.ok) {
-        setMessage('Login successful! Redirecting...');
+        setMessage(t('success'));
         setMessageType('success');
-        // Redirect to dashboard after successful login
         router.push('/users');
-        router.refresh(); // Refresh to update session
+        router.refresh();
       }
     } catch {
-      setMessage('An unexpected error occurred. Please try again.');
+      setMessage(t('unexpectedError'));
       setMessageType('error');
       setIsLoading(false);
     }
@@ -81,15 +65,15 @@ export default function LoginPage() {
     <Container size="sm" py="xl">
       <Stack gap="lg">
         <Group>
-          <Title order={1}>Login</Title>
+          <Title order={1}>{t('title')}</Title>
         </Group>
 
         <Paper shadow="md" p="xl" radius="md" withBorder>
           <form onSubmit={handleSubmit}>
             <Stack gap="md">
               <TextInput
-                label="Email"
-                placeholder="john@example.com"
+                label={t('email')}
+                placeholder={t('emailPlaceholder')}
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.currentTarget.value)}
@@ -99,8 +83,8 @@ export default function LoginPage() {
               />
 
               <PasswordInput
-                label="Password"
-                placeholder="Enter your password"
+                label={t('password')}
+                placeholder={t('passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.currentTarget.value)}
                 required
@@ -131,13 +115,13 @@ export default function LoginPage() {
                 leftSection={<IconLogin size={18} />}
                 mt="sm"
               >
-                {isLoading ? 'Logging in...' : 'Login'}
+                {isLoading ? t('submitting') : t('submit')}
               </Button>
 
               <Text size="sm" ta="center" mt="md">
-                Don&apos;t have an account?{' '}
+                {t('noAccount')}{' '}
                 <Anchor component={Link} href="/register">
-                  Register here
+                  {t('registerLink')}
                 </Anchor>
               </Text>
             </Stack>

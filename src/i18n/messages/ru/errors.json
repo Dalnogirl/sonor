@@ -1,0 +1,11 @@
+{
+  "LessonNotFoundError": "Урок не найден",
+  "UserNotFoundError": "Пользователь не найден",
+  "UnauthorizedError": "У вас нет прав для выполнения этого действия",
+  "InvalidCredentialsError": "Неверный email или пароль",
+  "EmailAlreadyExistsError": "Этот email уже зарегистрирован",
+  "LessonNotRecurringError": "Этот урок не является повторяющимся",
+  "LessonExceptionAlreadyExistsError": "Исключение для этой даты уже существует",
+  "InvalidLessonExceptionError": "Недопустимое исключение урока",
+  "unexpected": "Произошла непредвиденная ошибка. Попробуйте снова."
+}
