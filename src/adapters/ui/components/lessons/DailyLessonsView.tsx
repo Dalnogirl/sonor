@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Button, Group, Text, Box, Stack, Card, Loader, Center } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import Link from 'next/link';
@@ -38,18 +39,24 @@ import { formatFullDate, formatTimeRange } from '@/adapters/ui/utils/date-utils'
 interface DailyLessonsViewProps {
   initialDate?: Date | null;
   onDateChange?: (date: Date) => void;
+  onCanCreateChange?: (canCreate: boolean) => void;
 }
 
-export const DailyLessonsView = ({ initialDate, onDateChange }: DailyLessonsViewProps) => {
+export const DailyLessonsView = ({ initialDate, onDateChange, onCanCreateChange }: DailyLessonsViewProps) => {
   const {
     currentDay,
     lessons,
+    canCreate,
     isLoading,
     isToday,
     goToPreviousDay,
     goToNextDay,
     goToToday,
   } = useDailyLessons({ initialDate, onDateChange });
+
+  useEffect(() => {
+    onCanCreateChange?.(canCreate);
+  }, [canCreate, onCanCreateChange]);
 
   return (
     <Stack gap="md">

@@ -1,4 +1,5 @@
 export {
+  type LessonPermissions,
   type SerializedLesson,
   getLessonsForDay,
   sortLessonsByTime,

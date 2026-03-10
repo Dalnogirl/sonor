@@ -30,13 +30,16 @@ export const useDailyLessons = (options: UseDailyLessonsOptions = {}) => {
 
   const dayEnd = useMemo(() => endOfDay(currentDay), [currentDay]);
 
-  const { data: lessons, isLoading, error } = trpc.lesson.getMyTeachingLessonsForPeriod.useQuery({
+  const { data, isLoading, error } = trpc.lesson.getMyTeachingLessonsForPeriod.useQuery({
     startDate: currentDay,
     endDate: dayEnd,
   });
 
+  const lessons = data?.lessons ?? [];
+  const canCreate = data?.canCreate ?? false;
+
   const sortedLessons = useMemo(
-    () => sortLessonsByTime((lessons || []) as SerializedLesson[]),
+    () => sortLessonsByTime(lessons as SerializedLesson[]),
     [lessons]
   );
 
@@ -69,6 +72,7 @@ export const useDailyLessons = (options: UseDailyLessonsOptions = {}) => {
     dayEnd,
     isToday,
     lessons: sortedLessons,
+    canCreate,
     isLoading,
     error,
     goToPreviousDay,

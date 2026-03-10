@@ -57,7 +57,7 @@ export const useMonthlyLessons = (options: UseMonthlyLessonsOptions = {}) => {
   // Week groups for mobile layout
   const weeks = useMemo(() => groupDaysByWeek(monthDays), [monthDays]);
 
-  const { data: lessons, isLoading, error } =
+  const { data, isLoading, error } =
     trpc.lesson.getMyTeachingLessonsForPeriod.useQuery(
       {
         startDate: currentMonthStart,
@@ -66,8 +66,11 @@ export const useMonthlyLessons = (options: UseMonthlyLessonsOptions = {}) => {
       { staleTime: 5 * 60 * 1000 }
     );
 
+  const lessons = data?.lessons ?? [];
+  const canCreate = data?.canCreate ?? false;
+
   const getLessonsForDayMemo = useMemo(() => {
-    const lessonsArray = (lessons || []) as SerializedLesson[];
+    const lessonsArray = lessons as SerializedLesson[];
     return (day: Date) => getLessonsForDay(lessonsArray, day);
   }, [lessons]);
 
@@ -97,7 +100,8 @@ export const useMonthlyLessons = (options: UseMonthlyLessonsOptions = {}) => {
     monthDays,
     paddingDays,
     weeks,
-    lessons: (lessons || []) as SerializedLesson[],
+    lessons: lessons as SerializedLesson[],
+    canCreate,
     getLessonsForDay: getLessonsForDayMemo,
     isLoading,
     error,

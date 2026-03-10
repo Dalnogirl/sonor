@@ -48,9 +48,9 @@ function CustomMantineProvider({ children }: { children: React.ReactNode }) {
         primaryColor: accentColor, // Main accent color - affects buttons, links, etc.
         // You can use: blue, cyan, teal, green, lime, yellow, orange, red, pink, grape, violet, indigo
 
-        // Optional: customize other theme aspects
-        // fontFamily: 'Your Font, sans-serif',
-        // headings: { fontFamily: 'Your Heading Font, serif' },
+        fontFamily: 'var(--font-jetbrains-mono), monospace',
+        fontFamilyMonospace: 'var(--font-jetbrains-mono), monospace',
+        headings: { fontFamily: 'var(--font-jetbrains-mono), monospace' },
         components: {
           Avatar: {
             defaultProps: {

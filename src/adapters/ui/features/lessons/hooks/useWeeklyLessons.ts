@@ -33,13 +33,16 @@ export const useWeeklyLessons = (options: UseWeeklyLessonsOptions = {}) => {
   const weekEnd = useMemo(() => getWeekEnd(currentWeekStart), [currentWeekStart]);
   const weekDays = useMemo(() => generateWeekDays(currentWeekStart), [currentWeekStart]);
 
-  const { data: lessons, isLoading, error } = trpc.lesson.getMyTeachingLessonsForPeriod.useQuery({
+  const { data, isLoading, error } = trpc.lesson.getMyTeachingLessonsForPeriod.useQuery({
     startDate: currentWeekStart,
     endDate: weekEnd,
   });
 
+  const lessons = data?.lessons ?? [];
+  const canCreate = data?.canCreate ?? false;
+
   const getLessonsForDayMemo = useMemo(() => {
-    const lessonsArray = (lessons || []) as SerializedLesson[];
+    const lessonsArray = lessons as SerializedLesson[];
     return (day: Date) => getLessonsForDay(lessonsArray, day);
   }, [lessons]);
 
@@ -67,7 +70,8 @@ export const useWeeklyLessons = (options: UseWeeklyLessonsOptions = {}) => {
     currentWeekStart,
     weekEnd,
     weekDays,
-    lessons: (lessons || []) as SerializedLesson[],
+    lessons: lessons as SerializedLesson[],
+    canCreate,
     getLessonsForDay: getLessonsForDayMemo,
     isLoading,
     error,

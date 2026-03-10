@@ -61,6 +61,11 @@ export const useLessonDetail = () => {
   const endDate = lesson ? new Date(lesson.endDate) : null;
   const isRecurring = !!lesson?.recurringPattern;
   const hasOccurrenceContext = isRecurring && !!occurrenceDate;
+  const permissions = lesson?.permissions ?? {
+    canEdit: false,
+    canDelete: false,
+    canSkip: false,
+  };
 
   return {
     // Core data
@@ -75,6 +80,7 @@ export const useLessonDetail = () => {
     occurrenceDate,
     isRecurring,
     hasOccurrenceContext,
+    permissions,
 
     // Edit modal
     editModal: {

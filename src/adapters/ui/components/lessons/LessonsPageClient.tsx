@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback, useState } from 'react';
 import {
   Button,
   Container,
@@ -8,7 +9,6 @@ import {
   SegmentedControl,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import React from 'react';
 import { CreateLessonModal } from '@/adapters/ui/components/lessons/CreateLessonModal';
 import { DailyLessonsView } from '@/adapters/ui/components/lessons/DailyLessonsView';
 import { WeeklyLessonsView } from '@/adapters/ui/components/lessons/WeeklyLessonsView';
@@ -17,6 +17,8 @@ import { useLessonsViewState } from '@/adapters/ui/features/lessons';
 
 export const LessonsPageClient = () => {
   const [opened, { open, close }] = useDisclosure(false);
+  const [canCreate, setCanCreate] = useState(false);
+  const handleCanCreateChange = useCallback((value: boolean) => setCanCreate(value), []);
   const { viewMode, currentDate, setViewMode, setCurrentDate } =
     useLessonsViewState();
 
@@ -31,7 +33,7 @@ export const LessonsPageClient = () => {
           }}
         >
           <Title order={1}>Lessons</Title>
-          <Button onClick={open}>Create Lesson</Button>
+          {canCreate && <Button onClick={open}>Create Lesson</Button>}
         </div>
 
         <SegmentedControl
@@ -50,16 +52,19 @@ export const LessonsPageClient = () => {
           <DailyLessonsView
             initialDate={currentDate}
             onDateChange={setCurrentDate}
+            onCanCreateChange={handleCanCreateChange}
           />
         ) : viewMode === 'weekly' ? (
           <WeeklyLessonsView
             initialDate={currentDate}
             onDateChange={setCurrentDate}
+            onCanCreateChange={handleCanCreateChange}
           />
         ) : (
           <MonthlyLessonsView
             initialDate={currentDate}
             onDateChange={setCurrentDate}
+            onCanCreateChange={handleCanCreateChange}
           />
         )}
       </Stack>

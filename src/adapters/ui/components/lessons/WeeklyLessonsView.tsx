@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Button, Group, Text, Box, Stack, Card, Loader, Center } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import Link from 'next/link';
@@ -46,19 +47,25 @@ import {
 interface WeeklyLessonsViewProps {
   initialDate?: Date | null;
   onDateChange?: (date: Date) => void;
+  onCanCreateChange?: (canCreate: boolean) => void;
 }
 
-export const WeeklyLessonsView = ({ initialDate, onDateChange }: WeeklyLessonsViewProps) => {
+export const WeeklyLessonsView = ({ initialDate, onDateChange, onCanCreateChange }: WeeklyLessonsViewProps) => {
   const {
     currentWeekStart,
     weekEnd,
     weekDays,
+    canCreate,
     getLessonsForDay,
     isLoading,
     goToPreviousWeek,
     goToNextWeek,
     goToToday,
   } = useWeeklyLessons({ initialDate, onDateChange });
+
+  useEffect(() => {
+    onCanCreateChange?.(canCreate);
+  }, [canCreate, onCanCreateChange]);
 
   const isMobile = useIsMobile();
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import {
   Button,
   Group,
@@ -55,23 +56,30 @@ import {
 interface MonthlyLessonsViewProps {
   initialDate?: Date | null;
   onDateChange?: (date: Date) => void;
+  onCanCreateChange?: (canCreate: boolean) => void;
 }
 
 export const MonthlyLessonsView = ({
   initialDate,
   onDateChange,
+  onCanCreateChange,
 }: MonthlyLessonsViewProps) => {
   const {
     currentMonthStart,
     monthDays,
     paddingDays,
     weeks,
+    canCreate,
     getLessonsForDay,
     isLoading,
     goToPreviousMonth,
     goToNextMonth,
     goToToday,
   } = useMonthlyLessons({ initialDate, onDateChange });
+
+  useEffect(() => {
+    onCanCreateChange?.(canCreate);
+  }, [canCreate, onCanCreateChange]);
 
   const isMobile = useIsMobile();
 

@@ -3,6 +3,12 @@ import { isSameDay, getWeekStart } from '@/adapters/ui/utils/date-utils';
 /**
  * SerializedLesson type - lessons after tRPC serialization
  */
+export type LessonPermissions = {
+  canEdit: boolean;
+  canDelete: boolean;
+  canSkip: boolean;
+};
+
 export type SerializedLesson = {
   id: string;
   title: string;
@@ -13,6 +19,7 @@ export type SerializedLesson = {
   endDate: string;
   createdAt: string;
   updatedAt: string;
+  permissions: LessonPermissions;
 };
 
 /**

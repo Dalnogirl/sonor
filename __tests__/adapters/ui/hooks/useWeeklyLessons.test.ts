@@ -32,6 +32,8 @@ vi.mock('@/lib/trpc', () => ({
 }));
 
 describe('useWeeklyLessons', () => {
+  const mockPermissions = { canEdit: true, canDelete: true, canSkip: true };
+
   const mockLessons = [
     {
       id: '1',
@@ -43,6 +45,7 @@ describe('useWeeklyLessons', () => {
       endDate: '2025-11-10T11:00:00Z',
       createdAt: '2025-11-01T00:00:00Z',
       updatedAt: '2025-11-01T00:00:00Z',
+      permissions: mockPermissions,
     },
     {
       id: '2',
@@ -54,14 +57,17 @@ describe('useWeeklyLessons', () => {
       endDate: '2025-11-11T15:30:00Z',
       createdAt: '2025-11-01T00:00:00Z',
       updatedAt: '2025-11-01T00:00:00Z',
+      permissions: mockPermissions,
     },
   ];
+
+  const mockListResponse = { lessons: mockLessons, canCreate: true };
 
   beforeEach(() => {
     vi.clearAllMocks();
     // Default mock: successful query with data
     mockUseQuery.mockReturnValue({
-      data: mockLessons,
+      data: mockListResponse,
       isLoading: false,
       error: null,
     });
@@ -112,6 +118,12 @@ describe('useWeeklyLessons', () => {
       expect(result.current.error).toBe(null);
     });
 
+    it('should expose canCreate from response', () => {
+      const { result } = renderHook(() => useWeeklyLessons());
+
+      expect(result.current.canCreate).toBe(true);
+    });
+
     it('should return empty array when no data', () => {
       mockUseQuery.mockReturnValue({
         data: undefined,
@@ -122,6 +134,7 @@ describe('useWeeklyLessons', () => {
       const { result } = renderHook(() => useWeeklyLessons());
 
       expect(result.current.lessons).toEqual([]);
+      expect(result.current.canCreate).toBe(false);
     });
 
     it('should expose loading state', () => {
@@ -384,6 +397,7 @@ describe('useWeeklyLessons', () => {
       expect(result.current).toHaveProperty('weekEnd');
       expect(result.current).toHaveProperty('weekDays');
       expect(result.current).toHaveProperty('lessons');
+      expect(result.current).toHaveProperty('canCreate');
       expect(result.current).toHaveProperty('isLoading');
       expect(result.current).toHaveProperty('error');
       expect(result.current).toHaveProperty('goToPreviousWeek');

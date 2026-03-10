@@ -21,6 +21,12 @@ type Participant = {
   email: string;
 };
 
+type LessonPermissions = {
+  canEdit: boolean;
+  canDelete: boolean;
+  canSkip: boolean;
+};
+
 type LessonDetailViewProps = {
   lesson: {
     title: string;
@@ -33,6 +39,7 @@ type LessonDetailViewProps = {
   occurrenceDate: Date | null;
   isRecurring: boolean;
   hasOccurrenceContext: boolean;
+  permissions: LessonPermissions;
   onEditClick: () => void;
   onDeleteClick: () => void;
   onSkipClick: () => void;
@@ -45,6 +52,7 @@ export function LessonDetailView({
   occurrenceDate,
   isRecurring,
   hasOccurrenceContext,
+  permissions,
   onEditClick,
   onDeleteClick,
   onSkipClick,
@@ -71,17 +79,21 @@ export function LessonDetailView({
           </Group>
         </div>
         <Group>
-          <Button variant="outline" onClick={onEditClick}>
-            Edit
-          </Button>
-          {isRecurring && (
+          {permissions.canEdit && (
+            <Button variant="outline" onClick={onEditClick}>
+              Edit
+            </Button>
+          )}
+          {isRecurring && permissions.canSkip && (
             <Button color="orange" variant="outline" onClick={onSkipClick}>
               Skip Occurrence
             </Button>
           )}
-          <Button color="red" variant="outline" onClick={onDeleteClick}>
-            Delete
-          </Button>
+          {permissions.canDelete && (
+            <Button color="red" variant="outline" onClick={onDeleteClick}>
+              Delete
+            </Button>
+          )}
         </Group>
       </Group>
 

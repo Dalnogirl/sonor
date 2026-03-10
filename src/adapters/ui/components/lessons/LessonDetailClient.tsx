@@ -17,6 +17,7 @@ export function LessonDetailClient() {
     occurrenceDate,
     isRecurring,
     hasOccurrenceContext,
+    permissions,
     editModal,
     deleteModal,
     skipModal,
@@ -74,6 +75,7 @@ export function LessonDetailClient() {
         occurrenceDate={occurrenceDate}
         isRecurring={isRecurring}
         hasOccurrenceContext={hasOccurrenceContext}
+        permissions={permissions}
         onEditClick={editModal.open}
         onDeleteClick={deleteModal.open}
         onSkipClick={skipModal.open}

@@ -5,6 +5,12 @@ import { ColorSchemeScript } from '@mantine/core';
 import { AppLayout } from '@/adapters/ui/components/shared/AppLayout';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { JetBrains_Mono } from 'next/font/google';
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
+});
 
 export const metadata: Metadata = {
   title: 'Sonor - Music School Management',
@@ -22,7 +28,7 @@ export default async function RootLayout({
       <head>
         <ColorSchemeScript defaultColorScheme="auto" />
       </head>
-      <body>
+      <body className={jetbrainsMono.variable}>
         <Providers session={session}>
           <AppLayout>{children}</AppLayout>
         </Providers>
