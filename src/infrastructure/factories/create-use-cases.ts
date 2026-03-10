@@ -61,7 +61,9 @@ export const createUseCases = (repositories: Repositories) => {
         repositories.lessonRepository,
         repositories.lessonExceptionRepository,
         occurrenceGeneratorService,
-        lessonMapper
+        lessonMapper,
+        repositories.userRepository,
+        lessonAuthService
       ),
       createLesson: new CreateLessonUseCase(
         repositories.lessonRepository,
@@ -72,7 +74,8 @@ export const createUseCases = (repositories: Repositories) => {
       getLesson: new GetLessonUseCase(
         repositories.lessonRepository,
         repositories.userRepository,
-        lessonMapper
+        lessonMapper,
+        lessonAuthService
       ),
       deleteLesson: new DeleteLessonUseCase(
         repositories.lessonRepository,

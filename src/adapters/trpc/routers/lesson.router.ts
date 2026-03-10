@@ -52,7 +52,7 @@ export const lessonRouter = router({
     .input(getLessonRequestSchema)
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.useCases.lesson.getLesson.execute(input);
+        return await ctx.useCases.lesson.getLesson.execute(input, ctx.session.user.id);
       } catch (error) {
         throw mapDomainError(error);
       }

@@ -114,7 +114,7 @@ describe('EditLessonUseCase', () => {
       expect(lesson.pupilIds).toEqual(['pupil-1', 'pupil-2']);
     });
 
-    it('should return mapped DTO', async () => {
+    it('should return mapped DTO with permissions', async () => {
       const lesson = createLesson();
       const teacher = createTeacher();
       vi.mocked(mockUserRepository.findById).mockResolvedValue(teacher);
@@ -134,7 +134,15 @@ describe('EditLessonUseCase', () => {
       );
 
       expect(mockLessonMapper.toDTO).toHaveBeenCalledWith(lesson);
-      expect(result).toEqual({ id: 'lesson-1', title: 'Updated' });
+      expect(result).toEqual({
+        id: 'lesson-1',
+        title: 'Updated',
+        permissions: {
+          canEdit: true,
+          canDelete: true,
+          canSkip: true,
+        },
+      });
     });
   });
 

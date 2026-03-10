@@ -1,5 +1,5 @@
 import { CreateLessonRequestDTO } from '@/application/dto/lesson/CreateLessonRequestDTO';
-import { LessonResponseDTO } from '@/application/dto/lesson/LessonResponseDTO';
+import { LessonResponseWithPermissionsDTO } from '@/application/dto/lesson/LessonResponseWithPermissionsDTO';
 import { LessonMapperPort } from '@/application/ports/mappers/LessonMapperPort';
 import { Lesson } from '@/domain/models/Lesson';
 import {
@@ -19,7 +19,10 @@ export class CreateLessonUseCase {
     private authService: LessonAuthorizationService
   ) {}
 
-  async execute(lessonData: CreateLessonRequestDTO, userId: string): Promise<LessonResponseDTO> {
+  async execute(
+    lessonData: CreateLessonRequestDTO,
+    userId: string
+  ): Promise<LessonResponseWithPermissionsDTO> {
     const user = await this.userRepository.findById(userId);
     if (!user) throw new UserNotFoundError(userId);
 
@@ -48,6 +51,13 @@ export class CreateLessonUseCase {
 
     await this.lessonRepository.create(lesson);
 
-    return this.lessonMapper.toDTO(lesson);
+    return {
+      ...this.lessonMapper.toDTO(lesson),
+      permissions: {
+        canEdit: this.authService.canEdit(user, lesson),
+        canDelete: this.authService.canDelete(user, lesson),
+        canSkip: this.authService.canSkip(user, lesson),
+      },
+    };
   }
 }

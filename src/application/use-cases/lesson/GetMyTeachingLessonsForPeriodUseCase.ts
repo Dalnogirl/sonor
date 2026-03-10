@@ -1,22 +1,33 @@
 import { GetMyTeachingLessonsForPeriodRequestDTO } from '@/application/dto/lesson/GetMyTeachingLessonsForPeriodRequestDTO';
-import { LessonResponseDTO } from '@/application/dto/lesson/LessonResponseDTO';
+import { LessonListResponseDTO } from '@/application/dto/lesson/LessonListResponseDTO';
+import { LessonPermissions } from '@/application/dto/lesson/LessonPermissions';
 import { LessonMapperPort } from '@/application/ports/mappers/LessonMapperPort';
 import { LessonException } from '@/domain/models/LessonException';
+import { Lesson } from '@/domain/models/Lesson';
+import { User } from '@/domain/models/User';
 import { LessonRepository } from '@/domain/ports/repositories/LessonRepository';
 import { LessonExceptionRepository } from '@/domain/ports/repositories/LessonExceptionRepository';
+import { UserRepository } from '@/domain/ports/repositories/UserRepository';
+import { UserNotFoundError } from '@/domain/errors/UserErrors';
 import { OccurrenceGeneratorService } from '@/domain/services/OccurrenceGeneratorService';
+import { LessonAuthorizationService } from '@/domain/services/LessonAuthorizationService';
 
 export class GetMyTeachingLessonsForPeriodUseCase {
   constructor(
     private repository: LessonRepository,
     private exceptionRepository: LessonExceptionRepository,
     private occurrenceGenerator: OccurrenceGeneratorService,
-    private lessonMapper: LessonMapperPort
+    private lessonMapper: LessonMapperPort,
+    private userRepository: UserRepository,
+    private authService: LessonAuthorizationService
   ) {}
 
   async execute(
     lessonDTO: GetMyTeachingLessonsForPeriodRequestDTO & { userId: string }
-  ): Promise<LessonResponseDTO[]> {
+  ): Promise<LessonListResponseDTO> {
+    const user = await this.userRepository.findById(lessonDTO.userId);
+    if (!user) throw new UserNotFoundError(lessonDTO.userId);
+
     const baseLessons = await this.repository.findMyTeachingLessonsForPeriod(
       lessonDTO.userId,
       lessonDTO.startDate,
@@ -24,7 +35,10 @@ export class GetMyTeachingLessonsForPeriodUseCase {
     );
 
     if (baseLessons.length === 0) {
-      return [];
+      return {
+        lessons: [],
+        canCreate: this.authService.canCreate(user),
+      };
     }
 
     const lessonIds = baseLessons.map((lesson) => lesson.id);
@@ -51,7 +65,23 @@ export class GetMyTeachingLessonsForPeriodUseCase {
       (a, b) => a.startDate.getTime() - b.startDate.getTime()
     );
 
-    return sorted.map((lesson) => this.lessonMapper.toDTO(lesson));
+    const lessons = sorted.map((lesson) => ({
+      ...this.lessonMapper.toDTO(lesson),
+      permissions: this.buildPermissions(user, lesson),
+    }));
+
+    return {
+      lessons,
+      canCreate: this.authService.canCreate(user),
+    };
+  }
+
+  private buildPermissions(user: User, lesson: Lesson): LessonPermissions {
+    return {
+      canEdit: this.authService.canEdit(user, lesson),
+      canDelete: this.authService.canDelete(user, lesson),
+      canSkip: this.authService.canSkip(user, lesson),
+    };
   }
 
   private groupExceptionsByLessonId(

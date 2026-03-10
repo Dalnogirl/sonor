@@ -23,6 +23,74 @@ describe('LessonAuthorizationService', () => {
       updatedAt: new Date(),
     });
 
+  describe('canCreate', () => {
+    it('should return true for ADMIN', () => {
+      expect(authService.canCreate(createUser(UserRole.ADMIN))).toBe(true);
+    });
+
+    it('should return true for TEACHER', () => {
+      expect(authService.canCreate(createUser(UserRole.TEACHER))).toBe(true);
+    });
+
+    it('should return false for PUPIL', () => {
+      expect(authService.canCreate(createUser(UserRole.PUPIL))).toBe(false);
+    });
+  });
+
+  describe('canEdit', () => {
+    it('should return true for ADMIN regardless of ownership', () => {
+      expect(authService.canEdit(createUser(UserRole.ADMIN, 'admin-1'), createLesson())).toBe(true);
+    });
+
+    it('should return true for owning teacher', () => {
+      expect(authService.canEdit(createUser(UserRole.TEACHER, 'teacher-1'), createLesson())).toBe(true);
+    });
+
+    it('should return false for non-owning teacher', () => {
+      expect(authService.canEdit(createUser(UserRole.TEACHER, 'teacher-2'), createLesson())).toBe(false);
+    });
+
+    it('should return false for PUPIL', () => {
+      expect(authService.canEdit(createUser(UserRole.PUPIL), createLesson())).toBe(false);
+    });
+  });
+
+  describe('canDelete', () => {
+    it('should return true for ADMIN', () => {
+      expect(authService.canDelete(createUser(UserRole.ADMIN, 'admin-1'), createLesson())).toBe(true);
+    });
+
+    it('should return true for owning teacher', () => {
+      expect(authService.canDelete(createUser(UserRole.TEACHER, 'teacher-1'), createLesson())).toBe(true);
+    });
+
+    it('should return false for non-owning teacher', () => {
+      expect(authService.canDelete(createUser(UserRole.TEACHER, 'teacher-2'), createLesson())).toBe(false);
+    });
+
+    it('should return false for PUPIL', () => {
+      expect(authService.canDelete(createUser(UserRole.PUPIL), createLesson())).toBe(false);
+    });
+  });
+
+  describe('canSkip', () => {
+    it('should return true for ADMIN', () => {
+      expect(authService.canSkip(createUser(UserRole.ADMIN, 'admin-1'), createLesson())).toBe(true);
+    });
+
+    it('should return true for owning teacher', () => {
+      expect(authService.canSkip(createUser(UserRole.TEACHER, 'teacher-1'), createLesson())).toBe(true);
+    });
+
+    it('should return false for non-owning teacher', () => {
+      expect(authService.canSkip(createUser(UserRole.TEACHER, 'teacher-2'), createLesson())).toBe(false);
+    });
+
+    it('should return false for PUPIL', () => {
+      expect(authService.canSkip(createUser(UserRole.PUPIL), createLesson())).toBe(false);
+    });
+  });
+
   describe('assertCanCreate', () => {
     it('should allow ADMIN', () => {
       expect(() => authService.assertCanCreate(createUser(UserRole.ADMIN))).not.toThrow();

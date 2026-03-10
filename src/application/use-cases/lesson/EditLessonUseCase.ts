@@ -1,4 +1,5 @@
 import { EditLessonRequestDTO } from '@/application/dto/lesson/EditLessonRequestDTO.schema';
+import { LessonResponseWithPermissionsDTO } from '@/application/dto/lesson/LessonResponseWithPermissionsDTO';
 import { LessonMapperPort } from '@/application/ports/mappers/LessonMapperPort';
 import { LessonNotFoundError } from '@/domain/errors';
 import { UserNotFoundError } from '@/domain/errors/UserErrors';
@@ -17,7 +18,10 @@ export class EditLessonUseCase {
     private authService: LessonAuthorizationService
   ) {}
 
-  async execute(lessonData: EditLessonRequestDTO, userId: string) {
+  async execute(
+    lessonData: EditLessonRequestDTO,
+    userId: string
+  ): Promise<LessonResponseWithPermissionsDTO> {
     const user = await this.userRepository.findById(userId);
     if (!user) throw new UserNotFoundError(userId);
 
@@ -48,6 +52,13 @@ export class EditLessonUseCase {
 
     await this.lessonRepository.save(existingLesson);
 
-    return this.lessonMapper.toDTO(existingLesson);
+    return {
+      ...this.lessonMapper.toDTO(existingLesson),
+      permissions: {
+        canEdit: this.authService.canEdit(user, existingLesson),
+        canDelete: this.authService.canDelete(user, existingLesson),
+        canSkip: this.authService.canSkip(user, existingLesson),
+      },
+    };
   }
 }
