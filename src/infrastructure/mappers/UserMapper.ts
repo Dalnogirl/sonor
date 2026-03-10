@@ -37,6 +37,7 @@ export class UserMapper implements UserMapperPort {
       name: user.name,
       email: user.email,
       isEmailVerified: user.isEmailVerified,
+      role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };

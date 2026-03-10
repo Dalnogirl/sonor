@@ -1,23 +1,26 @@
-import { UnauthorizedError } from '@/domain/errors/AuthorizationErrors';
 import { LessonNotFoundError } from '@/domain/errors/LessonErrors';
+import { UserNotFoundError } from '@/domain/errors/UserErrors';
 import { LessonRepository } from '@/domain/ports/repositories/LessonRepository';
+import { UserRepository } from '@/domain/ports/repositories/UserRepository';
 import { Logger } from '@/domain/ports/services/Logger';
+import { LessonAuthorizationService } from '@/domain/services/LessonAuthorizationService';
 
 export class DeleteLessonUseCase {
   constructor(
     private lessonRepository: LessonRepository,
-    private logger: Logger
+    private logger: Logger,
+    private userRepository: UserRepository,
+    private authService: LessonAuthorizationService
   ) {}
 
   async execute(lessonId: string, userId: string): Promise<void> {
-    const lesson = await this.lessonRepository.findById(lessonId);
-    if (!lesson) {
-      throw new LessonNotFoundError(lessonId);
-    }
+    const user = await this.userRepository.findById(userId);
+    if (!user) throw new UserNotFoundError(userId);
 
-    if (!lesson.hasTeacher(userId)) {
-      throw new UnauthorizedError('Only teachers can delete their lessons');
-    }
+    const lesson = await this.lessonRepository.findById(lessonId);
+    if (!lesson) throw new LessonNotFoundError(lessonId);
+
+    this.authService.assertCanDelete(user, lesson);
 
     lesson.delete();
     await this.lessonRepository.save(lesson);

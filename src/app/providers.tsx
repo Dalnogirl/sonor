@@ -40,7 +40,7 @@ export const Providers = ({
 };
 
 function CustomMantineProvider({ children }: { children: React.ReactNode }) {
-  const accentColor = 'orange';
+  const accentColor = 'pink';
   return (
     <MantineProvider
       defaultColorScheme="auto"

@@ -1,18 +1,27 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { DeleteLessonUseCase } from '@/application/use-cases/lesson/DeleteLessonUseCase';
 import { LessonRepository } from '@/domain/ports/repositories/LessonRepository';
+import { UserRepository } from '@/domain/ports/repositories/UserRepository';
 import { Logger } from '@/domain/ports/services/Logger';
+import { LessonAuthorizationService } from '@/domain/services/LessonAuthorizationService';
 import { Lesson } from '@/domain/models/Lesson';
+import { User } from '@/domain/models/User';
+import { UserRole } from '@/domain/models/UserRole';
 import { LessonNotFoundError } from '@/domain/errors/LessonErrors';
 import { UnauthorizedError } from '@/domain/errors/AuthorizationErrors';
+import { UserNotFoundError } from '@/domain/errors/UserErrors';
 
 describe('DeleteLessonUseCase', () => {
   let deleteLessonUseCase: DeleteLessonUseCase;
   let mockLessonRepository: LessonRepository;
+  let mockUserRepository: UserRepository;
   let mockLogger: Logger;
+  const authService = new LessonAuthorizationService();
 
   const teacherId = 'teacher-1';
-  const otherUserId = 'other-user';
+
+  const createTeacher = (id = teacherId) =>
+    User.createWithDefaults(id, 'Teacher', 't@t.com', 'Pass123!', UserRole.TEACHER);
 
   beforeEach(() => {
     mockLessonRepository = {
@@ -22,6 +31,16 @@ describe('DeleteLessonUseCase', () => {
       save: vi.fn(),
     };
 
+    mockUserRepository = {
+      findById: vi.fn(),
+      findByEmail: vi.fn(),
+      findAll: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      findByIds: vi.fn(),
+    };
+
     mockLogger = {
       info: vi.fn(),
       error: vi.fn(),
@@ -29,13 +48,14 @@ describe('DeleteLessonUseCase', () => {
 
     deleteLessonUseCase = new DeleteLessonUseCase(
       mockLessonRepository,
-      mockLogger
+      mockLogger,
+      mockUserRepository,
+      authService
     );
   });
 
   describe('Successful Soft Delete', () => {
-    it('should soft-delete lesson when user is a teacher', async () => {
-      // Arrange
+    it('should soft-delete lesson when user is a teacher of the lesson', async () => {
       const lessonId = 'lesson-123';
       const lesson = new Lesson({
         id: lessonId,
@@ -47,14 +67,14 @@ describe('DeleteLessonUseCase', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
+      const teacher = createTeacher();
 
+      vi.mocked(mockUserRepository.findById).mockResolvedValue(teacher);
       vi.mocked(mockLessonRepository.findById).mockResolvedValue(lesson);
       vi.mocked(mockLessonRepository.save).mockResolvedValue(undefined);
 
-      // Act
       await deleteLessonUseCase.execute(lessonId, teacherId);
 
-      // Assert - Domain method sets deletedAt, repo persists
       expect(mockLessonRepository.findById).toHaveBeenCalledWith(lessonId);
       expect(mockLessonRepository.save).toHaveBeenCalledWith(lesson);
       expect(lesson.isDeleted).toBe(true);
@@ -62,7 +82,6 @@ describe('DeleteLessonUseCase', () => {
     });
 
     it('should log only after successful soft-delete', async () => {
-      // Arrange
       const lessonId = 'lesson-456';
       const lesson = new Lesson({
         id: lessonId,
@@ -74,14 +93,14 @@ describe('DeleteLessonUseCase', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
+      const teacher = createTeacher();
 
+      vi.mocked(mockUserRepository.findById).mockResolvedValue(teacher);
       vi.mocked(mockLessonRepository.findById).mockResolvedValue(lesson);
       vi.mocked(mockLessonRepository.save).mockResolvedValue(undefined);
 
-      // Act
       await deleteLessonUseCase.execute(lessonId, teacherId);
 
-      // Assert
       expect(mockLogger.info).toHaveBeenCalledTimes(1);
       expect(mockLogger.info).toHaveBeenCalledWith(
         `Lesson ${lessonId} soft-deleted by user ${teacherId}`
@@ -89,7 +108,6 @@ describe('DeleteLessonUseCase', () => {
     });
 
     it('should not log if save fails', async () => {
-      // Arrange
       const lessonId = 'lesson-789';
       const lesson = new Lesson({
         id: lessonId,
@@ -101,13 +119,12 @@ describe('DeleteLessonUseCase', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
+      const teacher = createTeacher();
 
+      vi.mocked(mockUserRepository.findById).mockResolvedValue(teacher);
       vi.mocked(mockLessonRepository.findById).mockResolvedValue(lesson);
-      vi.mocked(mockLessonRepository.save).mockRejectedValue(
-        new Error('DB error')
-      );
+      vi.mocked(mockLessonRepository.save).mockRejectedValue(new Error('DB error'));
 
-      // Act & Assert
       await expect(
         deleteLessonUseCase.execute(lessonId, teacherId)
       ).rejects.toThrow('DB error');
@@ -116,37 +133,90 @@ describe('DeleteLessonUseCase', () => {
     });
   });
 
-  describe('Authorization (Protected Variations)', () => {
-    it('should throw UnauthorizedError when user is not a teacher', async () => {
-      // Arrange
+  describe('Authorization (Protected Variations via LessonAuthorizationService)', () => {
+    it('should throw UserNotFoundError when user does not exist', async () => {
+      vi.mocked(mockUserRepository.findById).mockResolvedValue(null);
+
+      await expect(
+        deleteLessonUseCase.execute('lesson-123', 'nonexistent')
+      ).rejects.toThrow(UserNotFoundError);
+
+      expect(mockLessonRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('should throw UnauthorizedError when teacher is not lesson owner', async () => {
       const lessonId = 'lesson-123';
       const lesson = new Lesson({
         id: lessonId,
         title: 'Math 101',
         teacherIds: [teacherId],
-        pupilIds: [otherUserId],
+        pupilIds: ['pupil-1'],
         startDate: new Date('2025-11-10T10:00:00Z'),
         endDate: new Date('2025-11-10T11:00:00Z'),
         createdAt: new Date(),
         updatedAt: new Date(),
       });
+      const otherTeacher = createTeacher('other-teacher');
 
+      vi.mocked(mockUserRepository.findById).mockResolvedValue(otherTeacher);
       vi.mocked(mockLessonRepository.findById).mockResolvedValue(lesson);
 
-      // Act & Assert
       await expect(
-        deleteLessonUseCase.execute(lessonId, otherUserId)
+        deleteLessonUseCase.execute(lessonId, 'other-teacher')
       ).rejects.toThrow(UnauthorizedError);
-
-      await expect(
-        deleteLessonUseCase.execute(lessonId, otherUserId)
-      ).rejects.toThrow('Only teachers can delete their lessons');
 
       expect(mockLessonRepository.save).not.toHaveBeenCalled();
     });
 
+    it('should throw UnauthorizedError for PUPIL', async () => {
+      const lessonId = 'lesson-123';
+      const lesson = new Lesson({
+        id: lessonId,
+        title: 'Math 101',
+        teacherIds: [teacherId],
+        pupilIds: ['pupil-1'],
+        startDate: new Date('2025-11-10T10:00:00Z'),
+        endDate: new Date('2025-11-10T11:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      const pupil = User.createWithDefaults('pupil-1', 'Pupil', 'p@p.com', 'Pass123!', UserRole.PUPIL);
+
+      vi.mocked(mockUserRepository.findById).mockResolvedValue(pupil);
+      vi.mocked(mockLessonRepository.findById).mockResolvedValue(lesson);
+
+      await expect(
+        deleteLessonUseCase.execute(lessonId, 'pupil-1')
+      ).rejects.toThrow(UnauthorizedError);
+
+      expect(mockLessonRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('should allow ADMIN to delete any lesson', async () => {
+      const lessonId = 'lesson-123';
+      const lesson = new Lesson({
+        id: lessonId,
+        title: 'Math 101',
+        teacherIds: [teacherId],
+        pupilIds: [],
+        startDate: new Date('2025-11-10T10:00:00Z'),
+        endDate: new Date('2025-11-10T11:00:00Z'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      const admin = User.createWithDefaults('admin-1', 'Admin', 'a@a.com', 'Pass123!', UserRole.ADMIN);
+
+      vi.mocked(mockUserRepository.findById).mockResolvedValue(admin);
+      vi.mocked(mockLessonRepository.findById).mockResolvedValue(lesson);
+      vi.mocked(mockLessonRepository.save).mockResolvedValue(undefined);
+
+      await deleteLessonUseCase.execute(lessonId, 'admin-1');
+
+      expect(mockLessonRepository.save).toHaveBeenCalledWith(lesson);
+      expect(lesson.isDeleted).toBe(true);
+    });
+
     it('should allow deletion when user is one of multiple teachers', async () => {
-      // Arrange
       const lessonId = 'lesson-multi';
       const secondTeacherId = 'teacher-2';
       const lesson = new Lesson({
@@ -159,14 +229,14 @@ describe('DeleteLessonUseCase', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
+      const teacher2 = createTeacher(secondTeacherId);
 
+      vi.mocked(mockUserRepository.findById).mockResolvedValue(teacher2);
       vi.mocked(mockLessonRepository.findById).mockResolvedValue(lesson);
       vi.mocked(mockLessonRepository.save).mockResolvedValue(undefined);
 
-      // Act
       await deleteLessonUseCase.execute(lessonId, secondTeacherId);
 
-      // Assert
       expect(mockLessonRepository.save).toHaveBeenCalledWith(lesson);
       expect(lesson.isDeleted).toBe(true);
     });
@@ -174,13 +244,12 @@ describe('DeleteLessonUseCase', () => {
 
   describe('Error Handling', () => {
     it('should throw LessonNotFoundError when lesson does not exist', async () => {
-      // Arrange
-      const lessonId = 'nonexistent-id';
+      const teacher = createTeacher();
+      vi.mocked(mockUserRepository.findById).mockResolvedValue(teacher);
       vi.mocked(mockLessonRepository.findById).mockResolvedValue(null);
 
-      // Act & Assert
       await expect(
-        deleteLessonUseCase.execute(lessonId, teacherId)
+        deleteLessonUseCase.execute('nonexistent-id', teacherId)
       ).rejects.toThrow(LessonNotFoundError);
 
       expect(mockLessonRepository.save).not.toHaveBeenCalled();
@@ -189,8 +258,7 @@ describe('DeleteLessonUseCase', () => {
   });
 
   describe('Orchestration Order (Controller GRASP)', () => {
-    it('should find → authorize → domain.delete() → save → log', async () => {
-      // Arrange
+    it('should findUser → findLesson → auth → domain.delete() → save → log', async () => {
       const lessonId = 'lesson-order';
       const callOrder: string[] = [];
 
@@ -204,15 +272,20 @@ describe('DeleteLessonUseCase', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
+      const teacher = createTeacher();
+
+      vi.mocked(mockUserRepository.findById).mockImplementation(async () => {
+        callOrder.push('findUser');
+        return teacher;
+      });
 
       vi.mocked(mockLessonRepository.findById).mockImplementation(async () => {
-        callOrder.push('findById');
+        callOrder.push('findLesson');
         return lesson;
       });
 
       vi.mocked(mockLessonRepository.save).mockImplementation(async () => {
         callOrder.push('save');
-        // Verify lesson.delete() was called before save
         expect(lesson.isDeleted).toBe(true);
       });
 
@@ -220,11 +293,9 @@ describe('DeleteLessonUseCase', () => {
         callOrder.push('log');
       });
 
-      // Act
       await deleteLessonUseCase.execute(lessonId, teacherId);
 
-      // Assert - find → save (with deleted lesson) → log
-      expect(callOrder).toEqual(['findById', 'save', 'log']);
+      expect(callOrder).toEqual(['findUser', 'findLesson', 'save', 'log']);
     });
   });
 });

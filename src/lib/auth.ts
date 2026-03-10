@@ -7,7 +7,6 @@ import { BcryptPasswordHasher } from '@/infrastructure/services/BcryptPasswordHa
 import NextAuth, { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
-// Create dependencies (singleton pattern)
 const userRepository = new PrismaUserRepository(prisma);
 const bcrypt = new BcryptPasswordHasher();
 const userMapper = new UserMapper();
@@ -27,21 +26,20 @@ export const authOptions: AuthOptions = {
         }
 
         try {
-          // LoginUseCase now returns UserResponseDTO (safe, no password)
           const userDTO = await loginUseCase.execute({
             email: credentials.email,
             password: credentials.password,
           });
 
-          // Return user data for JWT token
           return {
             id: userDTO.id,
             email: userDTO.email,
             name: userDTO.name,
+            role: userDTO.role,
           };
         } catch (error: unknown) {
           if (error instanceof InvalidCredentialsError) {
-            return null; // Invalid login
+            return null;
           }
 
           console.error('Unexpected auth error:', error);
@@ -59,6 +57,7 @@ export const authOptions: AuthOptions = {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
+        token.role = user.role;
       }
       return token;
     },
@@ -67,12 +66,13 @@ export const authOptions: AuthOptions = {
         session.user.id = token.id as string;
         session.user.email = token.email as string;
         session.user.name = token.name as string;
+        session.user.role = token.role;
       }
       return session;
     },
   },
   pages: {
-    signIn: '/login', // Custom login page
+    signIn: '/login',
   },
 };
 

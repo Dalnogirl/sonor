@@ -7,14 +7,24 @@ import {
   DayOfWeek,
 } from '@/domain/models/RecurringPattern';
 import { LessonRepository } from '@/domain/ports/repositories/LessonRepository';
+import { UserRepository } from '@/domain/ports/repositories/UserRepository';
+import { UserNotFoundError } from '@/domain/errors/UserErrors';
+import { LessonAuthorizationService } from '@/domain/services/LessonAuthorizationService';
 
 export class CreateLessonUseCase {
   constructor(
     private lessonRepository: LessonRepository,
-    private lessonMapper: LessonMapperPort
+    private lessonMapper: LessonMapperPort,
+    private userRepository: UserRepository,
+    private authService: LessonAuthorizationService
   ) {}
 
-  async execute(lessonData: CreateLessonRequestDTO): Promise<LessonResponseDTO> {
+  async execute(lessonData: CreateLessonRequestDTO, userId: string): Promise<LessonResponseDTO> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) throw new UserNotFoundError(userId);
+
+    this.authService.assertCanCreate(user);
+
     const recurringPattern = lessonData.recurringPattern
       ? new RecurringPattern(
           lessonData.recurringPattern.frequency,

@@ -1,21 +1,30 @@
 import { EditLessonRequestDTO } from '@/application/dto/lesson/EditLessonRequestDTO.schema';
 import { LessonMapperPort } from '@/application/ports/mappers/LessonMapperPort';
 import { LessonNotFoundError } from '@/domain/errors';
+import { UserNotFoundError } from '@/domain/errors/UserErrors';
 import { DayOfWeek, RecurringPattern } from '@/domain/models/RecurringPattern';
 import { LessonRepository } from '@/domain/ports/repositories/LessonRepository';
 import { LessonExceptionRepository } from '@/domain/ports/repositories/LessonExceptionRepository';
+import { UserRepository } from '@/domain/ports/repositories/UserRepository';
+import { LessonAuthorizationService } from '@/domain/services/LessonAuthorizationService';
 
 export class EditLessonUseCase {
   constructor(
     private lessonRepository: LessonRepository,
     private lessonExceptionRepository: LessonExceptionRepository,
-    private lessonMapper: LessonMapperPort
+    private lessonMapper: LessonMapperPort,
+    private userRepository: UserRepository,
+    private authService: LessonAuthorizationService
   ) {}
 
-  async execute(lessonData: EditLessonRequestDTO) {
-    const existingLesson = await this.lessonRepository.findById(lessonData.id);
+  async execute(lessonData: EditLessonRequestDTO, userId: string) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) throw new UserNotFoundError(userId);
 
+    const existingLesson = await this.lessonRepository.findById(lessonData.id);
     if (!existingLesson) throw new LessonNotFoundError(lessonData.id);
+
+    this.authService.assertCanEdit(user, existingLesson);
 
     const recurringPattern = lessonData.recurringPattern
       ? new RecurringPattern(

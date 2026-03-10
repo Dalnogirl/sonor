@@ -1,4 +1,5 @@
 import { EmailIsAlreadyVerified } from '../errors';
+import { UserRole } from './UserRole';
 
 export class User {
   public readonly id: string;
@@ -8,6 +9,7 @@ export class User {
   public updatedAt: Date;
   private _password: string;
   public isEmailVerified: boolean;
+  public role: UserRole;
 
   constructor(
     id: string,
@@ -16,7 +18,8 @@ export class User {
     createdAt: Date,
     updatedAt: Date,
     password: string,
-    isEmailVerified: boolean
+    isEmailVerified: boolean,
+    role: UserRole = UserRole.PUPIL
   ) {
     this.id = id;
     this.name = name;
@@ -25,6 +28,19 @@ export class User {
     this.updatedAt = updatedAt;
     this._password = password;
     this.isEmailVerified = isEmailVerified;
+    this.role = role;
+  }
+
+  isAdmin(): boolean {
+    return this.role === UserRole.ADMIN;
+  }
+
+  isTeacher(): boolean {
+    return this.role === UserRole.TEACHER;
+  }
+
+  isPupil(): boolean {
+    return this.role === UserRole.PUPIL;
   }
 
   get password(): string {
@@ -61,9 +77,10 @@ export class User {
     id: string,
     name: string,
     email: string,
-    password: string
+    password: string,
+    role: UserRole = UserRole.PUPIL
   ): User {
     const now = new Date();
-    return new User(id, name, email, now, now, password, false);
+    return new User(id, name, email, now, now, password, false, role);
   }
 }

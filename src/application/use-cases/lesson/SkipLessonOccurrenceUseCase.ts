@@ -4,32 +4,28 @@ import {
   LessonNotRecurringError,
   LessonExceptionAlreadyExistsError,
 } from '@/domain/errors/LessonErrors';
+import { UserNotFoundError } from '@/domain/errors/UserErrors';
 import { LessonRepository } from '@/domain/ports/repositories/LessonRepository';
 import { LessonExceptionRepository } from '@/domain/ports/repositories/LessonExceptionRepository';
+import { UserRepository } from '@/domain/ports/repositories/UserRepository';
+import { LessonAuthorizationService } from '@/domain/services/LessonAuthorizationService';
 
-/**
- * SkipLessonOccurrence Use Case
- *
- * Marks specific occurrence of recurring lesson as skipped.
- * Validates lesson exists and has recurring pattern.
- *
- * **Design Principles:**
- * - Single Responsibility: Only handles skip operation
- * - Controller (GRASP): Orchestrates repositories + domain logic
- * - Information Expert: Domain entity creates exception
- */
 export class SkipLessonOccurrenceUseCase {
   constructor(
     private lessonRepository: LessonRepository,
-    private exceptionRepository: LessonExceptionRepository
+    private exceptionRepository: LessonExceptionRepository,
+    private userRepository: UserRepository,
+    private authService: LessonAuthorizationService
   ) {}
 
-  async execute(lessonId: string, occurrenceDate: Date): Promise<void> {
-    // Validate lesson exists
+  async execute(lessonId: string, occurrenceDate: Date, userId: string): Promise<void> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) throw new UserNotFoundError(userId);
+
     const lesson = await this.lessonRepository.findById(lessonId);
-    if (!lesson) {
-      throw new LessonNotFoundError(lessonId);
-    }
+    if (!lesson) throw new LessonNotFoundError(lessonId);
+
+    this.authService.assertCanSkip(user, lesson);
 
     if (!lesson.recurringPattern) {
       throw new LessonNotRecurringError(lessonId);
@@ -44,10 +40,7 @@ export class SkipLessonOccurrenceUseCase {
       throw new LessonExceptionAlreadyExistsError(lessonId, occurrenceDate);
     }
 
-    // Create skip exception (domain factory method)
     const exception = LessonException.skip(lessonId, occurrenceDate);
-
-    // Persist
     await this.exceptionRepository.create(exception);
   }
 }

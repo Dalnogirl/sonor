@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { UserMapper } from '@/infrastructure/mappers/UserMapper';
 import { User } from '@/domain/models/User';
+import { UserRole } from '@/domain/models/UserRole';
 
 describe('UserMapper', () => {
   // Create mapper instance for each test
@@ -28,6 +29,7 @@ describe('UserMapper', () => {
         name: 'John Doe',
         email: 'john@example.com',
         isEmailVerified: true,
+        role: UserRole.PUPIL,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-02'),
       });

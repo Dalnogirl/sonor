@@ -1,4 +1,5 @@
 import { User } from '@/domain/models/User';
+import { UserRole } from '@/domain/models/UserRole';
 
 /**
  * Type representing a Prisma user record structure.
@@ -10,6 +11,7 @@ export type PrismaUserRecord = {
   email: string;
   password: string;
   isEmailVerified: boolean;
+  role: string;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -65,7 +67,8 @@ export class PrismaUserMapper {
       prismaUser.createdAt,
       prismaUser.updatedAt,
       prismaUser.password,
-      prismaUser.isEmailVerified
+      prismaUser.isEmailVerified,
+      prismaUser.role as UserRole
     );
   }
 
@@ -105,6 +108,7 @@ export class PrismaUserMapper {
       email: user.email,
       password: user.password,
       isEmailVerified: user.isEmailVerified,
+      role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };

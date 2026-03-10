@@ -11,6 +11,7 @@ const seedUsers = [
     email: 'admin@sonor.com',
     name: 'Admin User',
     password: 'Admin123!',
+    role: 'ADMIN',
     isEmailVerified: true,
   },
   {

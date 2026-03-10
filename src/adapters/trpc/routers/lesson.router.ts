@@ -12,7 +12,10 @@ export const lessonRouter = router({
     .input(createLessonRequestSchema)
     .mutation(async ({ ctx, input }) => {
       try {
-        return await ctx.useCases.lesson.createLesson.execute(input);
+        return await ctx.useCases.lesson.createLesson.execute(
+          input,
+          ctx.session.user.id
+        );
       } catch (error) {
         throw mapDomainError(error);
       }
@@ -22,7 +25,10 @@ export const lessonRouter = router({
     .input(editLessonRequestSchema)
     .mutation(async ({ ctx, input }) => {
       try {
-        return await ctx.useCases.lesson.editLesson.execute(input);
+        return await ctx.useCases.lesson.editLesson.execute(
+          input,
+          ctx.session.user.id
+        );
       } catch (error) {
         throw mapDomainError(error);
       }
@@ -72,7 +78,8 @@ export const lessonRouter = router({
       try {
         await ctx.useCases.lesson.skipOccurrence.execute(
           input.lessonId,
-          input.occurrenceDate
+          input.occurrenceDate,
+          ctx.session.user.id
         );
         return { success: true };
       } catch (error) {

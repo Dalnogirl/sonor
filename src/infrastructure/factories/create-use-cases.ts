@@ -6,6 +6,7 @@ import { BcryptPasswordHasher } from '@/infrastructure/services/BcryptPasswordHa
 import { DayjsDateService } from '@/infrastructure/services/DayjsDateService';
 import { RecurrenceService } from '@/domain/services/RecurrenceService';
 import { OccurrenceGeneratorService } from '@/domain/services/OccurrenceGeneratorService';
+import { LessonAuthorizationService } from '@/domain/services/LessonAuthorizationService';
 import { UserMapper } from '@/infrastructure/mappers/UserMapper';
 import { Repositories } from './create-repositories';
 import { GetMyTeachingLessonsForPeriodUseCase } from '@/application/use-cases/lesson/GetMyTeachingLessonsForPeriodUseCase';
@@ -17,18 +18,7 @@ import { DeleteLessonUseCase } from '@/application/use-cases/lesson/DeleteLesson
 import { ConsoleLogger } from '../services/Logger';
 import { EditLessonUseCase } from '@/application/use-cases/lesson/EditLessonUseCase';
 
-/**
- * Dependency Injection Factory
- *
- * Wires up all infrastructure implementations and injects them into use cases
- *
- * Following Dependency Inversion Principle:
- * - Use cases depend on interfaces (ports)
- * - Infrastructure provides concrete implementations (adapters)
- * - Factory wires them together (composition root)
- */
 export const createUseCases = (repositories: Repositories) => {
-  // Infrastructure implementations
   const passwordHasher = new BcryptPasswordHasher();
   const dateService = new DayjsDateService();
   const userMapper = new UserMapper();
@@ -41,6 +31,7 @@ export const createUseCases = (repositories: Repositories) => {
     recurrenceService,
     dateService
   );
+  const lessonAuthService = new LessonAuthorizationService();
 
   return {
     user: {
@@ -48,7 +39,6 @@ export const createUseCases = (repositories: Repositories) => {
         repositories.userRepository,
         userMapper
       ),
-      // Future: createUserUseCase, updateUserUseCase, deleteUserUseCase, etc.
     },
     auth: {
       register: new RegisterUseCase(
@@ -75,7 +65,9 @@ export const createUseCases = (repositories: Repositories) => {
       ),
       createLesson: new CreateLessonUseCase(
         repositories.lessonRepository,
-        lessonMapper
+        lessonMapper,
+        repositories.userRepository,
+        lessonAuthService
       ),
       getLesson: new GetLessonUseCase(
         repositories.lessonRepository,
@@ -84,16 +76,22 @@ export const createUseCases = (repositories: Repositories) => {
       ),
       deleteLesson: new DeleteLessonUseCase(
         repositories.lessonRepository,
-        logger
+        logger,
+        repositories.userRepository,
+        lessonAuthService
       ),
       editLesson: new EditLessonUseCase(
         repositories.lessonRepository,
         repositories.lessonExceptionRepository,
-        lessonMapper
+        lessonMapper,
+        repositories.userRepository,
+        lessonAuthService
       ),
       skipOccurrence: new SkipLessonOccurrenceUseCase(
         repositories.lessonRepository,
-        repositories.lessonExceptionRepository
+        repositories.lessonExceptionRepository,
+        repositories.userRepository,
+        lessonAuthService
       ),
     },
     services: {
